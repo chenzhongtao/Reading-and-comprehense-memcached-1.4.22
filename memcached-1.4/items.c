@@ -20,44 +20,44 @@ static void item_unlink_q(item *it);
 
 #define LARGEST_ID POWER_LARGEST
 /*
-automoveÏß³ÌÒª½øĞĞ×Ô¶¯¼ì²â£¬¼ì²â¾ÍĞèÒªÒ»Ğ©ÊµÊ±Êı¾İ½øĞĞ·ÖÎö¡£È»ºóµÃ³ö½áÂÛ£ºÄÄ¸öslabclass_tĞèÒª¸ü¶àµÄÄÚ´æ£¬
-ÄÄ¸öÓÖ²»ĞèÒª¡£automoveÏß³ÌÍ¨¹ıÈ«¾Ö±äÁ¿itemstatsÊÕ¼¯itemµÄ¸÷ÖÖÊı¾İ¡£
+automoveçº¿ç¨‹è¦è¿›è¡Œè‡ªåŠ¨æ£€æµ‹ï¼Œæ£€æµ‹å°±éœ€è¦ä¸€äº›å®æ—¶æ•°æ®è¿›è¡Œåˆ†æã€‚ç„¶åå¾—å‡ºç»“è®ºï¼šå“ªä¸ªslabclass_téœ€è¦æ›´å¤šçš„å†…å­˜ï¼Œ
+å“ªä¸ªåˆä¸éœ€è¦ã€‚automoveçº¿ç¨‹é€šè¿‡å…¨å±€å˜é‡itemstatsæ”¶é›†itemçš„å„ç§æ•°æ®ã€‚
 
-itemstats±äÁ¿ÊÇÒ»¸öÊı×é£¬ËüÊÇºÍslabclassÊı×éÒ»Ò»¶ÔÓ¦µÄ¡£itemstatsÊı×éµÄÔªËØ¸ºÔğÊÕ¼¯slabclassÊı×éÖĞ¶ÔÓ¦ÔªËØµÄĞÅÏ¢¡£
-itemstats_t½á¹¹ÌåËäÈ»Ìá¹©ÁËºÜ¶à³ÉÔ±£¬¿ÉÒÔÊÕ¼¯ºÜ¶àĞÅÏ¢£¬µ«automoveÏß³ÌÖ»ÓÃµ½µÚÒ»¸ö³ÉÔ±evicted
+itemstatså˜é‡æ˜¯ä¸€ä¸ªæ•°ç»„ï¼Œå®ƒæ˜¯å’Œslabclassæ•°ç»„ä¸€ä¸€å¯¹åº”çš„ã€‚itemstatsæ•°ç»„çš„å…ƒç´ è´Ÿè´£æ”¶é›†slabclassæ•°ç»„ä¸­å¯¹åº”å…ƒç´ çš„ä¿¡æ¯ã€‚
+itemstats_tç»“æ„ä½“è™½ç„¶æä¾›äº†å¾ˆå¤šæˆå‘˜ï¼Œå¯ä»¥æ”¶é›†å¾ˆå¤šä¿¡æ¯ï¼Œä½†automoveçº¿ç¨‹åªç”¨åˆ°ç¬¬ä¸€ä¸ªæˆå‘˜evicted
 */
-typedef struct { //½á¹¹ÊôÓÚitemstats[]
-    uint64_t evicted; //ÒòÎªLRUÌßÁË¶àÉÙ¸öitem 
-    //¼´Ê¹Ò»¸öitemµÄexptimeÉèÖÃÎª0£¬Ò²ÊÇ»á±»ÌßµÄ  
-    uint64_t evicted_nonzero;//±»ÌßµÄitemÖĞ£¬³¬Ê±Ê±¼ä(exptime)²»Îª0µÄitemÊı  
-    rel_time_t evicted_time;//×îºóÒ»´ÎÌßitemÊ±£¬±»ÌßµÄitemÒÑ¾­¹ıÆÚ¶à¾ÃÁË  
-    uint64_t reclaimed; //item±»ÖØ¸´Ê¹ÓÃµÄ´ÎÊı£¬¸³Öµ¼ûdo_item_alloc  //ÔÚÉêÇëitemÊ±£¬·¢ÏÖ¹ıÆÚ²¢»ØÊÕµÄitemÊıÁ¿  
-    uint64_t outofmemory; //´ÓslabÖĞ»ñÈ¡memÊ§°ÜµÄ´ÎÊı£¬¼ûdo_item_alloc  //ÎªitemÉêÇëÄÚ´æ£¬Ê§°ÜµÄ´ÎÊı  
-    uint64_t tailrepairs; //ĞèÒªĞŞ¸´µÄitemÊıÁ¿(³ı·ÇworkerÏß³ÌÓĞÎÊÌâ·ñÔòÒ»°ãÎª0)  
-    uint64_t expired_unfetched; //±»·ÃÎÊ¹ı²¢ÇÒ³¬Ê±µÄitem,¸³Öµ¼ûdo_item_alloc   //Ö±µ½±»³¬Ê±É¾³ıÊ±¶¼»¹Ã»±»·ÃÎÊ¹ıµÄitemÊıÁ¿  
-    uint64_t evicted_unfetched; //Ö±µ½±»LRUÌß³öÊ±¶¼»¹Ã»ÓĞ±»·ÃÎÊ¹ıµÄitemÊıÁ¿  
-    uint64_t crawler_reclaimed; //¸Ãslabclass±£´æµÄitemÊı  //±»LRUÅÀ³æ·¢ÏÖµÄ¹ıÆÚitemÊıÁ¿  
-    uint64_t lrutail_reflocked;//ÉêÇëitem¶øËÑË÷LRU¶ÓÁĞÊ±£¬±»ÆäËûworkerÏß³ÌÒıÓÃµÄitemÊıÁ¿  
-} itemstats_t; //itemµÄ×´Ì¬Í³¼ÆĞÅÏ¢£¬ÕâÀï¾Í²»·ÖÎöÁË
+typedef struct { //ç»“æ„å±äºitemstats[]
+    uint64_t evicted; //å› ä¸ºLRUè¸¢äº†å¤šå°‘ä¸ªitem 
+    //å³ä½¿ä¸€ä¸ªitemçš„exptimeè®¾ç½®ä¸º0ï¼Œä¹Ÿæ˜¯ä¼šè¢«è¸¢çš„  
+    uint64_t evicted_nonzero;//è¢«è¸¢çš„itemä¸­ï¼Œè¶…æ—¶æ—¶é—´(exptime)ä¸ä¸º0çš„itemæ•°  
+    rel_time_t evicted_time;//æœ€åä¸€æ¬¡è¸¢itemæ—¶ï¼Œè¢«è¸¢çš„itemå·²ç»è¿‡æœŸå¤šä¹…äº†  
+    uint64_t reclaimed; //itemè¢«é‡å¤ä½¿ç”¨çš„æ¬¡æ•°ï¼Œèµ‹å€¼è§do_item_alloc  //åœ¨ç”³è¯·itemæ—¶ï¼Œå‘ç°è¿‡æœŸå¹¶å›æ”¶çš„itemæ•°é‡  
+    uint64_t outofmemory; //ä»slabä¸­è·å–memå¤±è´¥çš„æ¬¡æ•°ï¼Œè§do_item_alloc  //ä¸ºitemç”³è¯·å†…å­˜ï¼Œå¤±è´¥çš„æ¬¡æ•°  
+    uint64_t tailrepairs; //éœ€è¦ä¿®å¤çš„itemæ•°é‡(é™¤éworkerçº¿ç¨‹æœ‰é—®é¢˜å¦åˆ™ä¸€èˆ¬ä¸º0)  
+    uint64_t expired_unfetched; //è¢«è®¿é—®è¿‡å¹¶ä¸”è¶…æ—¶çš„item,èµ‹å€¼è§do_item_alloc   //ç›´åˆ°è¢«è¶…æ—¶åˆ é™¤æ—¶éƒ½è¿˜æ²¡è¢«è®¿é—®è¿‡çš„itemæ•°é‡  
+    uint64_t evicted_unfetched; //ç›´åˆ°è¢«LRUè¸¢å‡ºæ—¶éƒ½è¿˜æ²¡æœ‰è¢«è®¿é—®è¿‡çš„itemæ•°é‡  
+    uint64_t crawler_reclaimed; //è¯¥slabclassä¿å­˜çš„itemæ•°  //è¢«LRUçˆ¬è™«å‘ç°çš„è¿‡æœŸitemæ•°é‡  
+    uint64_t lrutail_reflocked;//ç”³è¯·itemè€Œæœç´¢LRUé˜Ÿåˆ—æ—¶ï¼Œè¢«å…¶ä»–workerçº¿ç¨‹å¼•ç”¨çš„itemæ•°é‡  
+} itemstats_t; //itemçš„çŠ¶æ€ç»Ÿè®¡ä¿¡æ¯ï¼Œè¿™é‡Œå°±ä¸åˆ†æäº†
 
-//Ö¸ÏòÃ¿Ò»¸öLRU¶ÓÁĞÍ·  LRU¶ÓÁĞ¿ÉÒÔ²Î¿¼http://blog.csdn.net/luotuo44/article/details/42869325
-//ÅÅÔÚ¶ÓÁĞÇ°ÃæµÄ±íÊ¾×î½ü±»·ÃÎÊµÄkey£¬ÅÅÔÚheadºóÃæµÄÔò±íÊ¾×î½üÃ»·ÃÎÊ¸Ãkey£¬ÒòÎªÃ¿´Î·ÃÎÊkey¶¼»á°Ñkey-value¶ÔÓ¦µÄitemÈ¡³öÀ´·Åµ½headÍ·²¿£¬¼ûdo_item_update
-//lru¶ÓÁĞÀïÃæµÄitemÊÇ¸ù¾İtime½µĞòÅÅĞòµÄ
+//æŒ‡å‘æ¯ä¸€ä¸ªLRUé˜Ÿåˆ—å¤´  LRUé˜Ÿåˆ—å¯ä»¥å‚è€ƒhttp://blog.csdn.net/luotuo44/article/details/42869325
+//æ’åœ¨é˜Ÿåˆ—å‰é¢çš„è¡¨ç¤ºæœ€è¿‘è¢«è®¿é—®çš„keyï¼Œæ’åœ¨headåé¢çš„åˆ™è¡¨ç¤ºæœ€è¿‘æ²¡è®¿é—®è¯¥keyï¼Œå› ä¸ºæ¯æ¬¡è®¿é—®keyéƒ½ä¼šæŠŠkey-valueå¯¹åº”çš„itemå–å‡ºæ¥æ”¾åˆ°headå¤´éƒ¨ï¼Œè§do_item_update
+//lrué˜Ÿåˆ—é‡Œé¢çš„itemæ˜¯æ ¹æ®timeé™åºæ’åºçš„
 
-//LRUÕæÕıµÄÌÔÌ­»úÖÆÊµÏÖ¹ı³ÌÔÚdo_item_alloc->it = slabs_alloc(ntotal, id)) == NULL ¼ÈÃ»ÓĞ¹ıÆÚµÄitem£¬»ñÈ¡ĞÂitemÓÖÊ§°ÜÁË£¬Ôò½øĞĞLRUÌÔÌ­»úÖÆ
-static item *heads[LARGEST_ID]; //LRUÁ´Ê×Ö¸Õë,  Ã¿¸öclassidÒ»¸öLRUÁ´
-//Ö¸ÏòÃ¿Ò»¸öLRU¶ÓÁĞÎ²  
-static item *tails[LARGEST_ID]; //LRUÁ´Î²Ö¸Õë£¬Ã¿¸öclassidÒ»¸öLRUÁ´ 
+//LRUçœŸæ­£çš„æ·˜æ±°æœºåˆ¶å®ç°è¿‡ç¨‹åœ¨do_item_alloc->it = slabs_alloc(ntotal, id)) == NULL æ—¢æ²¡æœ‰è¿‡æœŸçš„itemï¼Œè·å–æ–°itemåˆå¤±è´¥äº†ï¼Œåˆ™è¿›è¡ŒLRUæ·˜æ±°æœºåˆ¶
+static item *heads[LARGEST_ID]; //LRUé“¾é¦–æŒ‡é’ˆ,  æ¯ä¸ªclassidä¸€ä¸ªLRUé“¾
+//æŒ‡å‘æ¯ä¸€ä¸ªLRUé˜Ÿåˆ—å°¾  
+static item *tails[LARGEST_ID]; //LRUé“¾å°¾æŒ‡é’ˆï¼Œæ¯ä¸ªclassidä¸€ä¸ªLRUé“¾ 
 
-//crawlersÊÇÒ»¸öÎ±itemÀàĞÍÊı×é¡£Èç¹ûÓÃ»§ÒªÇåÀíÄ³Ò»¸öLRU¶ÓÁĞ£¬ÄÇÃ´¾ÍÔÚÕâ¸öLRU¶ÓÁĞÖĞ²åÈëÒ»¸öÎ±item  
+//crawlersæ˜¯ä¸€ä¸ªä¼ªitemç±»å‹æ•°ç»„ã€‚å¦‚æœç”¨æˆ·è¦æ¸…ç†æŸä¸€ä¸ªLRUé˜Ÿåˆ—ï¼Œé‚£ä¹ˆå°±åœ¨è¿™ä¸ªLRUé˜Ÿåˆ—ä¸­æ’å…¥ä¸€ä¸ªä¼ªitem  
 static crawler crawlers[LARGEST_ID]; //lru_crawler_crawl
 static itemstats_t itemstats[LARGEST_ID];
-//Ã¿Ò»¸öLRU¶ÓÁĞÓĞ¶àÉÙ¸öitem
-static unsigned int sizes[LARGEST_ID];//Ã¿¸öclassidµÄLRUÁ´µÄ³¤¶È(item¸öÊı£©
+//æ¯ä¸€ä¸ªLRUé˜Ÿåˆ—æœ‰å¤šå°‘ä¸ªitem
+static unsigned int sizes[LARGEST_ID];//æ¯ä¸ªclassidçš„LRUé“¾çš„é•¿åº¦(itemä¸ªæ•°ï¼‰
 
-static int crawler_count = 0; //±¾´ÎÈÎÎñÒª´¦Àí¶àÉÙ¸öLRU¶ÓÁĞ  
-static volatile int do_run_lru_crawler_thread = 0; //Îª1±êÊ¶ÒÑ¾­ÆôÓÃÅÀ³æÏß³Ì
-static int lru_crawler_initialized = 0;//±íÊ¾ÊÇ·ñ³õÊ¼»¯lruÅÀ³æÏß³ÌËøºÍlruÅÀ³æÏß³ÌÌõ¼ş±äÁ¿
+static int crawler_count = 0; //æœ¬æ¬¡ä»»åŠ¡è¦å¤„ç†å¤šå°‘ä¸ªLRUé˜Ÿåˆ—  
+static volatile int do_run_lru_crawler_thread = 0; //ä¸º1æ ‡è¯†å·²ç»å¯ç”¨çˆ¬è™«çº¿ç¨‹
+static int lru_crawler_initialized = 0;//è¡¨ç¤ºæ˜¯å¦åˆå§‹åŒ–lruçˆ¬è™«çº¿ç¨‹é”å’Œlruçˆ¬è™«çº¿ç¨‹æ¡ä»¶å˜é‡
 static pthread_mutex_t lru_crawler_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t  lru_crawler_cond = PTHREAD_COND_INITIALIZER;
 
@@ -102,41 +102,41 @@ static size_t item_make_header(const uint8_t nkey, const int flags, const int nb
     /* suffix is defined at 40 chars elsewhere.. */
     *nsuffix = (uint8_t) snprintf(suffix, 40, " %d %d\r\n", flags, nbytes - 2);  
 
-    //snpintfºó£¬*nsuffic´óĞ¡Ó¦¸Ã¾ÍÊÇÉÏÃæ""ÖĞµÄ×Ö½ÚÊı
-    return sizeof(item) + nkey + *nsuffix + nbytes; //expire±£´æµ½it->expire  cas±£´æÔÚit->data->caseÖĞµÄ
+    //snpintfåï¼Œ*nsufficå¤§å°åº”è¯¥å°±æ˜¯ä¸Šé¢""ä¸­çš„å­—èŠ‚æ•°
+    return sizeof(item) + nkey + *nsuffix + nbytes; //expireä¿å­˜åˆ°it->expire  casä¿å­˜åœ¨it->data->caseä¸­çš„
 }
 
 /*
-µ±workerÏß³Ì½ÓÊÕµ½flush_allÃüÁîºó£¬»áÓÃÈ«¾Ö±äÁ¿settingsµÄoldest_live³ÉÔ±´æ´¢½ÓÊÕµ½Õâ¸öÃüÁîÄÇÒ»¿ÌµÄÊ±¼ä(×¼È·µØËµ£¬
-ÊÇworkerÏß³Ì½âÎöµÃÖªÕâÊÇÒ»¸öflush_allÃüÁîÄÇÒ»¿ÌÔÙ¼õÒ»)£¬´úÂëÎªsettings.oldest_live =current_time - 1;È»ºóµ÷ÓÃ
-item_flush_expiredº¯ÊıËøÉÏcache_lock£¬È»ºóµ÷ÓÃdo_item_flush_expiredº¯ÊıÍê³É¹¤×÷¡£
-    ¶èĞÔÉ¾³ı¿ÉÒÔ²Î¿¼do_item_getÖĞµÄif (settings.oldest_live != 0 && settings.oldest_live <= current_time int i;
-do_item_getº¯ÊıÍâ£¬do_item_allocº¯ÊıÒ²ÊÇ»á´¦Àí¹ıÆÚÊ§Ğ§itemµÄ
+å½“workerçº¿ç¨‹æ¥æ”¶åˆ°flush_allå‘½ä»¤åï¼Œä¼šç”¨å…¨å±€å˜é‡settingsçš„oldest_liveæˆå‘˜å­˜å‚¨æ¥æ”¶åˆ°è¿™ä¸ªå‘½ä»¤é‚£ä¸€åˆ»çš„æ—¶é—´(å‡†ç¡®åœ°è¯´ï¼Œ
+æ˜¯workerçº¿ç¨‹è§£æå¾—çŸ¥è¿™æ˜¯ä¸€ä¸ªflush_allå‘½ä»¤é‚£ä¸€åˆ»å†å‡ä¸€)ï¼Œä»£ç ä¸ºsettings.oldest_live =current_time - 1;ç„¶åè°ƒç”¨
+item_flush_expiredå‡½æ•°é”ä¸Šcache_lockï¼Œç„¶åè°ƒç”¨do_item_flush_expiredå‡½æ•°å®Œæˆå·¥ä½œã€‚
+    æƒ°æ€§åˆ é™¤å¯ä»¥å‚è€ƒdo_item_getä¸­çš„if (settings.oldest_live != 0 && settings.oldest_live <= current_time int i;
+do_item_getå‡½æ•°å¤–ï¼Œdo_item_allocå‡½æ•°ä¹Ÿæ˜¯ä¼šå¤„ç†è¿‡æœŸå¤±æ•ˆitemçš„
 */
 
 
-//ÕæÕı´æ´¢ÔÚslabclass[id]ÖĞµÄtunckÖĞµÄÊı¾İ¸ñÊ½¼ûitem_make_header
+//çœŸæ­£å­˜å‚¨åœ¨slabclass[id]ä¸­çš„tunckä¸­çš„æ•°æ®æ ¼å¼è§item_make_header
 
 /*@null@*/
-//key¡¢flags¡¢exptimeÈı¸ö²ÎÊıÊÇÓÃ»§ÔÚÊ¹ÓÃset¡¢addÃüÁî´æ´¢Ò»ÌõÊı¾İÊ±ÊäÈëµÄ²ÎÊı
-//nkeyÊÇkey×Ö·û´®µÄ³¤¶È¡£nbytesÔòÊÇÓÃ»§Òª´æ´¢µÄdata³¤¶È+2£¬ÒòÎªÔÚdata½áÎ²´¦»¹Òª¼ÓÉÏ"\r\n",dataµÄ\r\nÔÚ¸Ãº¯ÊıÇ°+2µÄ
-//cur_hvÔòÊÇ¸ù¾İ¼üÖµkey¼ÆËãµÃµ½µÄ¹şÏ£Öµ
+//keyã€flagsã€exptimeä¸‰ä¸ªå‚æ•°æ˜¯ç”¨æˆ·åœ¨ä½¿ç”¨setã€addå‘½ä»¤å­˜å‚¨ä¸€æ¡æ•°æ®æ—¶è¾“å…¥çš„å‚æ•°
+//nkeyæ˜¯keyå­—ç¬¦ä¸²çš„é•¿åº¦ã€‚nbytesåˆ™æ˜¯ç”¨æˆ·è¦å­˜å‚¨çš„dataé•¿åº¦+2ï¼Œå› ä¸ºåœ¨dataç»“å°¾å¤„è¿˜è¦åŠ ä¸Š"\r\n",dataçš„\r\nåœ¨è¯¥å‡½æ•°å‰+2çš„
+//cur_hvåˆ™æ˜¯æ ¹æ®é”®å€¼keyè®¡ç®—å¾—åˆ°çš„å“ˆå¸Œå€¼
 item *do_item_alloc(char *key, const size_t nkey, const int flags,
                     const rel_time_t exptime, const int nbytes,
-                    const uint32_t cur_hv) { //do_item_alloc (·ÖÅäitem) ºÍ item_free £¨ÊÍ·Åitem£©
+                    const uint32_t cur_hv) { //do_item_alloc (åˆ†é…item) å’Œ item_free ï¼ˆé‡Šæ”¾itemï¼‰
     uint8_t nsuffix;
     item *it = NULL;
     char suffix[40];
 
-	//Òª´æ´¢Õâ¸öitemĞèÒªµÄ×Ü¿Õ¼ä  nkey+1ÊÇÒòÎªset key 0 0 3\n  abc\r\n  ¶ÔÓ¦µÄkeyĞĞºóÃæÓĞ\n
+	//è¦å­˜å‚¨è¿™ä¸ªiteméœ€è¦çš„æ€»ç©ºé—´  nkey+1æ˜¯å› ä¸ºset key 0 0 3\n  abc\r\n  å¯¹åº”çš„keyè¡Œåé¢æœ‰\n
     size_t ntotal = item_make_header(nkey + 1, flags, nbytes, suffix, &nsuffix);
     if (settings.use_cas) {
         ntotal += sizeof(uint64_t);
     }
 
-	//¸ù¾İ´óĞ¡ÅĞ¶Ï´ÓÊôÓÚÄÄ¸öslab
+	//æ ¹æ®å¤§å°åˆ¤æ–­ä»å±äºå“ªä¸ªslab
     unsigned int id = slabs_clsid(ntotal);
-    if (id == 0) //0±íÊ¾²»ÊôÓÚÈÎºÎÒ»¸öslab  slabclassÊÇ´Ó1¿ªÊ¼µÄ
+    if (id == 0) //0è¡¨ç¤ºä¸å±äºä»»ä½•ä¸€ä¸ªslab  slabclassæ˜¯ä»1å¼€å§‹çš„
         return 0;
 
     mutex_lock(&cache_lock);
@@ -154,22 +154,22 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags,
     /* We walk up *only* for locked items. Never searching for expired.
      * Waste of CPU for almost all deployments */
 
-	//µÚÒ»´Î¿´Õâ¸öforÑ­»·£¬Ö±½ÓÈÏÎªsearchµÈÓÚNULL£¬Ö±½Ó¿´forÑ­»·ºóÃæµÄ´úÂë
-	//Õâ¸öÑ­»·ÀïÃæ»áÔÚ¶ÔÓ¦LRU¶ÓÁĞÖĞ²éÕÒ¹ıÆÚÊ§Ğ§µÄitem£¬×î¶à³¢ÊÔtries¸öitem¡£
-	//´ÓLRUµÄ¶ÓÎ²¿ªÊ¼³¢ÊÔ¡£Èç¹ûitem±»ÆäËûworkerÏß³ÌÒıÓÃÁË£¬ÄÇÃ´¾Í³¢ÊÔÏÂÒ»¸ö
-	//Èç¹ûÃ»ÓĞµÄ±»ÆäËûworkerÏß³ÌËùÒıÓÃ£¬ÄÇÃ´¾Í²âÊÔ¸ÃitemÊÇ·ñ¹ıÆÚÊ§Ğ§
-	//Èç¹û¹ıÆÚÊ§Ğ§ÁË£¬ÄÇÃ´¾Í¿ÉÒÔÊ¹ÓÃÕâ¸öitem(×îÖÕ»á·µ»ØÕâ¸öitem)¡£Èç¹ûÃ»ÓĞ
-	//¹ıÆÚÊ§Ğ§£¬ÄÇÃ´²»ÔÙ³¢ÊÔÆäËûitemÁË(ÒòÎªÊÇ´ÓLRU¶ÓÁĞµÄ¶ÓÎ²¿ªÊ¼³¢ÊÔµÄ,¶ÔÎ²µÄ¶¼Ã»ÓĞÊ§Ğ§£¬ÆäËûÇ°ÃæµÄ¿Ï¶¨²»»áÊ§Ğ§)£¬
-	//Ö±½Óµ÷ÓÃslabs_allocÉêÇëÒ»¸öĞÂµÄÄÚ´æ´æ´¢item¡£Èç¹ûÉêÇëĞÂÄÚ´æ¶¼Ê§°Ü£¬
-	//ÄÇÃ´ÔÚÔÊĞíLRUÌÔÌ­µÄÇé¿öÏÂ¾Í»áÆô¶¯ÌßÈË»úÖÆ
+	//ç¬¬ä¸€æ¬¡çœ‹è¿™ä¸ªforå¾ªç¯ï¼Œç›´æ¥è®¤ä¸ºsearchç­‰äºNULLï¼Œç›´æ¥çœ‹forå¾ªç¯åé¢çš„ä»£ç 
+	//è¿™ä¸ªå¾ªç¯é‡Œé¢ä¼šåœ¨å¯¹åº”LRUé˜Ÿåˆ—ä¸­æŸ¥æ‰¾è¿‡æœŸå¤±æ•ˆçš„itemï¼Œæœ€å¤šå°è¯•triesä¸ªitemã€‚
+	//ä»LRUçš„é˜Ÿå°¾å¼€å§‹å°è¯•ã€‚å¦‚æœitemè¢«å…¶ä»–workerçº¿ç¨‹å¼•ç”¨äº†ï¼Œé‚£ä¹ˆå°±å°è¯•ä¸‹ä¸€ä¸ª
+	//å¦‚æœæ²¡æœ‰çš„è¢«å…¶ä»–workerçº¿ç¨‹æ‰€å¼•ç”¨ï¼Œé‚£ä¹ˆå°±æµ‹è¯•è¯¥itemæ˜¯å¦è¿‡æœŸå¤±æ•ˆ
+	//å¦‚æœè¿‡æœŸå¤±æ•ˆäº†ï¼Œé‚£ä¹ˆå°±å¯ä»¥ä½¿ç”¨è¿™ä¸ªitem(æœ€ç»ˆä¼šè¿”å›è¿™ä¸ªitem)ã€‚å¦‚æœæ²¡æœ‰
+	//è¿‡æœŸå¤±æ•ˆï¼Œé‚£ä¹ˆä¸å†å°è¯•å…¶ä»–itemäº†(å› ä¸ºæ˜¯ä»LRUé˜Ÿåˆ—çš„é˜Ÿå°¾å¼€å§‹å°è¯•çš„,å¯¹å°¾çš„éƒ½æ²¡æœ‰å¤±æ•ˆï¼Œå…¶ä»–å‰é¢çš„è‚¯å®šä¸ä¼šå¤±æ•ˆ)ï¼Œ
+	//ç›´æ¥è°ƒç”¨slabs_allocç”³è¯·ä¸€ä¸ªæ–°çš„å†…å­˜å­˜å‚¨itemã€‚å¦‚æœç”³è¯·æ–°å†…å­˜éƒ½å¤±è´¥ï¼Œ
+	//é‚£ä¹ˆåœ¨å…è®¸LRUæ·˜æ±°çš„æƒ…å†µä¸‹å°±ä¼šå¯åŠ¨è¸¢äººæœºåˆ¶
 	
     for (; tries > 0 && search != NULL; tries--, search=next_it) {
         /* we might relink search mid-loop, so search->prev isn't reliable */
         next_it = search->prev;
         if (search->nbytes == 0 && search->nkey == 0 && search->it_flags == 1) {
             /* We are a crawler, ignore it. */
-			//ÕâÊÇÒ»¸öÅÀ³æitem£¬Ö±½ÓÌø¹ı
-            tries++; //ÅÀ³æitem²»¼ÆÈë³¢ÊÔµÄitemÊıÖĞ
+			//è¿™æ˜¯ä¸€ä¸ªçˆ¬è™«itemï¼Œç›´æ¥è·³è¿‡
+            tries++; //çˆ¬è™«itemä¸è®¡å…¥å°è¯•çš„itemæ•°ä¸­
             continue;
         }
         uint32_t hv = hash(ITEM_key(search), search->nkey);
@@ -177,19 +177,19 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags,
          * other callers can incr the refcount
          */
         /* Don't accidentally grab ourselves, or bail if we can't quicklock */
-		//³¢ÊÔÇÀÕ¼Ëø£¬ÇÀ²»ÁË¾Í×ßÈË£¬²»µÈ´ıËø¡£
+		//å°è¯•æŠ¢å é”ï¼ŒæŠ¢ä¸äº†å°±èµ°äººï¼Œä¸ç­‰å¾…é”ã€‚
         if (hv == cur_hv || (hold_lock = item_trylock(hv)) == NULL)
             continue;
         /* Now see if the item is refcount locked */
-        if (refcount_incr(&search->refcount) != 2) { //ÒıÓÃ¼ÆÊı>=3  //ÒıÓÃÊı£¬»¹ÓĞÆäËûÏß³ÌÔÚÒıÓÃ£¬²»ÄÜ°ÔÕ¼Õâ¸öitem  
+        if (refcount_incr(&search->refcount) != 2) { //å¼•ç”¨è®¡æ•°>=3  //å¼•ç”¨æ•°ï¼Œè¿˜æœ‰å…¶ä»–çº¿ç¨‹åœ¨å¼•ç”¨ï¼Œä¸èƒ½éœ¸å è¿™ä¸ªitem  
             /* Avoid pathological case with ref'ed items in tail */
-			//Ë¢ĞÂÕâ¸öitemµÄ·ÃÎÊÊ±¼äÒÔ¼°ÔÚLRU¶ÓÁĞÖĞµÄÎ»ÖÃ
+			//åˆ·æ–°è¿™ä¸ªitemçš„è®¿é—®æ—¶é—´ä»¥åŠåœ¨LRUé˜Ÿåˆ—ä¸­çš„ä½ç½®
             do_item_update_nolock(search);
             tries_lrutail_reflocked--;
             tries++;
             refcount_decr(&search->refcount);
 
-			//´ËÊ±ÒıÓÃÊı>=2
+			//æ­¤æ—¶å¼•ç”¨æ•°>=2
             itemstats[id].lrutail_reflocked++;
             /* Old rare bug could cause a refcount leak. We haven't seen
              * it in years, but we leave this code in to prevent failures
@@ -210,34 +210,34 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags,
         }
 
 
-//searchÖ¸ÏòµÄitemµÄrefcountµÈÓÚ2£¬ÕâËµÃ÷´ËÊ±Õâ¸öitem³ıÁË±¾workerÏß³ÌÍâ£¬Ã»ÓĞÆäËûÈÎºÎworkerÏß³ÌË÷ÒıÆä¡£¿ÉÒÔ·ÅĞÄÊÍ·Å²¢ÖØÓÃÕâ¸öitem  
+//searchæŒ‡å‘çš„itemçš„refcountç­‰äº2ï¼Œè¿™è¯´æ˜æ­¤æ—¶è¿™ä¸ªitemé™¤äº†æœ¬workerçº¿ç¨‹å¤–ï¼Œæ²¡æœ‰å…¶ä»–ä»»ä½•workerçº¿ç¨‹ç´¢å¼•å…¶ã€‚å¯ä»¥æ”¾å¿ƒé‡Šæ”¾å¹¶é‡ç”¨è¿™ä¸ªitem  
           
-//ÒòÎªÕâ¸öÑ­»·ÊÇ´ÓlruÁ´±íµÄºóÃæ¿ªÊ¼±éÀúµÄ¡£ËùÒÔÒ»¿ªÊ¼search¾ÍÖ¸ÏòÁË×î²»³£ÓÃµÄitem£¬Èç¹ûÕâ¸öitem¶¼Ã»ÓĞ¹ıÆÚ¡£ÄÇÃ´ÆäËûµÄ±ÈÆä¸ü³£ÓÃ  
-//µÄitem¾Í²»ÒªÉ¾³ıÁË(¼´Ê¹ËüÃÇ¹ıÆÚÁË)¡£´ËÊ±Ö»ÄÜÏòslabsÉêÇëÄÚ´æ   
+//å› ä¸ºè¿™ä¸ªå¾ªç¯æ˜¯ä»lrué“¾è¡¨çš„åé¢å¼€å§‹éå†çš„ã€‚æ‰€ä»¥ä¸€å¼€å§‹searchå°±æŒ‡å‘äº†æœ€ä¸å¸¸ç”¨çš„itemï¼Œå¦‚æœè¿™ä¸ªiteméƒ½æ²¡æœ‰è¿‡æœŸã€‚é‚£ä¹ˆå…¶ä»–çš„æ¯”å…¶æ›´å¸¸ç”¨  
+//çš„itemå°±ä¸è¦åˆ é™¤äº†(å³ä½¿å®ƒä»¬è¿‡æœŸäº†)ã€‚æ­¤æ—¶åªèƒ½å‘slabsç”³è¯·å†…å­˜   
         /* Expired or flushed */
         if ((search->exptime != 0 && search->exptime < current_time)
             || (search->time <= oldest_live && oldest_live <= current_time)) { 
-            ////searchÖ¸ÏòµÄitemÊÇÒ»¸ö¹ıÆÚÊ§Ğ§µÄitem£¬¿ÉÒÔÊ¹ÓÃÖ®  
+            ////searchæŒ‡å‘çš„itemæ˜¯ä¸€ä¸ªè¿‡æœŸå¤±æ•ˆçš„itemï¼Œå¯ä»¥ä½¿ç”¨ä¹‹  
             itemstats[id].reclaimed++;
             if ((search->it_flags & ITEM_FETCHED) == 0) {
                 itemstats[id].expired_unfetched++;
             }
             it = search;
-            //ÖØĞÂ¼ÆËãÒ»ÏÂÕâ¸öslabclass_t·ÖÅä³öÈ¥µÄÄÚ´æ´óĞ¡Ö±½Ó°ÔÕ¼¾ÉµÄitem¾ÍĞèÒªÖØĞÂ¼ÆËã  
+            //é‡æ–°è®¡ç®—ä¸€ä¸‹è¿™ä¸ªslabclass_tåˆ†é…å‡ºå»çš„å†…å­˜å¤§å°ç›´æ¥éœ¸å æ—§çš„itemå°±éœ€è¦é‡æ–°è®¡ç®—  
             slabs_adjust_mem_requested(it->slabs_clsid, ITEM_ntotal(it), ntotal); 
             do_item_unlink_nolock(it, hv);  
             /* Initialize the item block: */
             it->slabs_clsid = 0;
-        } else if ((it = slabs_alloc(ntotal, id)) == NULL) { //¸Ãid¶ÔÓÚµÄslabÖĞÃ»ÓĞ¹ıÆÚµÄitem£¬Ôò´ÓslabÖØĞÂ»ñÈ¡Ò»¸öitem
+        } else if ((it = slabs_alloc(ntotal, id)) == NULL) { //è¯¥idå¯¹äºçš„slabä¸­æ²¡æœ‰è¿‡æœŸçš„itemï¼Œåˆ™ä»slabé‡æ–°è·å–ä¸€ä¸ªitem
             tried_alloc = 1;
-            if (settings.evict_to_free == 0) { //ÉèÖÃÁË²»½øĞĞLRUÌÔÌ­item  
-                itemstats[id].outofmemory++; //´ËÊ±Ö»ÄÜÏò¿Í»§¶Ë»Ø¸´´íÎóÁË  
+            if (settings.evict_to_free == 0) { //è®¾ç½®äº†ä¸è¿›è¡ŒLRUæ·˜æ±°item  
+                itemstats[id].outofmemory++; //æ­¤æ—¶åªèƒ½å‘å®¢æˆ·ç«¯å›å¤é”™è¯¯äº†  
             } else {
-                //´Ë¿Ì£¬¹ıÆÚÊ§Ğ§µÄitemÃ»ÓĞÕÒµ½£¬ÉêÇëÄÚ´æÓÖÊ§°ÜÁË¡£¿´À´Ö»ÄÜÊ¹ÓÃ  
-                //LRUÌÔÌ­Ò»¸öitem(¼´Ê¹Õâ¸öitem²¢Ã»ÓĞ¹ıÆÚÊ§Ğ§)  
-                itemstats[id].evicted++;//Ôö¼Ó±»ÌßµÄitemÊı  
+                //æ­¤åˆ»ï¼Œè¿‡æœŸå¤±æ•ˆçš„itemæ²¡æœ‰æ‰¾åˆ°ï¼Œç”³è¯·å†…å­˜åˆå¤±è´¥äº†ã€‚çœ‹æ¥åªèƒ½ä½¿ç”¨  
+                //LRUæ·˜æ±°ä¸€ä¸ªitem(å³ä½¿è¿™ä¸ªitemå¹¶æ²¡æœ‰è¿‡æœŸå¤±æ•ˆ)  
+                itemstats[id].evicted++;//å¢åŠ è¢«è¸¢çš„itemæ•°  
                 itemstats[id].evicted_time = current_time - search->time;
-                if (search->exptime != 0) //¼´Ê¹Ò»¸öitemµÄexptime³ÉÔ±ÉèÖÃÎªÓÀ²»³¬Ê±(0)£¬»¹ÊÇ»á±»ÌßµÄ  
+                if (search->exptime != 0) //å³ä½¿ä¸€ä¸ªitemçš„exptimeæˆå‘˜è®¾ç½®ä¸ºæ°¸ä¸è¶…æ—¶(0)ï¼Œè¿˜æ˜¯ä¼šè¢«è¸¢çš„  
                     itemstats[id].evicted_nonzero++;
                 if ((search->it_flags & ITEM_FETCHED) == 0) { 
                     itemstats[id].evicted_unfetched++;
@@ -255,15 +255,15 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags,
                  * would be an eviction. Then kick off the slab mover before the
                  * eviction happens.
                  */
-                //Ò»µ©·¢ÏÖÓĞitem±»Ìß£¬ÄÇÃ´¾ÍÆô¶¯ÄÚ´æÒ³ÖØ·ÖÅä²Ù×÷  
-                //Õâ¸öÌ«Æµ·±ÁË£¬²»ÍÆ¼ö   
+                //ä¸€æ—¦å‘ç°æœ‰itemè¢«è¸¢ï¼Œé‚£ä¹ˆå°±å¯åŠ¨å†…å­˜é¡µé‡åˆ†é…æ“ä½œ  
+                //è¿™ä¸ªå¤ªé¢‘ç¹äº†ï¼Œä¸æ¨è   
                 if (settings.slab_automove == 2)
                     slabs_reassign(-1, id);
             }
         }
 
-        //ÒıÓÃ¼ÆÊı¼õÒ»¡£´ËÊ±¸ÃitemÒÑ¾­Ã»ÓĞÈÎºÎworkerÏß³ÌË÷ÒıÆä£¬²¢ÇÒ¹şÏ£±íÒ²  
-        //²»ÔÙË÷ÒıÆä  
+        //å¼•ç”¨è®¡æ•°å‡ä¸€ã€‚æ­¤æ—¶è¯¥itemå·²ç»æ²¡æœ‰ä»»ä½•workerçº¿ç¨‹ç´¢å¼•å…¶ï¼Œå¹¶ä¸”å“ˆå¸Œè¡¨ä¹Ÿ  
+        //ä¸å†ç´¢å¼•å…¶  
         refcount_decr(&search->refcount);
         /* If hash values were equal, we don't grab a second lock */
         if (hold_lock)
@@ -286,7 +286,7 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags,
     /* Item initialization can happen outside of the lock; the item's already
      * been removed from the slab LRU.
      */
-    it->refcount = 1;     /* the caller will have a reference */  //ĞÂ¿ªÅÌµÄÄ¬ÈÏ³õÖµÎª1
+    it->refcount = 1;     /* the caller will have a reference */  //æ–°å¼€ç›˜çš„é»˜è®¤åˆå€¼ä¸º1
     mutex_unlock(&cache_lock);
     it->next = it->prev = it->h_next = 0;
     it->slabs_clsid = id;
@@ -294,11 +294,11 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags,
     DEBUG_REFCNT(it, '*');
     it->it_flags = settings.use_cas ? ITEM_CAS : 0;
     it->nkey = nkey;
-    it->nbytes = nbytes;  //set casµÈÃüÁîĞĞÖĞµÄexpire±£´æµ½it->expire  cas±£´æÔÚit->data->caseÖĞµÄ
+    it->nbytes = nbytes;  //set casç­‰å‘½ä»¤è¡Œä¸­çš„expireä¿å­˜åˆ°it->expire  casä¿å­˜åœ¨it->data->caseä¸­çš„
     memcpy(ITEM_key(it), key, nkey);
     it->exptime = exptime;
     memcpy(ITEM_suffix(it), suffix, (size_t)nsuffix);
-    it->nsuffix = nsuffix; //Êµ¼Ê·ÖÅäµÄitem¿Õ¼ä´óĞ¡Îªit->nkey +1 + it->nsuffix +it->nbytes
+    it->nsuffix = nsuffix; //å®é™…åˆ†é…çš„itemç©ºé—´å¤§å°ä¸ºit->nkey +1 + it->nsuffix +it->nbytes
     return it;
 }
 
@@ -334,7 +334,7 @@ bool item_size_ok(const size_t nkey, const int flags, const int nbytes) {
     return slabs_clsid(ntotal) != 0;
 }
 
-//½«item²åÈëµ½LRU¶ÓÁĞµÄÍ·²¿  //½«item¼ÓÈëµ½¶ÔÓ¦classidµÄLRUÁ´µÄhead   ²åÈëhash±íº¯ÊıÎªassoc_insert  ²åÈëlru¶ÓÁĞµÄº¯ÊıÎªitem_link_q
+//å°†itemæ’å…¥åˆ°LRUé˜Ÿåˆ—çš„å¤´éƒ¨  //å°†itemåŠ å…¥åˆ°å¯¹åº”classidçš„LRUé“¾çš„head   æ’å…¥hashè¡¨å‡½æ•°ä¸ºassoc_insert  æ’å…¥lrué˜Ÿåˆ—çš„å‡½æ•°ä¸ºitem_link_q
 static void item_link_q(item *it) { /* item is the new head */
     item **head, **tail;
     assert(it->slabs_clsid < LARGEST_ID);
@@ -345,47 +345,47 @@ static void item_link_q(item *it) { /* item is the new head */
     assert(it != *head);
     assert((*head && *tail) || (*head == 0 && *tail == 0));
 
-	//Í·²å·¨²åÈë¸Ãitem
+	//å¤´æ’æ³•æ’å…¥è¯¥item
     it->prev = 0;
     it->next = *head;
     if (it->next) it->next->prev = it;
-    *head = it;//¸Ãitem×÷Îª¶ÔÓ¦Á´±íµÄµÚÒ»¸ö½Úµã
+    *head = it;//è¯¥itemä½œä¸ºå¯¹åº”é“¾è¡¨çš„ç¬¬ä¸€ä¸ªèŠ‚ç‚¹
 
-	//Èç¹û¸Ãitem¶ÔÓ¦idÉÏµÄµÚÒ»¸öitem£¬ÄÇÃ´»¹»á±»ÈÏÎªÊÇ¸ÃidÁ´ÉÏ×îºóÒ»¸öitem
-	//ÒòÎªÔÚheadÄÇÀïÊ¹ÓÃÍ·²å·¨£¬ËùÒÔµÚÒ»¸ö²åÈëµÄitem£¬µ½ÁËºóÃæÈ·Êµ³ÉÁË×îºóÒ»¸öitem
+	//å¦‚æœè¯¥itemå¯¹åº”idä¸Šçš„ç¬¬ä¸€ä¸ªitemï¼Œé‚£ä¹ˆè¿˜ä¼šè¢«è®¤ä¸ºæ˜¯è¯¥idé“¾ä¸Šæœ€åä¸€ä¸ªitem
+	//å› ä¸ºåœ¨headé‚£é‡Œä½¿ç”¨å¤´æ’æ³•ï¼Œæ‰€ä»¥ç¬¬ä¸€ä¸ªæ’å…¥çš„itemï¼Œåˆ°äº†åé¢ç¡®å®æˆäº†æœ€åä¸€ä¸ªitem
     if (*tail == 0) *tail = it;
     sizes[it->slabs_clsid]++;
     return;
 }
 
-//½«it´Ó¶ÔÓ¦µÄLRU¶ÓÁĞÖĞÉ¾³ı  //½«item´Ó¶ÔÓ¦classidµÄLRUÁ´ÉÏÒÆ³ı
+//å°†itä»å¯¹åº”çš„LRUé˜Ÿåˆ—ä¸­åˆ é™¤  //å°†itemä»å¯¹åº”classidçš„LRUé“¾ä¸Šç§»é™¤
 static void item_unlink_q(item *it) {
     item **head, **tail;
     assert(it->slabs_clsid < LARGEST_ID);
     head = &heads[it->slabs_clsid];
     tail = &tails[it->slabs_clsid];
 
-	//Á´±íÉÏµÄµÚÒ»¸ö½Úµã
+	//é“¾è¡¨ä¸Šçš„ç¬¬ä¸€ä¸ªèŠ‚ç‚¹
     if (*head == it) { 
         assert(it->prev == 0);
         *head = it->next;
     }
-	//Á´±íÉÏµÄ×îºóÒ»¸ö½Úµã
+	//é“¾è¡¨ä¸Šçš„æœ€åä¸€ä¸ªèŠ‚ç‚¹
     if (*tail == it) {
         assert(it->next == 0);
         *tail = it->prev;
     }
     assert(it->next != it);
     assert(it->prev != it);
-	//°ÑitemµÄÇ°Çı½áµãºÍºóÇø½áµãÁ¬½ÓÆğÀ´
+	//æŠŠitemçš„å‰é©±ç»“ç‚¹å’ŒååŒºç»“ç‚¹è¿æ¥èµ·æ¥
     if (it->next) it->next->prev = it->prev;
     if (it->prev) it->prev->next = it->next;
-	//¸öÊı¼õÒ»
+	//ä¸ªæ•°å‡ä¸€
     sizes[it->slabs_clsid]--;
     return;
 }
 
-////½«item¼ÓÈëµ½hashtable²¢¼ÓÈëµ½¶ÔÓ¦classidµÄLRUÁ´ÖĞ¡£
+////å°†itemåŠ å…¥åˆ°hashtableå¹¶åŠ å…¥åˆ°å¯¹åº”classidçš„LRUé“¾ä¸­ã€‚
 int do_item_link(item *it, const uint32_t hv) {
     MEMCACHED_ITEM_LINK(ITEM_key(it), it->nkey, it->nbytes);
     assert((it->it_flags & (ITEM_LINKED|ITEM_SLABBED)) == 0);
@@ -401,21 +401,21 @@ int do_item_link(item *it, const uint32_t hv) {
 
     /* Allocate a new CAS ID on link. */
     ITEM_set_cas(it, (settings.use_cas) ? get_cas_id() : 0);
-    assoc_insert(it, hv); //²åÈëµ½hash±íÖĞ£¬ÓÃÓÚ¿ìËÙ²éÕÒ
-    item_link_q(it); //¼ÓÈëµ½LRU¶ÓÁĞ
-    refcount_incr(&it->refcount); //Ôö¼ÓrefcountÒıÓÃÊı
+    assoc_insert(it, hv); //æ’å…¥åˆ°hashè¡¨ä¸­ï¼Œç”¨äºå¿«é€ŸæŸ¥æ‰¾
+    item_link_q(it); //åŠ å…¥åˆ°LRUé˜Ÿåˆ—
+    refcount_incr(&it->refcount); //å¢åŠ refcountå¼•ç”¨æ•°
     mutex_unlock(&cache_lock);
 
     return 1;
 }
 
 /*
-µ±Ò»¸öitem²åÈëµ½¹şÏ£±íºÍLRU¶ÓÁĞºó£¬ÄÇÃ´Õâ¸öitem¾Í±»¹şÏ£±íºÍLRU¶ÓÁĞËùÒıÓÃÁË¡£´ËÊ±£¬Èç¹ûÃ»ÓĞÆäËûÏß³ÌÔÚÒıÓÃÕâ¸öitemµÄ»°£¬
-ÄÇÃ´Õâ¸öitemµÄÒıÓÃÊıÎª1(¹şÏ£±íºÍLRU¶ÓÁĞ¿´×÷Ò»¸öÒıÓÃ)¡£ËùÒÔÒ»¸öworkerÏß³ÌÒªÉ¾³ıÒ»¸öitem(µ±È»ÔÚÉ¾³ıÇ°Õâ¸öworkerÏß³ÌÒª
-Õ¼ÓĞÕâ¸öitem)£¬ÄÇÃ´ĞèÒª¼õÉÙÁ½´ÎitemµÄÒıÓÃÊı£¬Ò»´ÎÊÇ¼õÉÙ¹şÏ£±íºÍLRU¶ÓÁĞµÄÒıÓÃ£¬ÁíÍâÒ»´ÎÊÇ¼õÉÙ×Ô¼ºµÄÒıÓÃ¡£ËùÒÔ¾­³£ÄÜ
-ÔÚ´úÂëÖĞ¿´µ½É¾³ıÒ»¸öitemĞèÒªµ÷ÓÃº¯Êıdo_item_unlink (it, hv)ºÍdo_item_remove(it)ÕâÁ½¸öº¯Êı¡£
+å½“ä¸€ä¸ªitemæ’å…¥åˆ°å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—åï¼Œé‚£ä¹ˆè¿™ä¸ªitemå°±è¢«å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—æ‰€å¼•ç”¨äº†ã€‚æ­¤æ—¶ï¼Œå¦‚æœæ²¡æœ‰å…¶ä»–çº¿ç¨‹åœ¨å¼•ç”¨è¿™ä¸ªitemçš„è¯ï¼Œ
+é‚£ä¹ˆè¿™ä¸ªitemçš„å¼•ç”¨æ•°ä¸º1(å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—çœ‹ä½œä¸€ä¸ªå¼•ç”¨)ã€‚æ‰€ä»¥ä¸€ä¸ªworkerçº¿ç¨‹è¦åˆ é™¤ä¸€ä¸ªitem(å½“ç„¶åœ¨åˆ é™¤å‰è¿™ä¸ªworkerçº¿ç¨‹è¦
+å æœ‰è¿™ä¸ªitem)ï¼Œé‚£ä¹ˆéœ€è¦å‡å°‘ä¸¤æ¬¡itemçš„å¼•ç”¨æ•°ï¼Œä¸€æ¬¡æ˜¯å‡å°‘å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—çš„å¼•ç”¨ï¼Œå¦å¤–ä¸€æ¬¡æ˜¯å‡å°‘è‡ªå·±çš„å¼•ç”¨ã€‚æ‰€ä»¥ç»å¸¸èƒ½
+åœ¨ä»£ç ä¸­çœ‹åˆ°åˆ é™¤ä¸€ä¸ªiteméœ€è¦è°ƒç”¨å‡½æ•°do_item_unlink (it, hv)å’Œdo_item_remove(it)è¿™ä¸¤ä¸ªå‡½æ•°ã€‚
 */
-//½«item´ÓhashtableºÍLRUÁ´ÖĞÒÆ³ı¡£ÊÇdo_item_linkµÄÄæ²Ù×÷£¬ do_item_unlink½â³ıÓëhashºÍlruµÄ¹ØÁª£¬ÕæÕıÊÍ·ÅitemÔÚdo_item_remove
+//å°†itemä»hashtableå’ŒLRUé“¾ä¸­ç§»é™¤ã€‚æ˜¯do_item_linkçš„é€†æ“ä½œï¼Œ do_item_unlinkè§£é™¤ä¸hashå’Œlruçš„å…³è”ï¼ŒçœŸæ­£é‡Šæ”¾itemåœ¨do_item_remove
 void do_item_unlink(item *it, const uint32_t hv) {
     MEMCACHED_ITEM_UNLINK(ITEM_key(it), it->nkey, it->nbytes);
     mutex_lock(&cache_lock);
@@ -433,7 +433,7 @@ void do_item_unlink(item *it, const uint32_t hv) {
 }
 
 /* FIXME: Is it necessary to keep this copy/pasted code? */
-//´ÓhashºÍitemÖĞÉ¾³ı
+//ä»hashå’Œitemä¸­åˆ é™¤
 void do_item_unlink_nolock(item *it, const uint32_t hv) {
     MEMCACHED_ITEM_UNLINK(ITEM_key(it), it->nkey, it->nbytes);
     if ((it->it_flags & ITEM_LINKED) != 0) {
@@ -448,7 +448,7 @@ void do_item_unlink_nolock(item *it, const uint32_t hv) {
     }
 }
 
-//do_item_unlink½â³ıÓëhashºÍlruµÄ¹ØÁª£¬ÕæÕıÊÍ·ÅitemÔÚdo_item_remove
+//do_item_unlinkè§£é™¤ä¸hashå’Œlruçš„å…³è”ï¼ŒçœŸæ­£é‡Šæ”¾itemåœ¨do_item_remove
 void do_item_remove(item *it) {
     MEMCACHED_ITEM_REMOVE(ITEM_key(it), it->nkey, it->nbytes);
     assert((it->it_flags & ITEM_SLABBED) == 0);
@@ -463,45 +463,45 @@ void do_item_remove(item *it) {
  * _nolock is only used in an uncommon case. */
 void do_item_update_nolock(item *it) {
     MEMCACHED_ITEM_UPDATE(ITEM_key(it), it->nkey, it->nbytes);
-	//ÏÂÃæµÄ´úÂë¿ÉÒÔ¿´µ½update²Ù×÷Ê±ºÄÊ±µÄ¡£Èç¹ûÕâ¸öitemÆµ·±±»·ÃÎÊ
-	//ÄÇÃ´»áµ¼ÖÂ¹ı¶àµÄupdate£¬¹ı¶àµÄÒ»ÏµÁĞ·ÑÊ±²Ù×÷¡£´ËÊ±¸üĞÂ¼ä¸ô¾ÍÓ¦ÔË¶øÉúÁË
-	//Èç¹ûÉÏÒ»´ÎµÄ·ÃÎÊÊ±¼ä(Ò²¿ÉÒÔËµÊÇupdateÊ±¼ä)¾àÀëÏÖÔÚ(current_time)
-	//»¹ÔÚ¸üĞÂ¼ä¸ôÄÚµÄ£¬¾Í²»¸üĞÂ¡£³¬³öÁË²Å¸üĞÂ¡£
+	//ä¸‹é¢çš„ä»£ç å¯ä»¥çœ‹åˆ°updateæ“ä½œæ—¶è€—æ—¶çš„ã€‚å¦‚æœè¿™ä¸ªitemé¢‘ç¹è¢«è®¿é—®
+	//é‚£ä¹ˆä¼šå¯¼è‡´è¿‡å¤šçš„updateï¼Œè¿‡å¤šçš„ä¸€ç³»åˆ—è´¹æ—¶æ“ä½œã€‚æ­¤æ—¶æ›´æ–°é—´éš”å°±åº”è¿è€Œç”Ÿäº†
+	//å¦‚æœä¸Šä¸€æ¬¡çš„è®¿é—®æ—¶é—´(ä¹Ÿå¯ä»¥è¯´æ˜¯updateæ—¶é—´)è·ç¦»ç°åœ¨(current_time)
+	//è¿˜åœ¨æ›´æ–°é—´éš”å†…çš„ï¼Œå°±ä¸æ›´æ–°ã€‚è¶…å‡ºäº†æ‰æ›´æ–°ã€‚
     if (it->time < current_time - ITEM_UPDATE_INTERVAL) {
         assert((it->it_flags & ITEM_SLABBED) == 0);
 
         if ((it->it_flags & ITEM_LINKED) != 0) {
-			//´ÓLRU¶ÓÁĞÖĞÉ¾³ı
+			//ä»LRUé˜Ÿåˆ—ä¸­åˆ é™¤
             item_unlink_q(it);
-			//¸üĞÂ·ÃÎÊÊ±¼ä
+			//æ›´æ–°è®¿é—®æ—¶é—´
             it->time = current_time;
-			//²åÈëµ½LRU¶ÓÁĞµÄÍ·²¿
+			//æ’å…¥åˆ°LRUé˜Ÿåˆ—çš„å¤´éƒ¨
             item_link_q(it);
         }
     }
 }
 
 /*
-ÎªÊ²Ã´Òª°Ñitem²åÈëµ½LRU¶ÓÁĞÍ·²¿ÄØ£¿µ±È»ÊµÏÖ¼òµ¥ÊÇÆäÖĞÒ»¸öÔ­Òò¡£µ«¸üÖØÒªµÄÊÇÕâÊÇÒ»¸öLRU¶ÓÁĞ£¡£¡»¹¼ÇµÃ²Ù×÷ÏµÍ³ÀïÃæµÄLRU°É¡£
-ÕâÊÇÒ»ÖÖÌÔÌ­»úÖÆ¡£ÔÚLRU¶ÓÁĞÖĞ£¬ÅÅµÃÔ½¿¿ºó¾ÍÈÏÎªÊÇÔ½ÉÙÊ¹ÓÃµÄitem£¬´ËÊ±±»ÌÔÌ­µÄ¼¸ÂÊ¾ÍÔ½´ó¡£ËùÒÔĞÂÏÊitem(·ÃÎÊÊ±¼äĞÂ)£¬ÒªÅÅ
-ÔÚ²»ÄÇÃ´ĞÂÏÊitemµÄÇ°Ãæ£¬ËùÒÔ²åÈëLRU¶ÓÁĞµÄÍ·²¿ÊÇ²»¶şÑ¡Ôñ¡£ÏÂÃæµÄdo_item_updateº¯Êı×ôÖ¤ÁËÕâÒ»µã¡£do_item_updateº¯ÊıÊÇÏÈ°Ñ
-¾ÉµÄitem´ÓLRU¶ÓÁĞÖĞÉ¾³ı£¬È»ºóÔÙ²åÈëµ½LRU¶ÓÁĞÖĞ(´ËÊ±ËüÔÚLRU¶ÓÁĞÖĞÅÅµÃ×îÇ°)¡£³ıÁË¸üĞÂitemÔÚ¶ÓÁĞÖĞµÄÎ»ÖÃÍâ£¬»¹»á¸üĞÂitemµÄ
-time³ÉÔ±£¬¸Ã³ÉÔ±Ö¸Ã÷ÉÏÒ»´Î·ÃÎÊµÄÊ±¼ä(¾ø¶ÔÊ±¼ä)¡£Èç¹û²»ÊÇÎªÁËLRU£¬ÄÇÃ´do_item_updateº¯Êı×î¼òµ¥µÄÊµÏÖ¾ÍÊÇÖ±½Ó¸üĞÂtime³ÉÔ±¼´¿É¡£
+ä¸ºä»€ä¹ˆè¦æŠŠitemæ’å…¥åˆ°LRUé˜Ÿåˆ—å¤´éƒ¨å‘¢ï¼Ÿå½“ç„¶å®ç°ç®€å•æ˜¯å…¶ä¸­ä¸€ä¸ªåŸå› ã€‚ä½†æ›´é‡è¦çš„æ˜¯è¿™æ˜¯ä¸€ä¸ªLRUé˜Ÿåˆ—ï¼ï¼è¿˜è®°å¾—æ“ä½œç³»ç»Ÿé‡Œé¢çš„LRUå§ã€‚
+è¿™æ˜¯ä¸€ç§æ·˜æ±°æœºåˆ¶ã€‚åœ¨LRUé˜Ÿåˆ—ä¸­ï¼Œæ’å¾—è¶Šé åå°±è®¤ä¸ºæ˜¯è¶Šå°‘ä½¿ç”¨çš„itemï¼Œæ­¤æ—¶è¢«æ·˜æ±°çš„å‡ ç‡å°±è¶Šå¤§ã€‚æ‰€ä»¥æ–°é²œitem(è®¿é—®æ—¶é—´æ–°)ï¼Œè¦æ’
+åœ¨ä¸é‚£ä¹ˆæ–°é²œitemçš„å‰é¢ï¼Œæ‰€ä»¥æ’å…¥LRUé˜Ÿåˆ—çš„å¤´éƒ¨æ˜¯ä¸äºŒé€‰æ‹©ã€‚ä¸‹é¢çš„do_item_updateå‡½æ•°ä½è¯äº†è¿™ä¸€ç‚¹ã€‚do_item_updateå‡½æ•°æ˜¯å…ˆæŠŠ
+æ—§çš„itemä»LRUé˜Ÿåˆ—ä¸­åˆ é™¤ï¼Œç„¶åå†æ’å…¥åˆ°LRUé˜Ÿåˆ—ä¸­(æ­¤æ—¶å®ƒåœ¨LRUé˜Ÿåˆ—ä¸­æ’å¾—æœ€å‰)ã€‚é™¤äº†æ›´æ–°itemåœ¨é˜Ÿåˆ—ä¸­çš„ä½ç½®å¤–ï¼Œè¿˜ä¼šæ›´æ–°itemçš„
+timeæˆå‘˜ï¼Œè¯¥æˆå‘˜æŒ‡æ˜ä¸Šä¸€æ¬¡è®¿é—®çš„æ—¶é—´(ç»å¯¹æ—¶é—´)ã€‚å¦‚æœä¸æ˜¯ä¸ºäº†LRUï¼Œé‚£ä¹ˆdo_item_updateå‡½æ•°æœ€ç®€å•çš„å®ç°å°±æ˜¯ç›´æ¥æ›´æ–°timeæˆå‘˜å³å¯ã€‚
 
-memcached´¦ÀígetÃüÁîÊ±»áµ÷ÓÃdo_item_updateº¯Êı¸üĞÂitemµÄ·ÃÎÊÊ±¼ä£¬¸üĞÂÆäÔÚLRU¶ÓÁĞµÄÎ»ÖÃ¡£ÔÚmemcachedÖĞgetÃüÁîÊÇºÜÆµ·±µÄÃüÁî£¬
-ÅÅÔÚLRU¶ÓÁĞµÚÒ»»òÕßÇ°¼¸µÄitem¸üÊÇÆµ·±±»get¡£¶ÔÓÚÅÅÔÚÇ°¼¸ÃûµÄitemÀ´Ëµ£¬µ÷ÓÃdo_item_updateÊÇÒâÒå²»´óµÄ£¬ÒòÎªµ÷ÓÃdo_item_update
-ºóÆäÎ»ÖÃ»¹ÊÇÇ°¼¸Ãû£¬²¢ÇÒLRUÌÔÌ­ÔÙ¶àitemÒ²ÄÑÓÚÌÔÌ­²»µ½ËüÃÇ(Ò»¸öLRU¶ÓÁĞµÄitemÊıÁ¿ÊÇºÜ¶àµÄ)¡£ÁíÒ»·½Ãæ£¬do_item_updateº¯ÊıºÄÊ±»¹
-ÊÇ»áÓĞÒ»¶¨µÄºÄÊ±£¬ÒòÎªÒªÇÀÕ¼cache_lockËø¡£Èç¹ûÆµ·±µ÷ÓÃdo_item_updateº¯ÊıĞÔÄÜ½«ÏÂ½µºÜ¶à¡£ÓÚÊÇmemcached¾ÍÊÇÊ¹ÓÃÁË¸üĞÂ¼ä¸ô¡£
+memcachedå¤„ç†getå‘½ä»¤æ—¶ä¼šè°ƒç”¨do_item_updateå‡½æ•°æ›´æ–°itemçš„è®¿é—®æ—¶é—´ï¼Œæ›´æ–°å…¶åœ¨LRUé˜Ÿåˆ—çš„ä½ç½®ã€‚åœ¨memcachedä¸­getå‘½ä»¤æ˜¯å¾ˆé¢‘ç¹çš„å‘½ä»¤ï¼Œ
+æ’åœ¨LRUé˜Ÿåˆ—ç¬¬ä¸€æˆ–è€…å‰å‡ çš„itemæ›´æ˜¯é¢‘ç¹è¢«getã€‚å¯¹äºæ’åœ¨å‰å‡ åçš„itemæ¥è¯´ï¼Œè°ƒç”¨do_item_updateæ˜¯æ„ä¹‰ä¸å¤§çš„ï¼Œå› ä¸ºè°ƒç”¨do_item_update
+åå…¶ä½ç½®è¿˜æ˜¯å‰å‡ åï¼Œå¹¶ä¸”LRUæ·˜æ±°å†å¤šitemä¹Ÿéš¾äºæ·˜æ±°ä¸åˆ°å®ƒä»¬(ä¸€ä¸ªLRUé˜Ÿåˆ—çš„itemæ•°é‡æ˜¯å¾ˆå¤šçš„)ã€‚å¦ä¸€æ–¹é¢ï¼Œdo_item_updateå‡½æ•°è€—æ—¶è¿˜
+æ˜¯ä¼šæœ‰ä¸€å®šçš„è€—æ—¶ï¼Œå› ä¸ºè¦æŠ¢å cache_locké”ã€‚å¦‚æœé¢‘ç¹è°ƒç”¨do_item_updateå‡½æ•°æ€§èƒ½å°†ä¸‹é™å¾ˆå¤šã€‚äºæ˜¯memcachedå°±æ˜¯ä½¿ç”¨äº†æ›´æ–°é—´éš”ã€‚
 */
-//¸üĞÂÒ»¸öitemµÄ×îºó·ÃÎÊÊ±¼ä£¬²»¹ıĞèÒªÔÚÒ»¶ÎÊ±¼äÖ®ºó  ¸üĞÂ·ÃÎÊÊ±¼ä
+//æ›´æ–°ä¸€ä¸ªitemçš„æœ€åè®¿é—®æ—¶é—´ï¼Œä¸è¿‡éœ€è¦åœ¨ä¸€æ®µæ—¶é—´ä¹‹å  æ›´æ–°è®¿é—®æ—¶é—´
 void do_item_update(item *it) {
     MEMCACHED_ITEM_UPDATE(ITEM_key(it), it->nkey, it->nbytes);
     if (it->time < current_time - ITEM_UPDATE_INTERVAL) {
         /*
-            //ÏÂÃæµÄ´úÂë¿ÉÒÔ¿´µ½update²Ù×÷ÊÇºÄÊ±µÄ¡£Èç¹ûÕâ¸öitemÆµ·±±»·ÃÎÊ£¬  
-            //ÄÇÃ´»áµ¼ÖÂ¹ı¶àµÄupdate£¬¹ı¶àµÄÒ»ÏµÁĞ·ÑÊ±²Ù×÷¡£´ËÊ±¸üĞÂ¼ä¸ô¾ÍÓ¦ÔË¶øÉú  
-            //ÁË¡£Èç¹ûÉÏÒ»´ÎµÄ·ÃÎÊÊ±¼ä(Ò²¿ÉÒÔËµÊÇupdateÊ±¼ä)¾àÀëÏÖÔÚ(current_time)  
-            //»¹ÔÚ¸üĞÂ¼ä¸ôÄÚµÄ£¬¾Í²»¸üĞÂ¡£³¬³öÁË²Å¸üĞÂ¡£  
+            //ä¸‹é¢çš„ä»£ç å¯ä»¥çœ‹åˆ°updateæ“ä½œæ˜¯è€—æ—¶çš„ã€‚å¦‚æœè¿™ä¸ªitemé¢‘ç¹è¢«è®¿é—®ï¼Œ  
+            //é‚£ä¹ˆä¼šå¯¼è‡´è¿‡å¤šçš„updateï¼Œè¿‡å¤šçš„ä¸€ç³»åˆ—è´¹æ—¶æ“ä½œã€‚æ­¤æ—¶æ›´æ–°é—´éš”å°±åº”è¿è€Œç”Ÿ  
+            //äº†ã€‚å¦‚æœä¸Šä¸€æ¬¡çš„è®¿é—®æ—¶é—´(ä¹Ÿå¯ä»¥è¯´æ˜¯updateæ—¶é—´)è·ç¦»ç°åœ¨(current_time)  
+            //è¿˜åœ¨æ›´æ–°é—´éš”å†…çš„ï¼Œå°±ä¸æ›´æ–°ã€‚è¶…å‡ºäº†æ‰æ›´æ–°ã€‚  
         */
         assert((it->it_flags & ITEM_SLABBED) == 0);
 
@@ -515,8 +515,8 @@ void do_item_update(item *it) {
     }
 }
 
-//½«itemÓÃnew_item´úÌæ
-int do_item_replace(item *it, item *new_it, const uint32_t hv) {  //×¢ÒâÕâÀïÃæold_it->refcount»á¼õ1£¬new_it»áÔö1
+//å°†itemç”¨new_itemä»£æ›¿
+int do_item_replace(item *it, item *new_it, const uint32_t hv) {  //æ³¨æ„è¿™é‡Œé¢old_it->refcountä¼šå‡1ï¼Œnew_itä¼šå¢1
     MEMCACHED_ITEM_REPLACE(ITEM_key(it), it->nkey, it->nbytes,
                            ITEM_key(new_it), new_it->nkey, new_it->nbytes);
     assert((it->it_flags & ITEM_SLABBED) == 0);
@@ -635,7 +635,7 @@ END
 void do_item_stats(ADD_STAT add_stats, void *c) {
     int i;
     for (i = 0; i < LARGEST_ID; i++) {
-        if (tails[i] != NULL) { //Ö»ÓĞ¶ÔÓ¦µÄslabÉÏÃæ°üº¬ÓĞÓĞĞ§item²Å»á½øĞĞÍ³¼Æ
+        if (tails[i] != NULL) { //åªæœ‰å¯¹åº”çš„slabä¸Šé¢åŒ…å«æœ‰æœ‰æ•ˆitemæ‰ä¼šè¿›è¡Œç»Ÿè®¡
             const char *fmt = "items:%d:%s";
             char key_str[STAT_KEY_LEN];
             char val_str[STAT_VAL_LEN];
@@ -679,7 +679,7 @@ STAT 96 4
 STAT 192 11
 END
 */
-//²é¿´Ä³ÖÖchunk¿éµÄÊ¹ÓÃÇé¿öµÄ
+//æŸ¥çœ‹æŸç§chunkå—çš„ä½¿ç”¨æƒ…å†µçš„
 /** dumps out a list of objects of each size, with granularity of 32 bytes */
 /*@null@*/
 void do_item_stats_sizes(ADD_STAT add_stats, void *c) {
@@ -717,31 +717,31 @@ void do_item_stats_sizes(ADD_STAT add_stats, void *c) {
 }
 
 /*
-µ±workerÏß³Ì½ÓÊÕµ½flush_allÃüÁîºó£¬»áÓÃÈ«¾Ö±äÁ¿settingsµÄoldest_live³ÉÔ±´æ´¢½ÓÊÕµ½Õâ¸öÃüÁîÄÇÒ»¿ÌµÄÊ±¼ä(×¼È·µØËµ£¬
-ÊÇworkerÏß³Ì½âÎöµÃÖªÕâÊÇÒ»¸öflush_allÃüÁîÄÇÒ»¿ÌÔÙ¼õÒ»)£¬´úÂëÎªsettings.oldest_live =current_time - 1;È»ºóµ÷ÓÃ
-item_flush_expiredº¯ÊıËøÉÏcache_lock£¬È»ºóµ÷ÓÃdo_item_flush_expiredº¯ÊıÍê³É¹¤×÷¡£
-    ¶èĞÔÉ¾³ı¿ÉÒÔ²Î¿¼do_item_getÖĞµÄif (settings.oldest_live != 0 && settings.oldest_live <= current_time int i;
-do_item_getº¯ÊıÍâ£¬do_item_allocº¯ÊıÒ²ÊÇ»á´¦Àí¹ıÆÚÊ§Ğ§itemµÄ
+å½“workerçº¿ç¨‹æ¥æ”¶åˆ°flush_allå‘½ä»¤åï¼Œä¼šç”¨å…¨å±€å˜é‡settingsçš„oldest_liveæˆå‘˜å­˜å‚¨æ¥æ”¶åˆ°è¿™ä¸ªå‘½ä»¤é‚£ä¸€åˆ»çš„æ—¶é—´(å‡†ç¡®åœ°è¯´ï¼Œ
+æ˜¯workerçº¿ç¨‹è§£æå¾—çŸ¥è¿™æ˜¯ä¸€ä¸ªflush_allå‘½ä»¤é‚£ä¸€åˆ»å†å‡ä¸€)ï¼Œä»£ç ä¸ºsettings.oldest_live =current_time - 1;ç„¶åè°ƒç”¨
+item_flush_expiredå‡½æ•°é”ä¸Šcache_lockï¼Œç„¶åè°ƒç”¨do_item_flush_expiredå‡½æ•°å®Œæˆå·¥ä½œã€‚
+    æƒ°æ€§åˆ é™¤å¯ä»¥å‚è€ƒdo_item_getä¸­çš„if (settings.oldest_live != 0 && settings.oldest_live <= current_time int i;
+do_item_getå‡½æ•°å¤–ï¼Œdo_item_allocå‡½æ•°ä¹Ÿæ˜¯ä¼šå¤„ç†è¿‡æœŸå¤±æ•ˆitemçš„
 */
 
 
 /** wrapper around assoc_find which does the lazy expiration logic */
-////µ÷ÓÃdo_item_getµÄº¯Êı¶¼ÒÑ¾­¼ÓÉÏÁËitem_lock(hv)¶Î¼¶±ğËø»òÕßÈ«¾ÖËø  
+////è°ƒç”¨do_item_getçš„å‡½æ•°éƒ½å·²ç»åŠ ä¸Šäº†item_lock(hv)æ®µçº§åˆ«é”æˆ–è€…å…¨å±€é”  
 item *do_item_get(const char *key, const size_t nkey, const uint32_t hv) {
     //mutex_lock(&cache_lock);
-    item *it = assoc_find(key, nkey, hv); //assoc_findº¯ÊıÄÚ²¿Ã»ÓĞ¼ÓËø
+    item *it = assoc_find(key, nkey, hv); //assoc_findå‡½æ•°å†…éƒ¨æ²¡æœ‰åŠ é”
     if (it != NULL) {
         refcount_incr(&it->refcount);
         /* Optimization for slab reassignment. prevents popular items from
          * jamming in busy wait. Can only do this here to satisfy lock order
          * of item_lock, cache_lock, slabs_lock. */
-         //Õâ¸öitem¸ÕºÃÔÚÒªÒÆ¶¯µÄÄÚ´æÒ³ÀïÃæ¡£´ËÊ±²»ÄÜ·µ»ØÕâ¸öitem  
-            //workerÏß³ÌÒª¸ºÔğ°ÑÕâ¸öitem´Ó¹şÏ£±íºÍLRU¶ÓÁĞÖĞÉ¾³ıÕâ¸öitem£¬±ÜÃâ  
-            //ºóÃæÓĞÆäËûworkerÏß³ÌÓÖ·ÃÎÊÕâ¸ö²»ÄÜÊ¹ÓÃµÄitem  
+         //è¿™ä¸ªitemåˆšå¥½åœ¨è¦ç§»åŠ¨çš„å†…å­˜é¡µé‡Œé¢ã€‚æ­¤æ—¶ä¸èƒ½è¿”å›è¿™ä¸ªitem  
+            //workerçº¿ç¨‹è¦è´Ÿè´£æŠŠè¿™ä¸ªitemä»å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—ä¸­åˆ é™¤è¿™ä¸ªitemï¼Œé¿å…  
+            //åé¢æœ‰å…¶ä»–workerçº¿ç¨‹åˆè®¿é—®è¿™ä¸ªä¸èƒ½ä½¿ç”¨çš„item  
         if (slab_rebalance_signal &&
             ((void *)it >= slab_rebal.slab_start && (void *)it < slab_rebal.slab_end)) {
-            do_item_unlink_nolock(it, hv);//ÒıÓÃ¼ÆÊı»á¼õÒ»
-            do_item_remove(it);//ÒıÓÃ¼ÆÊı¼õÒ»£¬Èç¹ûÒıÓÃ¼ÆÊıµÈÓÚ0£¬¾ÍÉ¾³ı
+            do_item_unlink_nolock(it, hv);//å¼•ç”¨è®¡æ•°ä¼šå‡ä¸€
+            do_item_remove(it);//å¼•ç”¨è®¡æ•°å‡ä¸€ï¼Œå¦‚æœå¼•ç”¨è®¡æ•°ç­‰äº0ï¼Œå°±åˆ é™¤
             it = NULL;
         }
     }
@@ -763,14 +763,14 @@ item *do_item_get(const char *key, const size_t nkey, const uint32_t hv) {
 
     if (it != NULL) {
         if (settings.oldest_live != 0 && settings.oldest_live <= current_time &&
-            it->time <= settings.oldest_live) {//flush_allÃüÁîÇå³ı
-            do_item_unlink(it, hv);//ÒıÓÃ¼ÆÊı»á¼õÒ»  
-            do_item_remove(it);//ÒıÓÃ¼ÆÊı¼õÒ»,Èç¹ûÒıÓÃ¼ÆÊıµÈÓÚ0£¬¾ÍÉ¾³ı
+            it->time <= settings.oldest_live) {//flush_allå‘½ä»¤æ¸…é™¤
+            do_item_unlink(it, hv);//å¼•ç”¨è®¡æ•°ä¼šå‡ä¸€  
+            do_item_remove(it);//å¼•ç”¨è®¡æ•°å‡ä¸€,å¦‚æœå¼•ç”¨è®¡æ•°ç­‰äº0ï¼Œå°±åˆ é™¤
             it = NULL;
             if (was_found) {
                 fprintf(stderr, " -nuked by flush");
             }
-        } else if (it->exptime != 0 && it->exptime <= current_time) {//¸ÃitemÒÑ¾­¹ıÆÚÊ§Ğ§ÁË  
+        } else if (it->exptime != 0 && it->exptime <= current_time) {//è¯¥itemå·²ç»è¿‡æœŸå¤±æ•ˆäº†  
             do_item_unlink(it, hv);
             do_item_remove(it);
             it = NULL;
@@ -778,7 +778,7 @@ item *do_item_get(const char *key, const size_t nkey, const uint32_t hv) {
                 fprintf(stderr, " -nuked by expire");
             }
         } else {
-            it->it_flags |= ITEM_FETCHED;//°ÑÕâ¸öitem±êÖ¾Îª±»·ÃÎÊ¹ıµÄ  
+            it->it_flags |= ITEM_FETCHED;//æŠŠè¿™ä¸ªitemæ ‡å¿—ä¸ºè¢«è®¿é—®è¿‡çš„  
             DEBUG_REFCNT(it, '+');
         }
     }
@@ -799,21 +799,21 @@ item *do_item_touch(const char *key, size_t nkey, uint32_t exptime,
 }
 
 /*
-µ±workerÏß³Ì½ÓÊÕµ½flush_allÃüÁîºó£¬»áÓÃÈ«¾Ö±äÁ¿settingsµÄoldest_live³ÉÔ±´æ´¢½ÓÊÕµ½Õâ¸öÃüÁîÄÇÒ»¿ÌµÄÊ±¼ä(×¼È·µØËµ£¬
-ÊÇworkerÏß³Ì½âÎöµÃÖªÕâÊÇÒ»¸öflush_allÃüÁîÄÇÒ»¿ÌÔÙ¼õÒ»)£¬´úÂëÎªsettings.oldest_live =current_time - 1;È»ºóµ÷ÓÃ
-item_flush_expiredº¯ÊıËøÉÏcache_lock£¬È»ºóµ÷ÓÃdo_item_flush_expiredº¯ÊıÍê³É¹¤×÷¡£
-    ¶èĞÔÉ¾³ı¿ÉÒÔ²Î¿¼do_item_getÖĞµÄif (settings.oldest_live != 0 && settings.oldest_live <= current_time int i;
-do_item_getº¯ÊıÍâ£¬do_item_allocº¯ÊıÒ²ÊÇ»á´¦Àí¹ıÆÚÊ§Ğ§itemµÄ
+å½“workerçº¿ç¨‹æ¥æ”¶åˆ°flush_allå‘½ä»¤åï¼Œä¼šç”¨å…¨å±€å˜é‡settingsçš„oldest_liveæˆå‘˜å­˜å‚¨æ¥æ”¶åˆ°è¿™ä¸ªå‘½ä»¤é‚£ä¸€åˆ»çš„æ—¶é—´(å‡†ç¡®åœ°è¯´ï¼Œ
+æ˜¯workerçº¿ç¨‹è§£æå¾—çŸ¥è¿™æ˜¯ä¸€ä¸ªflush_allå‘½ä»¤é‚£ä¸€åˆ»å†å‡ä¸€)ï¼Œä»£ç ä¸ºsettings.oldest_live =current_time - 1;ç„¶åè°ƒç”¨
+item_flush_expiredå‡½æ•°é”ä¸Šcache_lockï¼Œç„¶åè°ƒç”¨do_item_flush_expiredå‡½æ•°å®Œæˆå·¥ä½œã€‚
+    æƒ°æ€§åˆ é™¤å¯ä»¥å‚è€ƒdo_item_getä¸­çš„if (settings.oldest_live != 0 && settings.oldest_live <= current_time int i;
+do_item_getå‡½æ•°å¤–ï¼Œdo_item_allocå‡½æ•°ä¹Ÿæ˜¯ä¼šå¤„ç†è¿‡æœŸå¤±æ•ˆitemçš„
 
-flush_allÃüÁîÊÇ¿ÉÒÔÓĞÊ±¼ä²ÎÊıµÄ¡£Õâ¸öÊ±¼äºÍÆäËûÊ±¼äÒ»ÑùÈ¡Öµ·¶Î§ÊÇ 1µ½REALTIME_MAXDELTA(30Ìì)¡£Èç¹ûÃüÁîÎªflush_all 100£¬
-ÄÇÃ´99ÃëºóËùÓĞµÄitemÊ§Ğ§¡£´ËÊ±settings.oldest_liveµÄÖµÎªcurrent_time+100-1£¬do_item_flush_expiredº¯ÊıÒ²Ã»ÓĞÊ²Ã´ÓÃÁË
-(×Ü²»»á±»ÇÀÕ¼CPU99Ãë°É)¡£Ò²ÕıÊÇÕâ¸öÔ­Òò£¬ĞèÒªÔÚdo_item_getÀïÃæ£¬¼ÓÈësettings.oldest_live<= current_timeÕâ¸öÅĞ¶Ï£¬·ÀÖ¹¹ıÔçÉ¾³ıÁËitem¡£
+flush_allå‘½ä»¤æ˜¯å¯ä»¥æœ‰æ—¶é—´å‚æ•°çš„ã€‚è¿™ä¸ªæ—¶é—´å’Œå…¶ä»–æ—¶é—´ä¸€æ ·å–å€¼èŒƒå›´æ˜¯ 1åˆ°REALTIME_MAXDELTA(30å¤©)ã€‚å¦‚æœå‘½ä»¤ä¸ºflush_all 100ï¼Œ
+é‚£ä¹ˆ99ç§’åæ‰€æœ‰çš„itemå¤±æ•ˆã€‚æ­¤æ—¶settings.oldest_liveçš„å€¼ä¸ºcurrent_time+100-1ï¼Œdo_item_flush_expiredå‡½æ•°ä¹Ÿæ²¡æœ‰ä»€ä¹ˆç”¨äº†
+(æ€»ä¸ä¼šè¢«æŠ¢å CPU99ç§’å§)ã€‚ä¹Ÿæ­£æ˜¯è¿™ä¸ªåŸå› ï¼Œéœ€è¦åœ¨do_item_geté‡Œé¢ï¼ŒåŠ å…¥settings.oldest_live<= current_timeè¿™ä¸ªåˆ¤æ–­ï¼Œé˜²æ­¢è¿‡æ—©åˆ é™¤äº†itemã€‚
 */
 
 /* expires items that are more recent than the oldest_live setting. */
 void do_item_flush_expired(void) { 
-//flush_allÇå³ıµ±Ç°ÏµÍ³ÖĞËùÓĞµÄitem£¬Êµ¼ÊÊÇitem->time±Èµ±Ç°Ê±¼äĞ¡µÄ»¹ÊÇ´æÔÚÓÚitemÖĞ£¬ÖªÊ¶°Ñ·ÃÎÊÊ±¼ä±Èsettings.oldest_live´óµÄÇå³ıÁË
-//ÕâÊÇÒ»ÖÖÇÉÃîËã·¨£¬ÒòÎª·ÃÎÊÊ±¼äitem->time±Èµ±Ç°Ê±¼äsettings.oldest_liveĞ¡µÄitemÈ«²¿Í¨¹ı¶èĞÔÉ¾³ıÊµÏÖ£¬ÀıÈçdo_item_getÖĞµÄif (settings.oldest_live != 0 && settings.oldest_live <= current_time 
+//flush_allæ¸…é™¤å½“å‰ç³»ç»Ÿä¸­æ‰€æœ‰çš„itemï¼Œå®é™…æ˜¯item->timeæ¯”å½“å‰æ—¶é—´å°çš„è¿˜æ˜¯å­˜åœ¨äºitemä¸­ï¼ŒçŸ¥è¯†æŠŠè®¿é—®æ—¶é—´æ¯”settings.oldest_liveå¤§çš„æ¸…é™¤äº†
+//è¿™æ˜¯ä¸€ç§å·§å¦™ç®—æ³•ï¼Œå› ä¸ºè®¿é—®æ—¶é—´item->timeæ¯”å½“å‰æ—¶é—´settings.oldest_liveå°çš„itemå…¨éƒ¨é€šè¿‡æƒ°æ€§åˆ é™¤å®ç°ï¼Œä¾‹å¦‚do_item_getä¸­çš„if (settings.oldest_live != 0 && settings.oldest_live <= current_time 
     int i;
     item *iter, *next;
     if (settings.oldest_live == 0)
@@ -827,21 +827,21 @@ void do_item_flush_expired(void) {
         for (iter = heads[i]; iter != NULL; iter = next) {
 
             /*
-                //iter->time == 0µÄÊÇlruÅÀ³æitem£¬Ö±½ÓºöÂÔ  
-                //Ò»°ãÇé¿öÏÂiter->timeÊÇĞ¡ÓÚsettings.oldest_liveµÄ¡£µ«ÔÚÕâÖÖÇé¿öÏÂ  
-                //¾ÍÓĞ¿ÉÄÜ³öÏÖiter->time >= settings.oldest_live :  worker1½ÓÊÕµ½  
-                //flush_allÃüÁî£¬²¢¸øsettings.oldest_live¸³ÖµÎªcurrent_time-1¡£  
-                //worker1Ïß³Ì»¹Ã»À´µÃ¼°µ÷ÓÃitem_flush_expiredº¯Êı£¬¾Í±»worker2  
-                //ÇÀÕ¼ÁËcpu£¬È»ºóworker2Íùlru¶ÓÁĞ²åÈëÁËÒ»¸öitem¡£Õâ¸öitemµÄtime  
-                //³ÉÔ±¾Í»áÂú×ãiter->time >= settings.oldest_live  
+                //iter->time == 0çš„æ˜¯lruçˆ¬è™«itemï¼Œç›´æ¥å¿½ç•¥  
+                //ä¸€èˆ¬æƒ…å†µä¸‹iter->timeæ˜¯å°äºsettings.oldest_liveçš„ã€‚ä½†åœ¨è¿™ç§æƒ…å†µä¸‹  
+                //å°±æœ‰å¯èƒ½å‡ºç°iter->time >= settings.oldest_live :  worker1æ¥æ”¶åˆ°  
+                //flush_allå‘½ä»¤ï¼Œå¹¶ç»™settings.oldest_liveèµ‹å€¼ä¸ºcurrent_time-1ã€‚  
+                //worker1çº¿ç¨‹è¿˜æ²¡æ¥å¾—åŠè°ƒç”¨item_flush_expiredå‡½æ•°ï¼Œå°±è¢«worker2  
+                //æŠ¢å äº†cpuï¼Œç„¶åworker2å¾€lrué˜Ÿåˆ—æ’å…¥äº†ä¸€ä¸ªitemã€‚è¿™ä¸ªitemçš„time  
+                //æˆå‘˜å°±ä¼šæ»¡è¶³iter->time >= settings.oldest_live  
             */
             
             /* iter->time of 0 are magic objects. */
             if (iter->time != 0 && iter->time >= settings.oldest_live) {
                 next = iter->next;
-                if ((iter->it_flags & ITEM_SLABBED) == 0) { //ËµÃ÷¸Ã½ÚµãÃ»ÓĞ¹é»¹¸øslab£¬ÔòĞèÒª¹é»¹¸øslab
-                    //ËäÈ»µ÷ÓÃµÄÊÇnolock,µ«±¾º¯ÊıµÄµ÷ÓÃÕßitem_flush_expired  
-                    //ÒÑ¾­ËøÉÏÁËcache_lock£¬²Åµ÷ÓÃ±¾º¯ÊıµÄ  
+                if ((iter->it_flags & ITEM_SLABBED) == 0) { //è¯´æ˜è¯¥èŠ‚ç‚¹æ²¡æœ‰å½’è¿˜ç»™slabï¼Œåˆ™éœ€è¦å½’è¿˜ç»™slab
+                    //è™½ç„¶è°ƒç”¨çš„æ˜¯nolock,ä½†æœ¬å‡½æ•°çš„è°ƒç”¨è€…item_flush_expired  
+                    //å·²ç»é”ä¸Šäº†cache_lockï¼Œæ‰è°ƒç”¨æœ¬å‡½æ•°çš„  
                     do_item_unlink_nolock(iter, hash(ITEM_key(iter), iter->nkey));
                 }
             } else {
@@ -897,9 +897,9 @@ static void crawler_unlink_q(item *it) {
 }
 
 /*
-Î±itemÍ¨¹ıÓëÇ°Çı½Úµã½»»»Î»ÖÃÊµÏÖÇ°½ø¡£Èç¹ûÎ±itemÊÇLRU¶ÓÁĞµÄÍ·½Úµã£¬ÄÇÃ´¾Í½«Õâ¸öÎ±itemÒÆ³öLRU¶ÓÁĞ¡£
-º¯Êıcrawler_crawl_qÍê³ÉÕâ¸ö½»»»²Ù×÷£¬²¢ÇÒ·µ»Ø½»»»Ç°Î±itemµÄÇ°Çı½Úµã(µ±È»ÔÚ½»»»ºó¾Í±ä³ÉÎ±itemµÄºóÇı½ÚµãÁË)¡£
-Èç¹ûÎ±item´¦ÓÚLRU¶ÓÁĞµÄÍ·²¿£¬ÄÇÃ´¾Í·µ»ØNULL(´ËÊ±Ã»ÓĞÇ°Çı½ÚµãÁË)
+ä¼ªitemé€šè¿‡ä¸å‰é©±èŠ‚ç‚¹äº¤æ¢ä½ç½®å®ç°å‰è¿›ã€‚å¦‚æœä¼ªitemæ˜¯LRUé˜Ÿåˆ—çš„å¤´èŠ‚ç‚¹ï¼Œé‚£ä¹ˆå°±å°†è¿™ä¸ªä¼ªitemç§»å‡ºLRUé˜Ÿåˆ—ã€‚
+å‡½æ•°crawler_crawl_qå®Œæˆè¿™ä¸ªäº¤æ¢æ“ä½œï¼Œå¹¶ä¸”è¿”å›äº¤æ¢å‰ä¼ªitemçš„å‰é©±èŠ‚ç‚¹(å½“ç„¶åœ¨äº¤æ¢åå°±å˜æˆä¼ªitemçš„åé©±èŠ‚ç‚¹äº†)ã€‚
+å¦‚æœä¼ªitemå¤„äºLRUé˜Ÿåˆ—çš„å¤´éƒ¨ï¼Œé‚£ä¹ˆå°±è¿”å›NULL(æ­¤æ—¶æ²¡æœ‰å‰é©±èŠ‚ç‚¹äº†)
 */
 /* This is too convoluted, but it's a difficult shuffle. Try to rewrite it
  * more clearly. */
@@ -960,11 +960,11 @@ static item *crawler_crawl_q(item *it) {
 
 /* I pulled this out to make the main thread clearer, but it reaches into the
  * main thread's values too much. Should rethink again.
- */ //Èç¹ûÕâ¸öitem¹ıÆÚÊ§Ğ§ÁË£¬ÄÇÃ´¾ÍÉ¾³ı
+ */ //å¦‚æœè¿™ä¸ªitemè¿‡æœŸå¤±æ•ˆäº†ï¼Œé‚£ä¹ˆå°±åˆ é™¤
 static void item_crawler_evaluate(item *search, uint32_t hv, int i) {
     rel_time_t oldest_live = settings.oldest_live;
-    if ((search->exptime != 0 && search->exptime < current_time)//Õâ¸öitemµÄexptimeÊ±¼ä´Áµ½ÁË£¬ÒÑ¾­¹ıÆÚÊ§Ğ§ÁË  
-        || (search->time <= oldest_live && oldest_live <= current_time)) { //ÒòÎª¿Í»§¶Ë·¢ËÍflush_allÃüÁî£¬µ¼ÖÂÕâ¸öitemÊ§Ğ§ÁË    
+    if ((search->exptime != 0 && search->exptime < current_time)//è¿™ä¸ªitemçš„exptimeæ—¶é—´æˆ³åˆ°äº†ï¼Œå·²ç»è¿‡æœŸå¤±æ•ˆäº†  
+        || (search->time <= oldest_live && oldest_live <= current_time)) { //å› ä¸ºå®¢æˆ·ç«¯å‘é€flush_allå‘½ä»¤ï¼Œå¯¼è‡´è¿™ä¸ªitemå¤±æ•ˆäº†    
         itemstats[i].crawler_reclaimed++;
 
         if (settings.verbose > 1) {
@@ -981,7 +981,7 @@ static void item_crawler_evaluate(item *search, uint32_t hv, int i) {
             itemstats[i].expired_unfetched++;
         }
 
-         //½«item´ÓLRU¶ÓÁĞÖĞÉ¾³ı  
+         //å°†itemä»LRUé˜Ÿåˆ—ä¸­åˆ é™¤  
         do_item_unlink_nolock(search, hv);
         do_item_remove(search);
         assert(search->slabs_clsid == 0);
@@ -991,9 +991,9 @@ static void item_crawler_evaluate(item *search, uint32_t hv, int i) {
 }
 
 /*
-¿ÉÒÔÓÃÃüÁîlru_crawler tocrawl numÖ¸¶¨Ã¿¸öLRU¶ÓÁĞ×î¶àÖ»¼ì²énum-1¸öitem¡£¿´Çå³şµã£¬ÊÇ¼ì²éÊı£¬²»ÊÇÉ¾³ıÊı£¬
-¶øÇÒÊÇnum-1¸ö¡£Ê×ÏÈÒªµ÷ÓÃitem_crawler_evaluateº¯Êı¼ì²éÒ»¸öitemÊÇ·ñ¹ıÆÚ£¬ÊÇµÄ»°¾ÍÉ¾³ı¡£Èç¹û¼ì²éÍênum-1¸ö£¬
-Î±item¶¼»¹Ã»ÓĞµ½´ïLRU¶ÓÁĞµÄÍ·²¿£¬ÄÇÃ´¾ÍÖ±½Ó½«Õâ¸öÎ±item´ÓLRU¶ÓÁĞÖĞÉ¾³ı¡£
+å¯ä»¥ç”¨å‘½ä»¤lru_crawler tocrawl numæŒ‡å®šæ¯ä¸ªLRUé˜Ÿåˆ—æœ€å¤šåªæ£€æŸ¥num-1ä¸ªitemã€‚çœ‹æ¸…æ¥šç‚¹ï¼Œæ˜¯æ£€æŸ¥æ•°ï¼Œä¸æ˜¯åˆ é™¤æ•°ï¼Œ
+è€Œä¸”æ˜¯num-1ä¸ªã€‚é¦–å…ˆè¦è°ƒç”¨item_crawler_evaluateå‡½æ•°æ£€æŸ¥ä¸€ä¸ªitemæ˜¯å¦è¿‡æœŸï¼Œæ˜¯çš„è¯å°±åˆ é™¤ã€‚å¦‚æœæ£€æŸ¥å®Œnum-1ä¸ªï¼Œ
+ä¼ªiteméƒ½è¿˜æ²¡æœ‰åˆ°è¾¾LRUé˜Ÿåˆ—çš„å¤´éƒ¨ï¼Œé‚£ä¹ˆå°±ç›´æ¥å°†è¿™ä¸ªä¼ªitemä»LRUé˜Ÿåˆ—ä¸­åˆ é™¤ã€‚
 */
 static void *item_crawler_thread(void *arg) {
     int i;
@@ -1002,11 +1002,11 @@ static void *item_crawler_thread(void *arg) {
     if (settings.verbose > 2)
         fprintf(stderr, "Starting LRU crawler background thread\n");
     while (do_run_lru_crawler_thread) {
-        //µÈ´ıworkerÏß³ÌÖ¸¶¨Òª´¦ÀíµÄLRU¶ÓÁĞ,Ò²¾ÍÊÇµÈ´ı¿Í»§¶ËÖ´ĞĞlru_crawler tocrawl <classid,classid,classid|all> 
-        //ÃüÁî¡±lru_crawler crawl<classid,classid,classid|all>¡±²ÅÊÇÖ¸¶¨ÈÎÎñµÄ¡£¸ÃÃüÁîÖ¸Ã÷ÁËÒª¶ÔÄÄ¸öLRU¶ÓÁĞ½øĞĞÇåÀí
+        //ç­‰å¾…workerçº¿ç¨‹æŒ‡å®šè¦å¤„ç†çš„LRUé˜Ÿåˆ—,ä¹Ÿå°±æ˜¯ç­‰å¾…å®¢æˆ·ç«¯æ‰§è¡Œlru_crawler tocrawl <classid,classid,classid|all> 
+        //å‘½ä»¤â€lru_crawler crawl<classid,classid,classid|all>â€æ‰æ˜¯æŒ‡å®šä»»åŠ¡çš„ã€‚è¯¥å‘½ä»¤æŒ‡æ˜äº†è¦å¯¹å“ªä¸ªLRUé˜Ÿåˆ—è¿›è¡Œæ¸…ç†
         pthread_cond_wait(&lru_crawler_cond, &lru_crawler_lock);
         
-        while (crawler_count) {//crawler_count±íÃ÷Òª´¦Àí¶àÉÙ¸öLRU¶ÓÁĞ  
+        while (crawler_count) {//crawler_countè¡¨æ˜è¦å¤„ç†å¤šå°‘ä¸ªLRUé˜Ÿåˆ—  
             item *search = NULL;
             void *hold_lock = NULL;
 
@@ -1015,18 +1015,18 @@ static void *item_crawler_thread(void *arg) {
                     continue;
                 }
                 pthread_mutex_lock(&cache_lock);
-                //·µ»Øcrawlers[i]µÄÇ°Çı½Úµã,²¢½»»»crawlers[i]ºÍÇ°Çı½ÚµãµÄÎ»ÖÃ  
+                //è¿”å›crawlers[i]çš„å‰é©±èŠ‚ç‚¹,å¹¶äº¤æ¢crawlers[i]å’Œå‰é©±èŠ‚ç‚¹çš„ä½ç½®  
                 search = crawler_crawl_q((item *)&crawlers[i]);
                 if (search == NULL ||
                     (crawlers[i].remaining && --crawlers[i].remaining < 1)) {
-                    //crawlers[i]ÊÇÍ·½Úµã£¬Ã»ÓĞÇ°Çı½Úµã  
-                //remainingµÄÖµÎªsettings.lru_crawler_tocrawl¡£Ã¿´ÎÆô¶¯lru  
-                //ÅÀ³æÏß³Ì£¬¼ì²éÃ¿Ò»¸ölru¶ÓÁĞµÄ¶àÉÙ¸öitem¡£
+                    //crawlers[i]æ˜¯å¤´èŠ‚ç‚¹ï¼Œæ²¡æœ‰å‰é©±èŠ‚ç‚¹  
+                //remainingçš„å€¼ä¸ºsettings.lru_crawler_tocrawlã€‚æ¯æ¬¡å¯åŠ¨lru  
+                //çˆ¬è™«çº¿ç¨‹ï¼Œæ£€æŸ¥æ¯ä¸€ä¸ªlrué˜Ÿåˆ—çš„å¤šå°‘ä¸ªitemã€‚
                     if (settings.verbose > 2)
                         fprintf(stderr, "Nothing left to crawl for %d\n", i);
-                    crawlers[i].it_flags = 0;//¼ì²éÁË×ã¹»¶à´Î£¬ÍË³ö¼ì²éÕâ¸ölru¶ÓÁĞ  
-                    crawler_count--;//ÇåÀíÍêÒ»¸öLRU¶ÓÁĞ,ÈÎÎñÊı¼õÒ»  
-                    crawler_unlink_q((item *)&crawlers[i]);//½«Õâ¸öÎ±item´ÓLRU¶ÓÁĞÖĞÉ¾³ı  
+                    crawlers[i].it_flags = 0;//æ£€æŸ¥äº†è¶³å¤Ÿå¤šæ¬¡ï¼Œé€€å‡ºæ£€æŸ¥è¿™ä¸ªlrué˜Ÿåˆ—  
+                    crawler_count--;//æ¸…ç†å®Œä¸€ä¸ªLRUé˜Ÿåˆ—,ä»»åŠ¡æ•°å‡ä¸€  
+                    crawler_unlink_q((item *)&crawlers[i]);//å°†è¿™ä¸ªä¼ªitemä»LRUé˜Ÿåˆ—ä¸­åˆ é™¤  
                     pthread_mutex_unlock(&cache_lock);
                     continue;
                 }
@@ -1034,13 +1034,13 @@ static void *item_crawler_thread(void *arg) {
                 /* Attempt to hash item lock the "search" item. If locked, no
                  * other callers can incr the refcount
                  */
-                if ((hold_lock = item_trylock(hv)) == NULL) {//³¢ÊÔËø×¡¿ØÖÆÕâ¸öitemµÄ¹şÏ£±í¶Î¼¶±ğËø  
+                if ((hold_lock = item_trylock(hv)) == NULL) {//å°è¯•é”ä½æ§åˆ¶è¿™ä¸ªitemçš„å“ˆå¸Œè¡¨æ®µçº§åˆ«é”  
                     pthread_mutex_unlock(&cache_lock);
                     continue;
                 }
                 /* Now see if the item is refcount locked */
-                if (refcount_incr(&search->refcount) != 2) { //´ËÊ±ÓĞÆäËûworkerÏß³ÌÔÚÒıÓÃÕâ¸öitem  
-                    refcount_decr(&search->refcount); //lruÅÀ³æÏß³Ì·ÅÆúÒıÓÃ¸Ãitem  
+                if (refcount_incr(&search->refcount) != 2) { //æ­¤æ—¶æœ‰å…¶ä»–workerçº¿ç¨‹åœ¨å¼•ç”¨è¿™ä¸ªitem  
+                    refcount_decr(&search->refcount); //lruçˆ¬è™«çº¿ç¨‹æ”¾å¼ƒå¼•ç”¨è¯¥item  
                     if (hold_lock)
                         item_trylock_unlock(hold_lock);
                     pthread_mutex_unlock(&cache_lock);
@@ -1049,7 +1049,7 @@ static void *item_crawler_thread(void *arg) {
 
                 /* Frees the item or decrements the refcount. */
                 /* Interface for this could improve: do the free/decr here
-                 * instead? *///Èç¹ûÕâ¸öitem¹ıÆÚÊ§Ğ§ÁË£¬ÄÇÃ´¾ÍÉ¾³ıÕâ¸öitem  
+                 * instead? *///å¦‚æœè¿™ä¸ªitemè¿‡æœŸå¤±æ•ˆäº†ï¼Œé‚£ä¹ˆå°±åˆ é™¤è¿™ä¸ªitem  
                 item_crawler_evaluate(search, hv, i);
                 
                 if (hold_lock)
@@ -1073,14 +1073,14 @@ static void *item_crawler_thread(void *arg) {
     return NULL;
 }
 
-static pthread_t item_crawler_tid; //ÅÀ³æÏß³ÌID
+static pthread_t item_crawler_tid; //çˆ¬è™«çº¿ç¨‹ID
 
-//workerÏß³ÌÔÚ½ÓÊÕµ½"lru_crawler disable"ÃüÁî»áÖ´ĞĞÕâ¸öº¯Êı  
+//workerçº¿ç¨‹åœ¨æ¥æ”¶åˆ°"lru_crawler disable"å‘½ä»¤ä¼šæ‰§è¡Œè¿™ä¸ªå‡½æ•°  
 int stop_item_crawler_thread(void) {
     int ret;
     pthread_mutex_lock(&lru_crawler_lock);
     do_run_lru_crawler_thread = 0;
-    //LRUÅÀ³æÏß³Ì¿ÉÄÜĞİÃßÓÚµÈ´ıÌõ¼ş±äÁ¿£¬ĞèÒª»½ĞÑ²ÅÄÜÍ£Ö¹LRUÅÀ³æÏß³Ì  
+    //LRUçˆ¬è™«çº¿ç¨‹å¯èƒ½ä¼‘çœ äºç­‰å¾…æ¡ä»¶å˜é‡ï¼Œéœ€è¦å”¤é†’æ‰èƒ½åœæ­¢LRUçˆ¬è™«çº¿ç¨‹  
     pthread_cond_signal(&lru_crawler_cond);
     pthread_mutex_unlock(&lru_crawler_lock);
     if ((ret = pthread_join(item_crawler_tid, NULL)) != 0) {
@@ -1092,52 +1092,52 @@ int stop_item_crawler_thread(void) {
 }
 
 /*
-LRUÅÀ³æ£º
-        Ç°ÃæËµµ½£¬memcachedÊÇÀÁ¶èÉ¾³ı¹ıÆÚÊ§Ğ§itemµÄ¡£ËùÒÔ¼´Ê¹ÓÃ»§ÔÚ¿Í»§¶ËÊ¹ÓÃÁËflush_allÃüÁîÊ¹µÃÈ«²¿item¶¼¹ıÆÚÊ§Ğ§ÁË£¬
-        µ«ÕâĞ©item»¹ÊÇÕ¼¾İÕß¹şÏ£±íºÍLRU¶ÓÁĞ²¢Ã»ÓĞ¹é»¹¸øslab·ÖÅäÆ÷¡£
+LRUçˆ¬è™«ï¼š
+        å‰é¢è¯´åˆ°ï¼Œmemcachedæ˜¯æ‡’æƒ°åˆ é™¤è¿‡æœŸå¤±æ•ˆitemçš„ã€‚æ‰€ä»¥å³ä½¿ç”¨æˆ·åœ¨å®¢æˆ·ç«¯ä½¿ç”¨äº†flush_allå‘½ä»¤ä½¿å¾—å…¨éƒ¨iteméƒ½è¿‡æœŸå¤±æ•ˆäº†ï¼Œ
+        ä½†è¿™äº›itemè¿˜æ˜¯å æ®è€…å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—å¹¶æ²¡æœ‰å½’è¿˜ç»™slabåˆ†é…å™¨ã€‚
 
-LRUÅÀ³æÏß³Ì£º
-        ÓĞÃ»ÓĞ°ì·¨Ç¿ÖÆÇå³ıÕâĞ©¹ıÆÚÊ§Ğ§µÄitem£¬²»ÔÙÕ¼¾İ¹şÏ£±íºÍLRU¶ÓÁĞµÄ¿Õ¼ä²¢¹é»¹¸øslabsÄØ£¿µ±È»ÊÇÓĞµÄ¡£memcached
-        Ìá¹©ÁËLRUÅÀ³æ¿ÉÒÔÊµÏÖÕâ¸ö¹¦ÄÜ¡£
-        ÒªÊ¹ÓÃLRUÅÀ³æ¾Í±ØĞëÔÚ¿Í»§¶ËÊ¹ÓÃlru_crawlerÃüÁî¡£memcached·şÎñÆ÷¸ù¾İ¾ßÌåµÄÃüÁî²ÎÊı½øĞĞ´¦Àí¡£
-        memcachedÊÇÓÃÒ»¸ö×¨ÃÅµÄÏß³Ì¸ºÔğÇå³ıÕâĞ©¹ıÆÚÊ§Ğ§itemµÄ£¬±¾ÎÄ½«³ÆÕâ¸öÏß³ÌÎªLRUÅÀ³æÏß³Ì¡£Ä¬ÈÏÇé¿öÏÂmemcached
-        ÊÇ²»Æô¶¯Õâ¸öÏß³ÌµÄ£¬µ«¿ÉÒÔÔÚÆô¶¯memcachedµÄÊ±ºòÌí¼Ó²ÎÊı-o lru_crawlerÆô¶¯Õâ¸öÏß³Ì¡£Ò²¿ÉÒÔÍ¨¹ı¿Í»§¶ËÃüÁîÆô
-        ¶¯¡£¼´Ê¹Æô¶¯ÁËÕâ¸öLRUÅÀ³æÏß³Ì£¬¸ÃÏß³Ì»¹ÊÇ²»»á¹¤×÷¡£ĞèÒªÁíÍâ·¢ËÍÃüÁî£¬Ö¸Ã÷Òª¶ÔÄÄ¸öLRU¶ÓÁĞ½øĞĞÇå³ı´¦Àí¡£ÏÖ
-        ÔÚ¿´Ò»ÏÂlru_crawlerÓĞÄÄĞ©²ÎÊı¡£
+LRUçˆ¬è™«çº¿ç¨‹ï¼š
+        æœ‰æ²¡æœ‰åŠæ³•å¼ºåˆ¶æ¸…é™¤è¿™äº›è¿‡æœŸå¤±æ•ˆçš„itemï¼Œä¸å†å æ®å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—çš„ç©ºé—´å¹¶å½’è¿˜ç»™slabså‘¢ï¼Ÿå½“ç„¶æ˜¯æœ‰çš„ã€‚memcached
+        æä¾›äº†LRUçˆ¬è™«å¯ä»¥å®ç°è¿™ä¸ªåŠŸèƒ½ã€‚
+        è¦ä½¿ç”¨LRUçˆ¬è™«å°±å¿…é¡»åœ¨å®¢æˆ·ç«¯ä½¿ç”¨lru_crawlerå‘½ä»¤ã€‚memcachedæœåŠ¡å™¨æ ¹æ®å…·ä½“çš„å‘½ä»¤å‚æ•°è¿›è¡Œå¤„ç†ã€‚
+        memcachedæ˜¯ç”¨ä¸€ä¸ªä¸“é—¨çš„çº¿ç¨‹è´Ÿè´£æ¸…é™¤è¿™äº›è¿‡æœŸå¤±æ•ˆitemçš„ï¼Œæœ¬æ–‡å°†ç§°è¿™ä¸ªçº¿ç¨‹ä¸ºLRUçˆ¬è™«çº¿ç¨‹ã€‚é»˜è®¤æƒ…å†µä¸‹memcached
+        æ˜¯ä¸å¯åŠ¨è¿™ä¸ªçº¿ç¨‹çš„ï¼Œä½†å¯ä»¥åœ¨å¯åŠ¨memcachedçš„æ—¶å€™æ·»åŠ å‚æ•°-o lru_crawlerå¯åŠ¨è¿™ä¸ªçº¿ç¨‹ã€‚ä¹Ÿå¯ä»¥é€šè¿‡å®¢æˆ·ç«¯å‘½ä»¤å¯
+        åŠ¨ã€‚å³ä½¿å¯åŠ¨äº†è¿™ä¸ªLRUçˆ¬è™«çº¿ç¨‹ï¼Œè¯¥çº¿ç¨‹è¿˜æ˜¯ä¸ä¼šå·¥ä½œã€‚éœ€è¦å¦å¤–å‘é€å‘½ä»¤ï¼ŒæŒ‡æ˜è¦å¯¹å“ªä¸ªLRUé˜Ÿåˆ—è¿›è¡Œæ¸…é™¤å¤„ç†ã€‚ç°
+        åœ¨çœ‹ä¸€ä¸‹lru_crawleræœ‰å“ªäº›å‚æ•°ã€‚
 
-LRUÅÀ³æÃüÁî£º
-lru_crawler  <enable|disable>  Æô¶¯»òÕßÍ£Ö¹Ò»¸öLRUÅÀ³æÏß³Ì¡£ÈÎºÎÊ±¿Ì£¬×î¶àÖ»ÓĞÒ»¸öLRUÅÀ³æÏß³Ì¡£¸ÃÃüÁî¶Ô
-settings.lru_crawler½øĞĞ¸³ÖµÎªtrue»òÕßfalse
-lru_crawler crawl <classid,classid,classid|all>  ¿ÉÒÔÊ¹ÓÃ2,3,6ÕâÑùµÄÁĞ±íÖ¸Ã÷Òª¶ÔÄÄ¸öLRU¶ÓÁĞ½øĞĞÇå³ı´¦Àí¡£
-Ò²¿ÉÒÔÊ¹ÓÃall¶ÔËùÓĞµÄLRU¶ÓÁĞ½øĞĞ´¦Àí
-lru_crawler sleep <microseconds>  LRUÅÀ³æÏß³ÌÔÚÇå³ıitemµÄÊ±ºò»áÕ¼ÓÃËø£¬»á·Á°­workerÏß³ÌµÄÕı³£ÒµÎñ¡£ËùÒÔLRU
-ÅÀ³æÔÚ´¦ÀíµÄÊ±ºòĞèÒªÊ±²»Ê±ĞİÃßÒ»ÏÂ¡£Ä¬ÈÏĞİÃßÊ±¼äÎª100Î¢Ãë¡£¸ÃÃüÁî¶Ôsettings.lru_crawler_sleep½øĞĞ¸³Öµ
-lru_crawler tocrawl <32u>  Ò»¸öLRU¶ÓÁĞ¿ÉÄÜ»áÓĞºÜ¶à¹ıÆÚÊ§Ğ§µÄitem¡£Èç¹ûÒ»Ö±¼ì²éºÍÇå³ıÏÂÈ¥£¬ÊÆ±Ø»á·Á°­worker
-Ïß³ÌµÄÕı³£ÒµÎñ¡£Õâ¸ö²ÎÊıÓÃÀ´Ö¸Ã÷×î¶àÖ»¼ì²éÃ¿Ò»ÌõLRU¶ÓÁĞµÄ¶àÉÙ¸öitem¡£Ä¬ÈÏÖµÎª0£¬ËùÒÔÈç¹û²»Ö¸¶¨ÄÇÃ´¾Í²»»á¹¤
-×÷¡£¸ÃÃüÁî¶Ôsettings.lru_crawler_tocrawl½øĞĞ¸³Öµ
-Èç¹ûÒªÆô¶¯LRUÅÀ³æÖ÷¶¯É¾³ı¹ıÆÚµÄitem£¬ĞèÒªÕâÑù×ö£ºÊ×ÏÈÊ¹ÓÃlru_crawler enableÃüÁîÆô¶¯Ò»¸öLRUÅÀ³æÏß³Ì¡£
-È»ºóÊ¹ÓÃlru_crawler tocrawl numÃüÁîÈ·¶¨Ã¿Ò»¸öLRU¶ÓÁĞ×î¶à¼ì²énum-1¸öitem¡£×îºóÊ¹ÓÃÃüÁî
-lru_crawler crawl <classid,classid,classid|all> Ö¸¶¨Òª´¦ÀíµÄLRU¶ÓÁĞ¡£lru_crawler sleep¿ÉÒÔ²»ÉèÖÃ£¬
-Èç¹ûÒªÉèÖÃÄÇÃ´¿ÉÒÔÔÚlru_crawler crawlÃüÁîÖ®Ç°ÉèÖÃ¼´¿É¡£
-*/ //²Î¿¼http://blog.csdn.net/luotuo44/article/details/42963793
-int start_item_crawler_thread(void) {//¿ÉÒÔÔÚÆô¶¯ÃüÁîĞĞÖĞ¼ÓÉÏ-o lru_crawler»òÕß¿Í»§¶ËÖ´ĞĞlru_crawler enableÃüÁîÀ´Æô¶¯ÅÀ³æÏß³Ì
+LRUçˆ¬è™«å‘½ä»¤ï¼š
+lru_crawler  <enable|disable>  å¯åŠ¨æˆ–è€…åœæ­¢ä¸€ä¸ªLRUçˆ¬è™«çº¿ç¨‹ã€‚ä»»ä½•æ—¶åˆ»ï¼Œæœ€å¤šåªæœ‰ä¸€ä¸ªLRUçˆ¬è™«çº¿ç¨‹ã€‚è¯¥å‘½ä»¤å¯¹
+settings.lru_crawlerè¿›è¡Œèµ‹å€¼ä¸ºtrueæˆ–è€…false
+lru_crawler crawl <classid,classid,classid|all>  å¯ä»¥ä½¿ç”¨2,3,6è¿™æ ·çš„åˆ—è¡¨æŒ‡æ˜è¦å¯¹å“ªä¸ªLRUé˜Ÿåˆ—è¿›è¡Œæ¸…é™¤å¤„ç†ã€‚
+ä¹Ÿå¯ä»¥ä½¿ç”¨allå¯¹æ‰€æœ‰çš„LRUé˜Ÿåˆ—è¿›è¡Œå¤„ç†
+lru_crawler sleep <microseconds>  LRUçˆ¬è™«çº¿ç¨‹åœ¨æ¸…é™¤itemçš„æ—¶å€™ä¼šå ç”¨é”ï¼Œä¼šå¦¨ç¢workerçº¿ç¨‹çš„æ­£å¸¸ä¸šåŠ¡ã€‚æ‰€ä»¥LRU
+çˆ¬è™«åœ¨å¤„ç†çš„æ—¶å€™éœ€è¦æ—¶ä¸æ—¶ä¼‘çœ ä¸€ä¸‹ã€‚é»˜è®¤ä¼‘çœ æ—¶é—´ä¸º100å¾®ç§’ã€‚è¯¥å‘½ä»¤å¯¹settings.lru_crawler_sleepè¿›è¡Œèµ‹å€¼
+lru_crawler tocrawl <32u>  ä¸€ä¸ªLRUé˜Ÿåˆ—å¯èƒ½ä¼šæœ‰å¾ˆå¤šè¿‡æœŸå¤±æ•ˆçš„itemã€‚å¦‚æœä¸€ç›´æ£€æŸ¥å’Œæ¸…é™¤ä¸‹å»ï¼ŒåŠ¿å¿…ä¼šå¦¨ç¢worker
+çº¿ç¨‹çš„æ­£å¸¸ä¸šåŠ¡ã€‚è¿™ä¸ªå‚æ•°ç”¨æ¥æŒ‡æ˜æœ€å¤šåªæ£€æŸ¥æ¯ä¸€æ¡LRUé˜Ÿåˆ—çš„å¤šå°‘ä¸ªitemã€‚é»˜è®¤å€¼ä¸º0ï¼Œæ‰€ä»¥å¦‚æœä¸æŒ‡å®šé‚£ä¹ˆå°±ä¸ä¼šå·¥
+ä½œã€‚è¯¥å‘½ä»¤å¯¹settings.lru_crawler_tocrawlè¿›è¡Œèµ‹å€¼
+å¦‚æœè¦å¯åŠ¨LRUçˆ¬è™«ä¸»åŠ¨åˆ é™¤è¿‡æœŸçš„itemï¼Œéœ€è¦è¿™æ ·åšï¼šé¦–å…ˆä½¿ç”¨lru_crawler enableå‘½ä»¤å¯åŠ¨ä¸€ä¸ªLRUçˆ¬è™«çº¿ç¨‹ã€‚
+ç„¶åä½¿ç”¨lru_crawler tocrawl numå‘½ä»¤ç¡®å®šæ¯ä¸€ä¸ªLRUé˜Ÿåˆ—æœ€å¤šæ£€æŸ¥num-1ä¸ªitemã€‚æœ€åä½¿ç”¨å‘½ä»¤
+lru_crawler crawl <classid,classid,classid|all> æŒ‡å®šè¦å¤„ç†çš„LRUé˜Ÿåˆ—ã€‚lru_crawler sleepå¯ä»¥ä¸è®¾ç½®ï¼Œ
+å¦‚æœè¦è®¾ç½®é‚£ä¹ˆå¯ä»¥åœ¨lru_crawler crawlå‘½ä»¤ä¹‹å‰è®¾ç½®å³å¯ã€‚
+*/ //å‚è€ƒhttp://blog.csdn.net/luotuo44/article/details/42963793
+int start_item_crawler_thread(void) {//å¯ä»¥åœ¨å¯åŠ¨å‘½ä»¤è¡Œä¸­åŠ ä¸Š-o lru_crawleræˆ–è€…å®¢æˆ·ç«¯æ‰§è¡Œlru_crawler enableå‘½ä»¤æ¥å¯åŠ¨çˆ¬è™«çº¿ç¨‹
     int ret;
-    //workerÏß³Ì½ÓÊÕµ½"lru_crawler enable"ÃüÁîºó»áµ÷ÓÃ±¾º¯Êı  
-    //Æô¶¯memcachedÊ±Èç¹ûÓĞ-o lru_crawler²ÎÊıÒ²ÊÇ»áµ÷ÓÃ±¾º¯Êı  
+    //workerçº¿ç¨‹æ¥æ”¶åˆ°"lru_crawler enable"å‘½ä»¤åä¼šè°ƒç”¨æœ¬å‡½æ•°  
+    //å¯åŠ¨memcachedæ—¶å¦‚æœæœ‰-o lru_crawlerå‚æ•°ä¹Ÿæ˜¯ä¼šè°ƒç”¨æœ¬å‡½æ•°  
 
 
-    //ÔÚstop_item_crawler_threadº¯Êı¿ÉÒÔ¿´µ½pthread_joinº¯Êı  
-    //ÔÚpthread_join·µ»Øºó£¬²Å»á°Ñsettings.lru_crawlerÉèÖÃÎªfalse¡£  
-    //ËùÒÔ²»»á³öÏÖÍ¬Ê±³öÏÖÁ½¸öcrawlerÏß³Ì  
-    if (settings.lru_crawler) //ÒÑ¾­ÆôÓÃÁËÅÂ´ÓÏß³Ì£¬²»ÓÃÔÙ´´½¨Ïß³ÌÁË
+    //åœ¨stop_item_crawler_threadå‡½æ•°å¯ä»¥çœ‹åˆ°pthread_joinå‡½æ•°  
+    //åœ¨pthread_joinè¿”å›åï¼Œæ‰ä¼šæŠŠsettings.lru_crawlerè®¾ç½®ä¸ºfalseã€‚  
+    //æ‰€ä»¥ä¸ä¼šå‡ºç°åŒæ—¶å‡ºç°ä¸¤ä¸ªcrawlerçº¿ç¨‹  
+    if (settings.lru_crawler) //å·²ç»å¯ç”¨äº†æ€•ä»çº¿ç¨‹ï¼Œä¸ç”¨å†åˆ›å»ºçº¿ç¨‹äº†
         return -1;
     pthread_mutex_lock(&lru_crawler_lock);
     do_run_lru_crawler_thread = 1;
     settings.lru_crawler = true;
 
-    //´´½¨Ò»¸öLRUÅÀ³æÏß³Ì£¬Ïß³Ìº¯ÊıÎªitem_crawler_thread¡£LRUÅÀ³æÏß³ÌÔÚ½øÈë  
-    //item_crawler_threadº¯Êıºó£¬»áµ÷ÓÃpthread_cond_wait£¬µÈ´ıworkerÏß³ÌÖ¸¶¨  
-    //Òª´¦ÀíµÄLRU¶ÓÁĞ  
+    //åˆ›å»ºä¸€ä¸ªLRUçˆ¬è™«çº¿ç¨‹ï¼Œçº¿ç¨‹å‡½æ•°ä¸ºitem_crawler_threadã€‚LRUçˆ¬è™«çº¿ç¨‹åœ¨è¿›å…¥  
+    //item_crawler_threadå‡½æ•°åï¼Œä¼šè°ƒç”¨pthread_cond_waitï¼Œç­‰å¾…workerçº¿ç¨‹æŒ‡å®š  
+    //è¦å¤„ç†çš„LRUé˜Ÿåˆ—  
     if ((ret = pthread_create(&item_crawler_tid, NULL,
         item_crawler_thread, NULL)) != 0) {
         fprintf(stderr, "Can't create LRU crawler thread: %s\n",
@@ -1151,34 +1151,34 @@ int start_item_crawler_thread(void) {//¿ÉÒÔÔÚÆô¶¯ÃüÁîĞĞÖĞ¼ÓÉÏ-o lru_crawler»òÕß¿
 }
 
 /*
-lru_crawler_crawlº¯Êı£¬memcached»áÔÚÕâ¸öº¯Êı»á°ÑÎ±item²åÈëµ½LRU¶ÓÁĞÎ²²¿µÄ¡£µ±workerÏß³Ì½ÓÊÕµ½lru_crawler 
-crawl<classid,classid,classid|all>ÃüÁîÊ±¾Í»áµ÷ÓÃÕâ¸öº¯Êı¡£ÒòÎªÓÃ»§¿ÉÄÜÒªÇóLRUÅÀ³æÏß³ÌÇåÀí¶à¸öLRU¶ÓÁĞµÄ¹ı
-ÆÚÊ§Ğ§item£¬ËùÒÔĞèÒªÒ»¸öÎ±itemÊı×é¡£Î±itemÊı×éµÄ´óĞ¡µÈÓÚLRU¶ÓÁĞµÄ¸öÊı£¬ËüÃÇÊÇÒ»Ò»¶ÔÓ¦µÄ
+lru_crawler_crawlå‡½æ•°ï¼Œmemcachedä¼šåœ¨è¿™ä¸ªå‡½æ•°ä¼šæŠŠä¼ªitemæ’å…¥åˆ°LRUé˜Ÿåˆ—å°¾éƒ¨çš„ã€‚å½“workerçº¿ç¨‹æ¥æ”¶åˆ°lru_crawler 
+crawl<classid,classid,classid|all>å‘½ä»¤æ—¶å°±ä¼šè°ƒç”¨è¿™ä¸ªå‡½æ•°ã€‚å› ä¸ºç”¨æˆ·å¯èƒ½è¦æ±‚LRUçˆ¬è™«çº¿ç¨‹æ¸…ç†å¤šä¸ªLRUé˜Ÿåˆ—çš„è¿‡
+æœŸå¤±æ•ˆitemï¼Œæ‰€ä»¥éœ€è¦ä¸€ä¸ªä¼ªitemæ•°ç»„ã€‚ä¼ªitemæ•°ç»„çš„å¤§å°ç­‰äºLRUé˜Ÿåˆ—çš„ä¸ªæ•°ï¼Œå®ƒä»¬æ˜¯ä¸€ä¸€å¯¹åº”çš„
 */
 
-//µ±¿Í»§¶ËÊ¹ÓÃÃüÁîlru_crawler crawl <classid,classid,classid|all>Ê±£¬  
-//workerÏß³Ì¾Í»áµ÷ÓÃ±¾º¯Êı,²¢½«ÃüÁîµÄµÚ¶ş¸ö²ÎÊı×÷Îª±¾º¯ÊıµÄ²ÎÊı  
+//å½“å®¢æˆ·ç«¯ä½¿ç”¨å‘½ä»¤lru_crawler crawl <classid,classid,classid|all>æ—¶ï¼Œ  
+//workerçº¿ç¨‹å°±ä¼šè°ƒç”¨æœ¬å‡½æ•°,å¹¶å°†å‘½ä»¤çš„ç¬¬äºŒä¸ªå‚æ•°ä½œä¸ºæœ¬å‡½æ•°çš„å‚æ•°  
 enum crawler_result_type lru_crawler_crawl(char *slabs) {
     char *b = NULL;
     uint32_t sid = 0;
     uint8_t tocrawl[POWER_LARGEST];
 
-    //LRUÅÀ³æÏß³Ì½øĞĞÇåÀíµÄÊ±ºò£¬»áËøÉÏlru_crawler_lock¡£Ö±µ½Íê³ÉËùÓĞ  
-    //µÄÇåÀíÈÎÎñ²Å»á½âËø¡£ËùÒÔ¿Í»§¶ËµÄÇ°Ò»¸öÇåÀíÈÎÎñ»¹Ã»½áÊøÇ°£¬²»ÄÜ  
-    //ÔÙÌá½»ÁíÍâÒ»¸öÇåÀíÈÎÎñ     
+    //LRUçˆ¬è™«çº¿ç¨‹è¿›è¡Œæ¸…ç†çš„æ—¶å€™ï¼Œä¼šé”ä¸Šlru_crawler_lockã€‚ç›´åˆ°å®Œæˆæ‰€æœ‰  
+    //çš„æ¸…ç†ä»»åŠ¡æ‰ä¼šè§£é”ã€‚æ‰€ä»¥å®¢æˆ·ç«¯çš„å‰ä¸€ä¸ªæ¸…ç†ä»»åŠ¡è¿˜æ²¡ç»“æŸå‰ï¼Œä¸èƒ½  
+    //å†æäº¤å¦å¤–ä¸€ä¸ªæ¸…ç†ä»»åŠ¡     
     if (pthread_mutex_trylock(&lru_crawler_lock) != 0) {
         return CRAWLER_RUNNING;
     }
     pthread_mutex_lock(&cache_lock);
 
-    //½âÎöÃüÁî£¬Èç¹ûÃüÁîÒªÇó¶ÔÄ³Ò»¸öLRU¶ÓÁĞ½øĞĞÇåÀí£¬ÄÇÃ´¾ÍÔÚtocrawlÊı×é  
-    //¶ÔÓ¦ÔªËØ¸³Öµ1×÷Îª±êÖ¾  
-    if (strcmp(slabs, "all") == 0) { //´¦ÀíÈ«²¿lru¶ÓÁĞ  
+    //è§£æå‘½ä»¤ï¼Œå¦‚æœå‘½ä»¤è¦æ±‚å¯¹æŸä¸€ä¸ªLRUé˜Ÿåˆ—è¿›è¡Œæ¸…ç†ï¼Œé‚£ä¹ˆå°±åœ¨tocrawlæ•°ç»„  
+    //å¯¹åº”å…ƒç´ èµ‹å€¼1ä½œä¸ºæ ‡å¿—  
+    if (strcmp(slabs, "all") == 0) { //å¤„ç†å…¨éƒ¨lrué˜Ÿåˆ—  
         for (sid = 0; sid < LARGEST_ID; sid++) {
             tocrawl[sid] = 1;
         }
     } else {
-        for (char *p = strtok_r(slabs, ",", &b);//½âÎö³öÒ»¸ö¸öµÄsid  
+        for (char *p = strtok_r(slabs, ",", &b);//è§£æå‡ºä¸€ä¸ªä¸ªçš„sid  
              p != NULL;
              p = strtok_r(NULL, ",", &b)) {
 
@@ -1192,13 +1192,13 @@ enum crawler_result_type lru_crawler_crawl(char *slabs) {
         }
     }
 
-    //crawlersÊÇÒ»¸öÎ±itemÀàĞÍÊı×é¡£Èç¹ûÓÃ»§ÒªÇåÀíÄ³Ò»¸öLRU¶ÓÁĞ£¬ÄÇÃ´  
-    //¾ÍÔÚÕâ¸öLRU¶ÓÁĞÖĞ²åÈëÒ»¸öÎ±item  
+    //crawlersæ˜¯ä¸€ä¸ªä¼ªitemç±»å‹æ•°ç»„ã€‚å¦‚æœç”¨æˆ·è¦æ¸…ç†æŸä¸€ä¸ªLRUé˜Ÿåˆ—ï¼Œé‚£ä¹ˆ  
+    //å°±åœ¨è¿™ä¸ªLRUé˜Ÿåˆ—ä¸­æ’å…¥ä¸€ä¸ªä¼ªitem  
     for (sid = 0; sid < LARGEST_ID; sid++) {
         if (tocrawl[sid] != 0 && tails[sid] != NULL) {
             if (settings.verbose > 2)
                 fprintf(stderr, "Kicking LRU crawler off for slab %d\n", sid);
-            //¶ÔÓÚÎ±itemºÍÕæÕıµÄitem£¬¿ÉÒÔÓÃnkey¡¢timeÕâÁ½¸ö³ÉÔ±µÄÖµÇø±ğ  
+            //å¯¹äºä¼ªitemå’ŒçœŸæ­£çš„itemï¼Œå¯ä»¥ç”¨nkeyã€timeè¿™ä¸¤ä¸ªæˆå‘˜çš„å€¼åŒºåˆ«  
             crawlers[sid].nbytes = 0;
             crawlers[sid].nkey = 0;
             crawlers[sid].it_flags = 1; /* For a crawler, this means enabled. */
@@ -1207,13 +1207,13 @@ enum crawler_result_type lru_crawler_crawl(char *slabs) {
             crawlers[sid].time = 0;
             crawlers[sid].remaining = settings.lru_crawler_tocrawl;
             crawlers[sid].slabs_clsid = sid;
-            crawler_link_q((item *)&crawlers[sid]); //½«Õâ¸öÎ±item²åÈëµ½¶ÔÓ¦µÄlru¶ÓÁĞµÄÎ²²¿  
-            crawler_count++; //Òª´¦ÀíµÄLRU¶ÓÁĞÊı¼ÓÒ»  
+            crawler_link_q((item *)&crawlers[sid]); //å°†è¿™ä¸ªä¼ªitemæ’å…¥åˆ°å¯¹åº”çš„lrué˜Ÿåˆ—çš„å°¾éƒ¨  
+            crawler_count++; //è¦å¤„ç†çš„LRUé˜Ÿåˆ—æ•°åŠ ä¸€  
         }
     }
     pthread_mutex_unlock(&cache_lock);
-    //ÃüÁî¡±lru_crawler crawl<classid,classid,classid|all>¡±²ÅÊÇÖ¸¶¨ÈÎÎñµÄ¡£¸ÃÃüÁîÖ¸Ã÷ÁËÒª¶ÔÄÄ¸öLRU¶ÓÁĞ½øĞĞÇåÀí
-    pthread_cond_signal(&lru_crawler_cond); //ÓĞÈÎÎñÁË£¬»½ĞÑLRUÅÀ³æÏß³Ì£¬ÈÃÆäÖ´ĞĞÇåÀíÈÎÎñ  
+    //å‘½ä»¤â€lru_crawler crawl<classid,classid,classid|all>â€æ‰æ˜¯æŒ‡å®šä»»åŠ¡çš„ã€‚è¯¥å‘½ä»¤æŒ‡æ˜äº†è¦å¯¹å“ªä¸ªLRUé˜Ÿåˆ—è¿›è¡Œæ¸…ç†
+    pthread_cond_signal(&lru_crawler_cond); //æœ‰ä»»åŠ¡äº†ï¼Œå”¤é†’LRUçˆ¬è™«çº¿ç¨‹ï¼Œè®©å…¶æ‰§è¡Œæ¸…ç†ä»»åŠ¡  
     STATS_LOCK();
     stats.lru_crawler_running = true;
     STATS_UNLOCK();

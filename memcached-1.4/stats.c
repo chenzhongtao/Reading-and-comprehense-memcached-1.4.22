@@ -13,22 +13,22 @@
 #include <string.h>
 #include <assert.h>
 
-//stats²Î¿¼:http://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
+//statså‚è€ƒ:http://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
 /*
  * Stats are tracked on the basis of key prefixes. This is a simple
  * fixed-size hash of prefixes; we run the prefixes through the same
  * CRC function used by the cache hashtable.
  */
 
-//stats²Î¿¼:http://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
+//statså‚è€ƒ:http://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
 typedef struct _prefix_stats PREFIX_STATS;
 struct _prefix_stats {
     char         *prefix;
     size_t        prefix_len;
-    uint64_t      num_gets;//get´ÎÊı
-    uint64_t      num_sets;//ÉèÖÃ´ÎÊı
-    uint64_t      num_deletes;//É¾³ı´ÎÊı
-    uint64_t      num_hits;//getÃüÖĞ´ÎÊı
+    uint64_t      num_gets;//getæ¬¡æ•°
+    uint64_t      num_sets;//è®¾ç½®æ¬¡æ•°
+    uint64_t      num_deletes;//åˆ é™¤æ¬¡æ•°
+    uint64_t      num_hits;//getå‘½ä¸­æ¬¡æ•°
     PREFIX_STATS *next;
 };
 /*
@@ -41,10 +41,10 @@ END
 */
 #define PREFIX_HASH_SIZE 256
 
-//stats²Î¿¼:http://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
-//·ÖÅäÁËÒ»¸ö256¸öÔªËØµÄÊı×éÓÃÀ´´æ´¢ËùÓĞÃüÃû¿Õ¼ä¶ÔÏóµÄ×´Ì¬¼ÇÂ¼,ËùÓĞÃüÃû¿Õ¼ä×Ö·û´®¶¼ÊÇ¾­¹ıhashÖ®ºó·ÖÅäµÄ,hashÖ®ºóÖµÏàÍ¬µÄÃüÃû¿Õ¼ä»á×é³Éµ¥ÏòÁ´±í
-static PREFIX_STATS *prefix_stats[PREFIX_HASH_SIZE]; //´æ´¢keyÏà¹ØµÄÏêÏ¸ĞÅÏ¢ 
-static int num_prefixes = 0; //prefix_stats hash±íÖĞ×ÜµÄkey½Úµã¸öÊı
+//statså‚è€ƒ:http://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
+//åˆ†é…äº†ä¸€ä¸ª256ä¸ªå…ƒç´ çš„æ•°ç»„ç”¨æ¥å­˜å‚¨æ‰€æœ‰å‘½åç©ºé—´å¯¹è±¡çš„çŠ¶æ€è®°å½•,æ‰€æœ‰å‘½åç©ºé—´å­—ç¬¦ä¸²éƒ½æ˜¯ç»è¿‡hashä¹‹ååˆ†é…çš„,hashä¹‹åå€¼ç›¸åŒçš„å‘½åç©ºé—´ä¼šç»„æˆå•å‘é“¾è¡¨
+static PREFIX_STATS *prefix_stats[PREFIX_HASH_SIZE]; //å­˜å‚¨keyç›¸å…³çš„è¯¦ç»†ä¿¡æ¯ 
+static int num_prefixes = 0; //prefix_stats hashè¡¨ä¸­æ€»çš„keyèŠ‚ç‚¹ä¸ªæ•°
 static int total_prefix_size = 0;
 
 void stats_prefix_init() {
@@ -75,7 +75,7 @@ void stats_prefix_clear() {
  * Returns the stats structure for a prefix, creating it if it's not already
  * in the list.
  */
-/*@null@*/ /*²éÕÒÒ»¸öÇ°×º¶ÔÓ¦µÄ½á¹¹Ìå¶ÔÏó,Ã»ÓĞÔò´´½¨Ò»¸ö*/
+/*@null@*/ /*æŸ¥æ‰¾ä¸€ä¸ªå‰ç¼€å¯¹åº”çš„ç»“æ„ä½“å¯¹è±¡,æ²¡æœ‰åˆ™åˆ›å»ºä¸€ä¸ª*/
 static PREFIX_STATS *stats_prefix_find(const char *key, const size_t nkey) {
     PREFIX_STATS *pfs;
     uint32_t hashval;
@@ -85,7 +85,7 @@ static PREFIX_STATS *stats_prefix_find(const char *key, const size_t nkey) {
     assert(key != NULL);
 
     for (length = 0; length < nkey && key[length] != '\0'; length++) {
-        if (key[length] == settings.prefix_delimiter) { //Èç¹ûkeyÖĞ°üº¬prefix_delimiter×Ö·û£¬ÔòÖ»¼ÆËã¸Ã×Ö·ûÇ°ÃæµÄ×Ö·û´®
+        if (key[length] == settings.prefix_delimiter) { //å¦‚æœkeyä¸­åŒ…å«prefix_delimiterå­—ç¬¦ï¼Œåˆ™åªè®¡ç®—è¯¥å­—ç¬¦å‰é¢çš„å­—ç¬¦ä¸²
             bailout = false;
             break;
         }
@@ -97,7 +97,7 @@ static PREFIX_STATS *stats_prefix_find(const char *key, const size_t nkey) {
 
     hashval = hash(key, length) % PREFIX_HASH_SIZE;
 
-    //Èç¹ûhashÖĞÒÑ¾­´æÔÚ¸Ãkey£¬ÔòÖ±½Ó·µ»Ø£¬·ñÔò´´½¨ĞÂµÄ½Úµã´æµ½hashÖĞ
+    //å¦‚æœhashä¸­å·²ç»å­˜åœ¨è¯¥keyï¼Œåˆ™ç›´æ¥è¿”å›ï¼Œå¦åˆ™åˆ›å»ºæ–°çš„èŠ‚ç‚¹å­˜åˆ°hashä¸­
     for (pfs = prefix_stats[hashval]; NULL != pfs; pfs = pfs->next) {
         if (strncmp(pfs->prefix, key, length) == 0)
             return pfs;
@@ -131,7 +131,7 @@ static PREFIX_STATS *stats_prefix_find(const char *key, const size_t nkey) {
 
 /*
  * Records a "get" of a key.
- */ //¼ÇÂ¼Ä³¼üÖµµÄget²Ù×÷´ÎÊıºÍÃüÖĞ´ÎÊı
+ */ //è®°å½•æŸé”®å€¼çš„getæ“ä½œæ¬¡æ•°å’Œå‘½ä¸­æ¬¡æ•°
 void stats_prefix_record_get(const char *key, const size_t nkey, const bool is_hit) {
     PREFIX_STATS *pfs;
 
@@ -148,7 +148,7 @@ void stats_prefix_record_get(const char *key, const size_t nkey, const bool is_h
 
 /*
  * Records a "delete" of a key.
- */ //¼ÇÂ¼Ä³keyµÄÉ¾³ı´ÎÊı
+ */ //è®°å½•æŸkeyçš„åˆ é™¤æ¬¡æ•°
 void stats_prefix_record_delete(const char *key, const size_t nkey) {
     PREFIX_STATS *pfs;
 
@@ -162,14 +162,14 @@ void stats_prefix_record_delete(const char *key, const size_t nkey) {
 
 /*
  * Records a "set" of a key.
- */ //¶Ôkey½øĞĞĞ´²Ù×÷µÄÏà¹ØÍ³¼Æ£¬°üÀ¨add set replace prepend appendÃüÁî¶ÔkeyµÄ²Ù×÷
-void stats_prefix_record_set(const char *key, const size_t nkey) {//¼ÇÂ¼Ä³key±»ÉèÖÃµÄ´ÎÊı
+ */ //å¯¹keyè¿›è¡Œå†™æ“ä½œçš„ç›¸å…³ç»Ÿè®¡ï¼ŒåŒ…æ‹¬add set replace prepend appendå‘½ä»¤å¯¹keyçš„æ“ä½œ
+void stats_prefix_record_set(const char *key, const size_t nkey) {//è®°å½•æŸkeyè¢«è®¾ç½®çš„æ¬¡æ•°
     PREFIX_STATS *pfs;
 
     STATS_LOCK();
     pfs = stats_prefix_find(key, nkey);
     if (NULL != pfs) {
-        pfs->num_sets++; //Ğ´²Ù×÷Ôö¼ÓÒ»´Î
+        pfs->num_sets++; //å†™æ“ä½œå¢åŠ ä¸€æ¬¡
     }
     STATS_UNLOCK();
 }
@@ -177,7 +177,7 @@ void stats_prefix_record_set(const char *key, const size_t nkey) {//¼ÇÂ¼Ä³key±»É
 /*
  * Returns stats in textual form suitable for writing to a client.
  */
-/*@null@*/ //Êä³öËùÓĞĞÅÏ¢  
+/*@null@*/ //è¾“å‡ºæ‰€æœ‰ä¿¡æ¯  
 char *stats_prefix_dump(int *length) {
     const char *format = "PREFIX %s get %llu hit %llu set %llu del %llu\r\n";
     PREFIX_STATS *pfs;
@@ -192,7 +192,7 @@ char *stats_prefix_dump(int *length) {
      * plus space for the "END" at the end.
      */
     STATS_LOCK();
-    //¼ÆËãĞèÒªÈ«²¿ÄÚ´æ¿Õ¼ä´óĞ¡
+    //è®¡ç®—éœ€è¦å…¨éƒ¨å†…å­˜ç©ºé—´å¤§å°
     size = strlen(format) + total_prefix_size +
            num_prefixes * (strlen(format) - 2 /* %s */
                            + 4 * (20 - 4)) /* %llu replaced by 20-digit num */
@@ -209,10 +209,10 @@ char *stats_prefix_dump(int *length) {
         for (pfs = prefix_stats[i]; NULL != pfs; pfs = pfs->next) {
             written = snprintf(buf + pos, size-pos, format,
                            pfs->prefix, pfs->num_gets, pfs->num_hits,
-                           pfs->num_sets, pfs->num_deletes);//¸ñÊ½»¯ºó¿½±´µ½Ö¸¶¨Ö¸Õë´¦
+                           pfs->num_sets, pfs->num_deletes);//æ ¼å¼åŒ–åæ‹·è´åˆ°æŒ‡å®šæŒ‡é’ˆå¤„
             pos += written;
             total_written += written;
-            assert(total_written < size);//ÅĞ¶ÏÊÇ·ñ¿½±´ÕıÈ·
+            assert(total_written < size);//åˆ¤æ–­æ˜¯å¦æ‹·è´æ­£ç¡®
         }
     }
 
@@ -224,7 +224,7 @@ char *stats_prefix_dump(int *length) {
 }
 
 //#define UNIT_TEST 1
-//µ¥Ôª²âÊÔ²¿·Ö
+//å•å…ƒæµ‹è¯•éƒ¨åˆ†
 #ifdef UNIT_TEST
 
 /****************************************************************************

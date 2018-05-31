@@ -1374,10 +1374,10 @@ static enum test_return test_binary_getq_impl(const char *key, uint8_t cmd) {
     size_t len = storage_command(send.bytes, sizeof(send.bytes),
                                  PROTOCOL_BINARY_CMD_ADD,
                                  key, strlen(key), NULL, 0,
-                                 0, 0);                           //add  test_binary_getq »òÕßadd  test_binary_getkq
+                                 0, 0);                           //add  test_binary_getq æˆ–è€…add  test_binary_getkq
     size_t len2 = ext_command(temp.bytes, sizeof(temp.bytes), cmd,
                               extlen ? &expiration : NULL, extlen,
-                              missing, strlen(missing), NULL, 0); //getq test_binary_getq_missing »òÕß getq test_binary_getq_missing
+                              missing, strlen(missing), NULL, 0); //getq test_binary_getq_missing æˆ–è€… getq test_binary_getq_missing
     /* I need to change the first opaque so that I can separate the two
      * return packets */
     temp.request.message.header.request.opaque = 0xfeedface;
@@ -1386,7 +1386,7 @@ static enum test_return test_binary_getq_impl(const char *key, uint8_t cmd) {
 
     len2 = ext_command(temp.bytes, sizeof(temp.bytes), cmd,
                        extlen ? &expiration : NULL, extlen,
-                       key, strlen(key), NULL, 0);                //getq test_binary_getq »òÕß getq test_binary_getkq
+                       key, strlen(key), NULL, 0);                //getq test_binary_getq æˆ–è€… getq test_binary_getkq
     memcpy(send.bytes + len, temp.bytes, len2);
     len += len2;
 
@@ -1685,7 +1685,7 @@ static enum test_return test_binary_prependq(void) {
 }
 
 static enum test_return test_binary_stat(void) {
-    return TEST_PASS; //ÎÒÃÇµÄ²»Ö§³ÖstatÃüÁî
+    return TEST_PASS; //æˆ‘ä»¬çš„ä¸æ”¯æŒstatå‘½ä»¤
     union {
         protocol_binary_request_no_extras request;
         protocol_binary_response_no_extras response;

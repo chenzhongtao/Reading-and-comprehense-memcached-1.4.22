@@ -18,23 +18,23 @@
 #define ITEMS_PER_ALLOC 64
 
 /* An item in the connection queue. */
-//CQ_ITEMÊÇÖ÷Ïß³Ìacceptºó·µ»ØµÄÒÑ½¨Á¢Á¬½ÓµÄfdµÄ·â×°¡£ ×îÖÕÈ«²¿´æÈëLIBEVENT_THREAD->new_conn_queue
+//CQ_ITEMæ˜¯ä¸»çº¿ç¨‹acceptåè¿”å›çš„å·²å»ºç«‹è¿æ¥çš„fdçš„å°è£…ã€‚ æœ€ç»ˆå…¨éƒ¨å­˜å…¥LIBEVENT_THREAD->new_conn_queue
 typedef struct conn_queue_item CQ_ITEM;
-struct conn_queue_item { //´´½¨¿Õ¼äºÍ¸³Öµ¼ûdispatch_conn_new
-    int               sfd; //¿Í»§¶ËÁ¬½ÓµÄfd
+struct conn_queue_item { //åˆ›å»ºç©ºé—´å’Œèµ‹å€¼è§dispatch_conn_new
+    int               sfd; //å®¢æˆ·ç«¯è¿æ¥çš„fd
     enum conn_states  init_state;
-    int               event_flags; //EV_READ | EV_PERSISTµÈ
-    int               read_buffer_size; //Ä¬ÈÏDATA_BUFFER_SIZE
-    enum network_transport     transport; //tcpÁ¬½Ó»¹ÊÇudpÁ¬½Ó
+    int               event_flags; //EV_READ | EV_PERSISTç­‰
+    int               read_buffer_size; //é»˜è®¤DATA_BUFFER_SIZE
+    enum network_transport     transport; //tcpè¿æ¥è¿˜æ˜¯udpè¿æ¥
     CQ_ITEM          *next;
 };
 
 /* A connection queue. */
 typedef struct conn_queue CQ;
 struct conn_queue {
-    CQ_ITEM *head; //Ö¸Ïò¶ÓÁĞµÄµÚÒ»¸ö½Úµã
-    CQ_ITEM *tail; //Ö¸Ïò¶ÓÁĞµÄ×îºóÒ»¸ö½Úµã
-    pthread_mutex_t lock; //Ò»¸ö¶ÓÁĞ¾Í¶ÔÓ¦Ò»¸öËø
+    CQ_ITEM *head; //æŒ‡å‘é˜Ÿåˆ—çš„ç¬¬ä¸€ä¸ªèŠ‚ç‚¹
+    CQ_ITEM *tail; //æŒ‡å‘é˜Ÿåˆ—çš„æœ€åä¸€ä¸ªèŠ‚ç‚¹
+    pthread_mutex_t lock; //ä¸€ä¸ªé˜Ÿåˆ—å°±å¯¹åº”ä¸€ä¸ªé”
 };
 
 /* Lock for cache operations (item_*, assoc_*) */
@@ -54,8 +54,8 @@ static pthread_mutex_t stats_lock;
 static CQ_ITEM *cqi_freelist;
 static pthread_mutex_t cqi_freelist_lock;
 
-//¿ÉÒÔ²Î¿¼http://blog.csdn.net/luotuo44/article/details/42913549
-static pthread_mutex_t *item_locks; //³õÊ¼»¯ºÍ¸³Öµ¼ûthread_init
+//å¯ä»¥å‚è€ƒhttp://blog.csdn.net/luotuo44/article/details/42913549
+static pthread_mutex_t *item_locks; //åˆå§‹åŒ–å’Œèµ‹å€¼è§thread_init
 /* size of the item lock hash table */
 static uint32_t item_lock_count;
 
@@ -66,14 +66,14 @@ static unsigned int item_lock_hashpower;
 /* this lock is temporarily engaged during a hash table expansion */
 static pthread_mutex_t item_global_lock;
 /* thread-specific variable for deeply finding the item lock type */
-static pthread_key_t item_lock_type_key; ////Ïß³ÌË½ÓĞÊı¾İµÄ¼üÖµ    ²»Í¬Ïß³ÌµÄĞŞ¸Ä»¥²»¸ÉÈÅ
+static pthread_key_t item_lock_type_key; ////çº¿ç¨‹ç§æœ‰æ•°æ®çš„é”®å€¼    ä¸åŒçº¿ç¨‹çš„ä¿®æ”¹äº’ä¸å¹²æ‰°
 
 static LIBEVENT_DISPATCHER_THREAD dispatcher_thread;
 
 /*
  * Each libevent instance has a wakeup pipe, which other threads
  * can use to signal that they've put a new connection on its queue.
- */ //´´½¨¿Õ¼äºÍ¸³ÖµÔÚthread_init
+ */ //åˆ›å»ºç©ºé—´å’Œèµ‹å€¼åœ¨thread_init
 static LIBEVENT_THREAD *threads;
 
 /*
@@ -126,14 +126,14 @@ void item_unlock_global(void) {
 }
 
 void item_lock(uint32_t hv) {
-    uint8_t *lock_type = pthread_getspecific(item_lock_type_key); //»ñÈ¡Ïß³ÌË½ÓĞ±äÁ¿  
-    //likelyÕâ¸öºê¶¨ÒåÓÃÓÚ´úÂëÖ¸ÁîÓÅ»¯  
-    //likely(*lock_type == ITEM_LOCK_GRANULAR)ÓÃÀ´¸æËß±àÒëÆ÷  
-    //*lock_typeµÈÓÚITEM_LOCK_GRANULARµÄ¿ÉÄÜĞÔºÜ´ó  
+    uint8_t *lock_type = pthread_getspecific(item_lock_type_key); //è·å–çº¿ç¨‹ç§æœ‰å˜é‡  
+    //likelyè¿™ä¸ªå®å®šä¹‰ç”¨äºä»£ç æŒ‡ä»¤ä¼˜åŒ–  
+    //likely(*lock_type == ITEM_LOCK_GRANULAR)ç”¨æ¥å‘Šè¯‰ç¼–è¯‘å™¨  
+    //*lock_typeç­‰äºITEM_LOCK_GRANULARçš„å¯èƒ½æ€§å¾ˆå¤§  
     if (likely(*lock_type == ITEM_LOCK_GRANULAR)) {
-        mutex_lock(&item_locks[hv & hashmask(item_lock_hashpower)]); //¶ÔÄ³Ğ©Í°µÄitem¼ÓËø  
+        mutex_lock(&item_locks[hv & hashmask(item_lock_hashpower)]); //å¯¹æŸäº›æ¡¶çš„itemåŠ é”  
     } else {
-        mutex_lock(&item_global_lock);//¶ÔËùÓĞitem¼ÓËø  
+        mutex_lock(&item_global_lock);//å¯¹æ‰€æœ‰itemåŠ é”  
     }
 }
 
@@ -166,8 +166,8 @@ void item_unlock(uint32_t hv) {
 }
 
 /*
-¼´Ö÷Ïß³Ì×èÈûÈç´Ë£¬µÈ´ıworker_libevent·¢³öµÄinit_condĞÅºÅ£¬»½ĞÑºó¼ì²éinit_count < nthreadsÊÇ·ñÎª¼Ù
-£¨¼´´´½¨µÄÏß³ÌÊıÄ¿ÊÇ·ñ´ïµ½ÒªÇó£©£¬·ñÔò¼ÌĞøµÈ´ı¡£
+å³ä¸»çº¿ç¨‹é˜»å¡å¦‚æ­¤ï¼Œç­‰å¾…worker_libeventå‘å‡ºçš„init_condä¿¡å·ï¼Œå”¤é†’åæ£€æŸ¥init_count < nthreadsæ˜¯å¦ä¸ºå‡
+ï¼ˆå³åˆ›å»ºçš„çº¿ç¨‹æ•°ç›®æ˜¯å¦è¾¾åˆ°è¦æ±‚ï¼‰ï¼Œå¦åˆ™ç»§ç»­ç­‰å¾…ã€‚
 */
 static void wait_for_thread_registration(int nthreads) {
     while (init_count < nthreads) {
@@ -175,7 +175,7 @@ static void wait_for_thread_registration(int nthreads) {
     }
 }
 
-//½áºÏwait_for_thread_registrationÊ¹ÓÃ£¬±£Ö¤×ÓÏß³ÌÏÈÔËĞĞÆğÀ´
+//ç»“åˆwait_for_thread_registrationä½¿ç”¨ï¼Œä¿è¯å­çº¿ç¨‹å…ˆè¿è¡Œèµ·æ¥
 static void register_thread_initialized(void) {
     pthread_mutex_lock(&init_lock);
     init_count++;
@@ -184,32 +184,32 @@ static void register_thread_initialized(void) {
 }
 
 /*
-    Ç¨ÒÆÏß³ÌÎªÊ²Ã´ÒªÕâÃ´ÓØ»ØÇúÕÛµØÇĞ»»workersÏß³ÌµÄËøÀàĞÍÄØ£¿Ö±½ÓĞŞ¸ÄËùÓĞÏß³ÌµÄLIBEVENT_THREAD½á¹¹µÄitem_lock_type
- ³ÉÔ±±äÁ¿²»¾ÍĞĞÁËÂğ£¿
-    ÕâÖ÷ÒªÊÇÒòÎªÇ¨ÒÆÏß³Ì²»ÖªµÀworkerÏß³Ì´Ë¿ÌÔÚ¸ÉĞ©Ê²Ã´¡£Èç¹ûworkerÏß³ÌÕıÔÚ·ÃÎÊitem£¬²¢ÇÀÕ¼ÁË¶Î¼¶±ğËø¡£´ËÊ±Äã°Ñworker
- Ïß³ÌµÄËøÇĞ»»µ½È«¾ÖËø£¬µÈworkerÏß³Ì½âËøµÄÊ±ºò¾Í»á½âÈ«¾ÖËø(²Î¿¼Ç°ÃæµÄitem_lockºÍitem_unlock´úÂë)£¬ÕâÑù³ÌĞò¾Í±ÀÀ£ÁË¡£
- ËùÒÔ²»ÄÜÇ¨ÒÆÏß³ÌÈ¥ÇĞ»»£¬Ö»ÄÜÇ¨ÒÆÏß³ÌÍ¨ÖªworkerÏß³Ì£¬È»ºóworkerÏß³Ì×Ô¼ºÈ¥ÇĞ»»¡£µ±È»ÊÇÒªworkerÏß³ÌÃ¦ÍêÁËÊÖÍ·ÉÏµÄÊÂÇé
- ºó£¬²Å»áÈ¥ĞŞ¸ÄÇĞ»»µÄ¡£ËùÒÔÇ¨ÒÆÏß³ÌÔÚÍ¨ÖªÍêËùÓĞµÄworkerÏß³Ìºó£¬»áµ÷ÓÃwait_for_thread_registrationº¯ÊıĞİÃßµÈ´ıËùÓĞµÄ
- workerÏß³Ì¶¼ÇĞ»»µ½Ö¸¶¨µÄËøÀàĞÍºó²ÅĞÑÀ´¡£
+    è¿ç§»çº¿ç¨‹ä¸ºä»€ä¹ˆè¦è¿™ä¹ˆè¿‚å›æ›²æŠ˜åœ°åˆ‡æ¢workersçº¿ç¨‹çš„é”ç±»å‹å‘¢ï¼Ÿç›´æ¥ä¿®æ”¹æ‰€æœ‰çº¿ç¨‹çš„LIBEVENT_THREADç»“æ„çš„item_lock_type
+ æˆå‘˜å˜é‡ä¸å°±è¡Œäº†å—ï¼Ÿ
+    è¿™ä¸»è¦æ˜¯å› ä¸ºè¿ç§»çº¿ç¨‹ä¸çŸ¥é“workerçº¿ç¨‹æ­¤åˆ»åœ¨å¹²äº›ä»€ä¹ˆã€‚å¦‚æœworkerçº¿ç¨‹æ­£åœ¨è®¿é—®itemï¼Œå¹¶æŠ¢å äº†æ®µçº§åˆ«é”ã€‚æ­¤æ—¶ä½ æŠŠworker
+ çº¿ç¨‹çš„é”åˆ‡æ¢åˆ°å…¨å±€é”ï¼Œç­‰workerçº¿ç¨‹è§£é”çš„æ—¶å€™å°±ä¼šè§£å…¨å±€é”(å‚è€ƒå‰é¢çš„item_lockå’Œitem_unlockä»£ç )ï¼Œè¿™æ ·ç¨‹åºå°±å´©æºƒäº†ã€‚
+ æ‰€ä»¥ä¸èƒ½è¿ç§»çº¿ç¨‹å»åˆ‡æ¢ï¼Œåªèƒ½è¿ç§»çº¿ç¨‹é€šçŸ¥workerçº¿ç¨‹ï¼Œç„¶åworkerçº¿ç¨‹è‡ªå·±å»åˆ‡æ¢ã€‚å½“ç„¶æ˜¯è¦workerçº¿ç¨‹å¿™å®Œäº†æ‰‹å¤´ä¸Šçš„äº‹æƒ…
+ åï¼Œæ‰ä¼šå»ä¿®æ”¹åˆ‡æ¢çš„ã€‚æ‰€ä»¥è¿ç§»çº¿ç¨‹åœ¨é€šçŸ¥å®Œæ‰€æœ‰çš„workerçº¿ç¨‹åï¼Œä¼šè°ƒç”¨wait_for_thread_registrationå‡½æ•°ä¼‘çœ ç­‰å¾…æ‰€æœ‰çš„
+ workerçº¿ç¨‹éƒ½åˆ‡æ¢åˆ°æŒ‡å®šçš„é”ç±»å‹åæ‰é†’æ¥ã€‚
 */
 
-//¹¤×÷×ÓÏß³Ì¶Á¹ÜµÀÓĞÊı¾İµ½À´£¬thread_libevent_process´Ó¶Á¹ÜµÀ¶ÁÈ¡µ½ĞÅÏ¢  
-//¶ÔÓ¦µÄÖ÷Ïß³ÌĞ´¹ÜµÀÔÚdispatch_conn_new»òÕßswitch_item_lock_type
+//å·¥ä½œå­çº¿ç¨‹è¯»ç®¡é“æœ‰æ•°æ®åˆ°æ¥ï¼Œthread_libevent_processä»è¯»ç®¡é“è¯»å–åˆ°ä¿¡æ¯  
+//å¯¹åº”çš„ä¸»çº¿ç¨‹å†™ç®¡é“åœ¨dispatch_conn_newæˆ–è€…switch_item_lock_type
 
-//¹şÏ£±íÇ¨ÒÆÏß³Ì»áÔÚassoc.cÎÄ¼şÖĞµÄassoc_maintenance_threadº¯Êıµ÷ÓÃswitch_item_lock_typeº¯Êı£¬ÈÃËùÓĞµÄ
-//workersÏß³Ì¶¼ÇĞ»»µ½¶Î¼¶±ğËø»òÕßÈ«¾Ö¼¶±ğËø
-void switch_item_lock_type(enum item_lock_types type) { //º¯Êıthread_libevent_process½ÓÊÕl »òÕßgĞÅÏ¢
+//å“ˆå¸Œè¡¨è¿ç§»çº¿ç¨‹ä¼šåœ¨assoc.cæ–‡ä»¶ä¸­çš„assoc_maintenance_threadå‡½æ•°è°ƒç”¨switch_item_lock_typeå‡½æ•°ï¼Œè®©æ‰€æœ‰çš„
+//workersçº¿ç¨‹éƒ½åˆ‡æ¢åˆ°æ®µçº§åˆ«é”æˆ–è€…å…¨å±€çº§åˆ«é”
+void switch_item_lock_type(enum item_lock_types type) { //å‡½æ•°thread_libevent_processæ¥æ”¶l æˆ–è€…gä¿¡æ¯
     char buf[1];
     int i;
 
     switch (type) {
         case ITEM_LOCK_GRANULAR:
-            buf[0] = 'l';//ÓÃl±íÊ¾ITEM_LOCK_GRANULAR ¶Î¼¶±ğËø  
+            buf[0] = 'l';//ç”¨lè¡¨ç¤ºITEM_LOCK_GRANULAR æ®µçº§åˆ«é”  
             break;
         case ITEM_LOCK_GLOBAL:
-            buf[0] = 'g';//ÓÃg±íÊ¾ITEM_LOCK_GLOBAL È«¾Ö¼¶±ğËø  
+            buf[0] = 'g';//ç”¨gè¡¨ç¤ºITEM_LOCK_GLOBAL å…¨å±€çº§åˆ«é”  
             break;
-        default: //Í¨¹ıÏòworker¼àÌıµÄ¹ÜµÀĞ´ÈëÒ»¸ö×Ö·ûÍ¨ÖªworkerÏß³Ì  
+        default: //é€šè¿‡å‘workerç›‘å¬çš„ç®¡é“å†™å…¥ä¸€ä¸ªå­—ç¬¦é€šçŸ¥workerçº¿ç¨‹  
             fprintf(stderr, "Unknown lock type: %d\n", type);
             assert(1 == 0);
             break;
@@ -223,7 +223,7 @@ void switch_item_lock_type(enum item_lock_types type) { //º¯Êıthread_libevent_pr
             /* TODO: This is a fatal problem. Can it ever happen temporarily? */
         }
     }
-    //µÈ´ıËùÓĞµÄworkersÏß³Ì¶¼°ÑËøÇĞ»»µ½typeÖ¸Ã÷µÄËøÀàĞÍ  
+    //ç­‰å¾…æ‰€æœ‰çš„workersçº¿ç¨‹éƒ½æŠŠé”åˆ‡æ¢åˆ°typeæŒ‡æ˜çš„é”ç±»å‹  
     wait_for_thread_registration(settings.num_threads);
     pthread_mutex_unlock(&init_lock);
 }
@@ -275,14 +275,14 @@ static void cq_push(CQ *cq, CQ_ITEM *item) {
 /*
  * Returns a fresh connection queue item.
  */
- //±¾º¯Êı²ÉÓÃÁËÒ»Ğ©ÓÅ»¯ÊÖ¶Î£¬²¢·ÇÃ¿µ÷ÓÃÒ»´Î±¾º¯Êı¾ÍÉêÇëÒ»¿éÄÚ´æ¡£Õâ»áµ¼ÖÂ
- //ÄÚ´æËéÆ¬¡£ÕâÀï²ÉÈ¡µÄÓÅ»¯·½·¨ÊÇ£¬Ò»´ÎĞÔ·ÖÅä64¸öCQ_ITEM´óĞ¡µÄÄÚ´æ(¼´Ô¤·ÖÅä)
- //ÏÂ´Îµ÷ÓÃ±¾º¯ÊıµÄÊ±ºò£¬Ö±½Ó´ÓÖ®Ç°·ÖÅä64¸öÖĞÒªÒ»¸ö¼´¿É¡£
- //ÓÉÓÚÊÇÎªÁË·ÀÖ¹ÄÚ´æËéÆ¬£¬ËùÒÔ²»ÊÇÒÔÁ´±íµÄĞÎÊ½´æ·Å×Å64¸öCQ_ITEM¡£¶øÊÇÊı×éµÄĞÎÊ½
- //ÓÚÊÇ£¬ cqi_freeº¯Êı¾ÍÓĞµãÌØ±ğ£¬Ëü²¢²»ÕæÕıÊÍ·Å£¬¶øÊÇÏñÄÚ´æ³ØÄÇÑù¹é»¹
-static CQ_ITEM *cqi_new(void) {//CQ_ITEMÊÇÖ÷Ïß³Ìacceptºó·µ»ØµÄÒÑ½¨Á¢Á¬½ÓµÄfdµÄ·â×°¡£
+ //æœ¬å‡½æ•°é‡‡ç”¨äº†ä¸€äº›ä¼˜åŒ–æ‰‹æ®µï¼Œå¹¶éæ¯è°ƒç”¨ä¸€æ¬¡æœ¬å‡½æ•°å°±ç”³è¯·ä¸€å—å†…å­˜ã€‚è¿™ä¼šå¯¼è‡´
+ //å†…å­˜ç¢ç‰‡ã€‚è¿™é‡Œé‡‡å–çš„ä¼˜åŒ–æ–¹æ³•æ˜¯ï¼Œä¸€æ¬¡æ€§åˆ†é…64ä¸ªCQ_ITEMå¤§å°çš„å†…å­˜(å³é¢„åˆ†é…)
+ //ä¸‹æ¬¡è°ƒç”¨æœ¬å‡½æ•°çš„æ—¶å€™ï¼Œç›´æ¥ä»ä¹‹å‰åˆ†é…64ä¸ªä¸­è¦ä¸€ä¸ªå³å¯ã€‚
+ //ç”±äºæ˜¯ä¸ºäº†é˜²æ­¢å†…å­˜ç¢ç‰‡ï¼Œæ‰€ä»¥ä¸æ˜¯ä»¥é“¾è¡¨çš„å½¢å¼å­˜æ”¾ç€64ä¸ªCQ_ITEMã€‚è€Œæ˜¯æ•°ç»„çš„å½¢å¼
+ //äºæ˜¯ï¼Œ cqi_freeå‡½æ•°å°±æœ‰ç‚¹ç‰¹åˆ«ï¼Œå®ƒå¹¶ä¸çœŸæ­£é‡Šæ”¾ï¼Œè€Œæ˜¯åƒå†…å­˜æ± é‚£æ ·å½’è¿˜
+static CQ_ITEM *cqi_new(void) {//CQ_ITEMæ˜¯ä¸»çº¿ç¨‹acceptåè¿”å›çš„å·²å»ºç«‹è¿æ¥çš„fdçš„å°è£…ã€‚
     CQ_ITEM *item = NULL;
-	//ËùÓĞÏß³Ì¶¼»á·ÃÎÊcqi_freelist£¬ËùÒÔĞèÒª¼ÓËø
+	//æ‰€æœ‰çº¿ç¨‹éƒ½ä¼šè®¿é—®cqi_freelistï¼Œæ‰€ä»¥éœ€è¦åŠ é”
     pthread_mutex_lock(&cqi_freelist_lock);
     if (cqi_freelist) {
         item = cqi_freelist;
@@ -290,7 +290,7 @@ static CQ_ITEM *cqi_new(void) {//CQ_ITEMÊÇÖ÷Ïß³Ìacceptºó·µ»ØµÄÒÑ½¨Á¢Á¬½ÓµÄfdµÄ·â
     }
     pthread_mutex_unlock(&cqi_freelist_lock);
 
-	//Ã»ÓĞ¶àÓàµÄCQ_ITEMÁË
+	//æ²¡æœ‰å¤šä½™çš„CQ_ITEMäº†
     if (NULL == item) {
         int i;
 
@@ -308,15 +308,15 @@ static CQ_ITEM *cqi_new(void) {//CQ_ITEMÊÇÖ÷Ïß³Ìacceptºó·µ»ØµÄÒÑ½¨Á¢Á¬½ÓµÄfdµÄ·â
          * (which we'll return to the caller) for placement on
          * the freelist.
          */
-         //item[0]Ö±½Ó·µ»ØÎªµ÷ÓÃÕß£¬²»ÓÃnextÖ¸ÕëÁ¬ÔÚÒ»Æğ¡£µ÷ÓÃÕß¸ºÔğ½«
-         //item[0].next¸³ÖµÎªNULL
-       	//½«Õâ¿éÄÚ´æ·Ö³ÉÒ»¸ö¸öµÄitem²¢ÇÒÓÃnextÖ¸ÕëÏñÁ´±íÒ»ÑùÁ¬ÆğÀ´
+         //item[0]ç›´æ¥è¿”å›ä¸ºè°ƒç”¨è€…ï¼Œä¸ç”¨nextæŒ‡é’ˆè¿åœ¨ä¸€èµ·ã€‚è°ƒç”¨è€…è´Ÿè´£å°†
+         //item[0].nextèµ‹å€¼ä¸ºNULL
+       	//å°†è¿™å—å†…å­˜åˆ†æˆä¸€ä¸ªä¸ªçš„itemå¹¶ä¸”ç”¨nextæŒ‡é’ˆåƒé“¾è¡¨ä¸€æ ·è¿èµ·æ¥
         for (i = 2; i < ITEMS_PER_ALLOC; i++)
             item[i - 1].next = &item[i];
 
         pthread_mutex_lock(&cqi_freelist_lock);
-		//ÒòÎªÖ÷Ïß³Ì¸ºÔğÉêÇëCQ_ITEM£¬×ÓÏß³Ì¸ºÔğÊÍ·ÅCQ_ITEM¡£ËùÒÔcqi_freelist´Ë¿Ì
-		//¿ÉÄÜ²¢²»µÈÓÚNULL¡£ÓÉÓÚÊ¹ÓÃÍ·²å·¨£¬ËùÒÔÎŞÂÛcqi_freelistÊÇ·ñÎªNULL£¬¶¼ÄÜ°ÑÁ´±íÁ¬ÆğÀ´µÄ
+		//å› ä¸ºä¸»çº¿ç¨‹è´Ÿè´£ç”³è¯·CQ_ITEMï¼Œå­çº¿ç¨‹è´Ÿè´£é‡Šæ”¾CQ_ITEMã€‚æ‰€ä»¥cqi_freelistæ­¤åˆ»
+		//å¯èƒ½å¹¶ä¸ç­‰äºNULLã€‚ç”±äºä½¿ç”¨å¤´æ’æ³•ï¼Œæ‰€ä»¥æ— è®ºcqi_freelistæ˜¯å¦ä¸ºNULLï¼Œéƒ½èƒ½æŠŠé“¾è¡¨è¿èµ·æ¥çš„
         item[ITEMS_PER_ALLOC - 1].next = cqi_freelist;
         cqi_freelist = &item[1];
         pthread_mutex_unlock(&cqi_freelist_lock);
@@ -329,11 +329,11 @@ static CQ_ITEM *cqi_new(void) {//CQ_ITEMÊÇÖ÷Ïß³Ìacceptºó·µ»ØµÄÒÑ½¨Á¢Á¬½ÓµÄfdµÄ·â
 /*
  * Frees a connection queue item (adds it to the freelist.)
  */
- //²¢·ÇÊÍ·Å£¬¶øÊÇÏñÄÚ´æ³ØÄÇÑù¹é»¹
+ //å¹¶éé‡Šæ”¾ï¼Œè€Œæ˜¯åƒå†…å­˜æ± é‚£æ ·å½’è¿˜
 static void cqi_free(CQ_ITEM *item) {
     pthread_mutex_lock(&cqi_freelist_lock);
     item->next = cqi_freelist;
-    cqi_freelist = item; //Í·²å·¨¹é»¹
+    cqi_freelist = item; //å¤´æ’æ³•å½’è¿˜
     pthread_mutex_unlock(&cqi_freelist_lock);
 }
 
@@ -366,24 +366,24 @@ void accept_new_conns(const bool do_accept) {
 /****************************** LIBEVENT THREADS *****************************/
 
 /*
- ÓÃ»§Ïß³ÌÊ¹ÓÃlibeventÔòÍ¨³£°´ÒÔÏÂ²½Öè£º
- 1£©ÓÃ»§Ïß³ÌÍ¨¹ıevent_init()º¯Êı´´½¨Ò»¸öevent_base¶ÔÏó¡£event_base¶ÔÏó¹ÜÀíËùÓĞ×¢²áµ½×Ô¼ºÄÚ²¿µÄIOÊÂ¼ş¡£
- ¶àÏß³Ì»·¾³ÏÂ£¬event_base¶ÔÏó²»ÄÜ±»¶à¸öÏß³Ì¹²Ïí£¬¼´Ò»¸öevent_base¶ÔÏóÖ»ÄÜ¶ÔÓ¦Ò»¸öÏß³Ì¡£
- 2£©È»ºó¸ÃÏß³ÌÍ¨¹ıevent_addº¯Êı£¬½«Óë×Ô¼º¸ĞĞËÈ¤µÄÎÄ¼şÃèÊö·ûÏà¹ØµÄIOÊÂ¼ş£¬×¢²áµ½event_base¶ÔÏó£¬Í¬Ê±Ö¸
- ¶¨ÊÂ¼ş·¢ÉúÊ±ËùÒªµ÷ÓÃµÄÊÂ¼ş´¦Àíº¯Êı£¨event handler£©¡£·şÎñÆ÷³ÌĞòÍ¨³£¼àÌıÌ×½Ó×Ö£¨socket£©µÄ¿É¶ÁÊÂ¼ş¡£
- ±ÈÈç£¬·şÎñÆ÷Ïß³Ì×¢²áÌ×½Ó×Ösock1µÄEV_READÊÂ¼ş£¬²¢Ö¸¶¨event_handler1()Îª¸ÃÊÂ¼şµÄ»Øµ÷º¯Êı¡£libevent½«
- IOÊÂ¼ş·â×°³Éstruct eventÀàĞÍ¶ÔÏó£¬ÊÂ¼şÀàĞÍÓÃEV_READ/EV_WRITEµÈ³£Á¿±êÖ¾¡£
- 3£© ×¢²áÍêÊÂ¼şÖ®ºó£¬Ïß³Ìµ÷ÓÃevent_base_loop½øÈëÑ­»·¼àÌı£¨monitor£©×´Ì¬¡£¸ÃÑ­»·ÄÚ²¿»áµ÷ÓÃepollµÈIO¸´
- ÓÃº¯Êı½øÈë×èÈû×´Ì¬£¬Ö±µ½ÃèÊö·ûÉÏ·¢Éú×Ô¼º¸ĞĞËÈ¤µÄÊÂ¼ş¡£´ËÊ±£¬Ïß³Ì»áµ÷ÓÃÊÂÏÈÖ¸¶¨µÄ»Øµ÷º¯Êı´¦Àí¸ÃÊÂ¼ş¡£
- ÀıÈç£¬µ±Ì×½Ó×Ösock1·¢Éú¿É¶ÁÊÂ¼ş£¬¼´sock1µÄÄÚºËbuffÖĞÒÑÓĞ¿É¶ÁÊı¾İÊ±£¬±»×èÈûµÄÏß³ÌÁ¢¼´·µ»Ø£¨wake up£©
- ²¢µ÷ÓÃevent_handler1()º¯ÊıÀ´´¦Àí¸Ã´ÎÊÂ¼ş¡£
- 4£©´¦ÀíÍêÕâ´Î¼àÌı»ñµÃµÄÊÂ¼şºó£¬Ïß³ÌÔÙ´Î½øÈë×èÈû×´Ì¬²¢¼àÌı£¬Ö±µ½ÏÂ´ÎÊÂ¼ş·¢Éú¡£
+ ç”¨æˆ·çº¿ç¨‹ä½¿ç”¨libeventåˆ™é€šå¸¸æŒ‰ä»¥ä¸‹æ­¥éª¤ï¼š
+ 1ï¼‰ç”¨æˆ·çº¿ç¨‹é€šè¿‡event_init()å‡½æ•°åˆ›å»ºä¸€ä¸ªevent_baseå¯¹è±¡ã€‚event_baseå¯¹è±¡ç®¡ç†æ‰€æœ‰æ³¨å†Œåˆ°è‡ªå·±å†…éƒ¨çš„IOäº‹ä»¶ã€‚
+ å¤šçº¿ç¨‹ç¯å¢ƒä¸‹ï¼Œevent_baseå¯¹è±¡ä¸èƒ½è¢«å¤šä¸ªçº¿ç¨‹å…±äº«ï¼Œå³ä¸€ä¸ªevent_baseå¯¹è±¡åªèƒ½å¯¹åº”ä¸€ä¸ªçº¿ç¨‹ã€‚
+ 2ï¼‰ç„¶åè¯¥çº¿ç¨‹é€šè¿‡event_addå‡½æ•°ï¼Œå°†ä¸è‡ªå·±æ„Ÿå…´è¶£çš„æ–‡ä»¶æè¿°ç¬¦ç›¸å…³çš„IOäº‹ä»¶ï¼Œæ³¨å†Œåˆ°event_baseå¯¹è±¡ï¼ŒåŒæ—¶æŒ‡
+ å®šäº‹ä»¶å‘ç”Ÿæ—¶æ‰€è¦è°ƒç”¨çš„äº‹ä»¶å¤„ç†å‡½æ•°ï¼ˆevent handlerï¼‰ã€‚æœåŠ¡å™¨ç¨‹åºé€šå¸¸ç›‘å¬å¥—æ¥å­—ï¼ˆsocketï¼‰çš„å¯è¯»äº‹ä»¶ã€‚
+ æ¯”å¦‚ï¼ŒæœåŠ¡å™¨çº¿ç¨‹æ³¨å†Œå¥—æ¥å­—sock1çš„EV_READäº‹ä»¶ï¼Œå¹¶æŒ‡å®ševent_handler1()ä¸ºè¯¥äº‹ä»¶çš„å›è°ƒå‡½æ•°ã€‚libeventå°†
+ IOäº‹ä»¶å°è£…æˆstruct eventç±»å‹å¯¹è±¡ï¼Œäº‹ä»¶ç±»å‹ç”¨EV_READ/EV_WRITEç­‰å¸¸é‡æ ‡å¿—ã€‚
+ 3ï¼‰ æ³¨å†Œå®Œäº‹ä»¶ä¹‹åï¼Œçº¿ç¨‹è°ƒç”¨event_base_loopè¿›å…¥å¾ªç¯ç›‘å¬ï¼ˆmonitorï¼‰çŠ¶æ€ã€‚è¯¥å¾ªç¯å†…éƒ¨ä¼šè°ƒç”¨epollç­‰IOå¤
+ ç”¨å‡½æ•°è¿›å…¥é˜»å¡çŠ¶æ€ï¼Œç›´åˆ°æè¿°ç¬¦ä¸Šå‘ç”Ÿè‡ªå·±æ„Ÿå…´è¶£çš„äº‹ä»¶ã€‚æ­¤æ—¶ï¼Œçº¿ç¨‹ä¼šè°ƒç”¨äº‹å…ˆæŒ‡å®šçš„å›è°ƒå‡½æ•°å¤„ç†è¯¥äº‹ä»¶ã€‚
+ ä¾‹å¦‚ï¼Œå½“å¥—æ¥å­—sock1å‘ç”Ÿå¯è¯»äº‹ä»¶ï¼Œå³sock1çš„å†…æ ¸buffä¸­å·²æœ‰å¯è¯»æ•°æ®æ—¶ï¼Œè¢«é˜»å¡çš„çº¿ç¨‹ç«‹å³è¿”å›ï¼ˆwake upï¼‰
+ å¹¶è°ƒç”¨event_handler1()å‡½æ•°æ¥å¤„ç†è¯¥æ¬¡äº‹ä»¶ã€‚
+ 4ï¼‰å¤„ç†å®Œè¿™æ¬¡ç›‘å¬è·å¾—çš„äº‹ä»¶åï¼Œçº¿ç¨‹å†æ¬¡è¿›å…¥é˜»å¡çŠ¶æ€å¹¶ç›‘å¬ï¼Œç›´åˆ°ä¸‹æ¬¡äº‹ä»¶å‘ç”Ÿã€‚
 
 
  * Set up a thread's information.
  */
 static void setup_thread(LIBEVENT_THREAD *me) {
-	//ĞÂ½¨Ò»¸öevent_base
+	//æ–°å»ºä¸€ä¸ªevent_base
     me->base = event_init();
     if (! me->base) {
         fprintf(stderr, "Can't allocate event base\n");
@@ -391,17 +391,17 @@ static void setup_thread(LIBEVENT_THREAD *me) {
     }
 
     /* Listen for notifications from other threads */
-	//¼àÌı¹ÜµÀµÄ¶Á¶Ë
+	//ç›‘å¬ç®¡é“çš„è¯»ç«¯
     event_set(&me->notify_event, me->notify_receive_fd,
               EV_READ | EV_PERSIST, thread_libevent_process, me);
-	//½«event_baseºÍeventÏë¹ØÁª
+	//å°†event_baseå’Œeventæƒ³å…³è”
     event_base_set(me->base, &me->notify_event);
 
     if (event_add(&me->notify_event, 0) == -1) {
         fprintf(stderr, "Can't monitor libevent notify pipe\n");
         exit(1);
     }
-	// ´´½¨Ò»¸öCQ¶ÓÁĞ
+	// åˆ›å»ºä¸€ä¸ªCQé˜Ÿåˆ—
     me->new_conn_queue = malloc(sizeof(struct conn_queue));
     if (me->new_conn_queue == NULL) {
         perror("Failed to allocate memory for connection queue");
@@ -436,15 +436,15 @@ static void *worker_libevent(void *arg) {
      * this could be unnecessary if we pass the conn *c struct through
      * all item_lock calls...
      */
-    me->item_lock_type = ITEM_LOCK_GRANULAR;//³õÊÔ×´Ì¬Ê¹ÓÃ¶Î¼¶±ğËø  
-    //ÎªworkersÏß³ÌÉèÖÃÏß³ÌË½ÓĞÊı¾İ  
-    //ÒòÎªËùÓĞµÄworkersÏß³Ì¶¼»áµ÷ÓÃÕâ¸öº¯Êı£¬ËùÒÔËùÓĞµÄworkersÏß³Ì¶¼ÉèÖÃÁËÏàÍ¬¼üÖµµÄ  
-    //Ïß³ÌË½ÓĞÊı¾İ  
+    me->item_lock_type = ITEM_LOCK_GRANULAR;//åˆè¯•çŠ¶æ€ä½¿ç”¨æ®µçº§åˆ«é”  
+    //ä¸ºworkersçº¿ç¨‹è®¾ç½®çº¿ç¨‹ç§æœ‰æ•°æ®  
+    //å› ä¸ºæ‰€æœ‰çš„workersçº¿ç¨‹éƒ½ä¼šè°ƒç”¨è¿™ä¸ªå‡½æ•°ï¼Œæ‰€ä»¥æ‰€æœ‰çš„workersçº¿ç¨‹éƒ½è®¾ç½®äº†ç›¸åŒé”®å€¼çš„  
+    //çº¿ç¨‹ç§æœ‰æ•°æ®  
     pthread_setspecific(item_lock_type_key, &me->item_lock_type);
 
     register_thread_initialized();
 
-    event_base_loop(me->base, 0); //µÈ´ıÊÂ¼şµ½À´´¥·¢setup_threadÖĞµÄthread_libevent_processÖ´ĞĞ
+    event_base_loop(me->base, 0); //ç­‰å¾…äº‹ä»¶åˆ°æ¥è§¦å‘setup_threadä¸­çš„thread_libevent_processæ‰§è¡Œ
     return NULL;
 }
 
@@ -453,11 +453,11 @@ static void *worker_libevent(void *arg) {
  * Processes an incoming "handle a new connection" item. This is called when
  * input arrives on the libevent wakeup pipe.
  */ 
-//thread_libevent_processÕâ¸ö¹ÜµÀÊÂ¼ş»Øµ÷Ê¹ÓÃÓÚÖ÷Ïß³Ì½ÓÊÜµ½¿Í»§¶ËÁ¬½ÓºóÍ¨Öª¹¤×÷×ÓÏß³ÌÖØĞÂ´´½¨Ò»¸öĞÂµÄ
-//conn£¬ÔÚconn_newÖØĞÂÉèÖÃÍøÂçÊÂ¼ş»Øµ÷º¯Êıconn_new->event_handler
+//thread_libevent_processè¿™ä¸ªç®¡é“äº‹ä»¶å›è°ƒä½¿ç”¨äºä¸»çº¿ç¨‹æ¥å—åˆ°å®¢æˆ·ç«¯è¿æ¥åé€šçŸ¥å·¥ä½œå­çº¿ç¨‹é‡æ–°åˆ›å»ºä¸€ä¸ªæ–°çš„
+//connï¼Œåœ¨conn_newé‡æ–°è®¾ç½®ç½‘ç»œäº‹ä»¶å›è°ƒå‡½æ•°conn_new->event_handler
  
- //¹¤×÷×ÓÏß³Ì¶Á¹ÜµÀÓĞÊı¾İµ½À´£¬thread_libevent_process´Ó¶Á¹ÜµÀ¶ÁÈ¡µ½ĞÅÏ¢  
- //¶ÔÓ¦µÄÖ÷Ïß³ÌĞ´¹ÜµÀÔÚdispatch_conn_new»òÕßswitch_item_lock_type
+ //å·¥ä½œå­çº¿ç¨‹è¯»ç®¡é“æœ‰æ•°æ®åˆ°æ¥ï¼Œthread_libevent_processä»è¯»ç®¡é“è¯»å–åˆ°ä¿¡æ¯  
+ //å¯¹åº”çš„ä¸»çº¿ç¨‹å†™ç®¡é“åœ¨dispatch_conn_newæˆ–è€…switch_item_lock_type
 static void thread_libevent_process(int fd, short which, void *arg) {
     LIBEVENT_THREAD *me = arg;
     CQ_ITEM *item;
@@ -469,12 +469,12 @@ static void thread_libevent_process(int fd, short which, void *arg) {
 
     switch (buf[0]) {
     case 'c': //dispatch_conn_new
-	//´ÓCQ¶ÓÁĞÖĞ¶ÁÈ¡Ò»¸öitem£¬ÒòÎªÊÇpopËùÒÔ¶ÁÈ¡ºó£¬CQ¶ÓÁĞ»á°ÑÕâ¸öitem´Ó¶ÓÁĞÖĞÉ¾³ı
+	//ä»CQé˜Ÿåˆ—ä¸­è¯»å–ä¸€ä¸ªitemï¼Œå› ä¸ºæ˜¯popæ‰€ä»¥è¯»å–åï¼ŒCQé˜Ÿåˆ—ä¼šæŠŠè¿™ä¸ªitemä»é˜Ÿåˆ—ä¸­åˆ é™¤
     item = cq_pop(me->new_conn_queue);
 
     if (NULL != item) {
-		//Îªsfd·ÖÅäÒ»¸öconn½á¹¹Ìå£¬²¢ÇÒÎªÕâ¸ösfd½¨Á¢Ò»¸öevent£¬È»ºóÈÃbase¼àÌıÕâ¸öevent
-		//Õâ¸ösfdµÄÊÂ¼ş»Øµ÷º¯ÊıÊÇevent_handler
+		//ä¸ºsfdåˆ†é…ä¸€ä¸ªconnç»“æ„ä½“ï¼Œå¹¶ä¸”ä¸ºè¿™ä¸ªsfdå»ºç«‹ä¸€ä¸ªeventï¼Œç„¶åè®©baseç›‘å¬è¿™ä¸ªevent
+		//è¿™ä¸ªsfdçš„äº‹ä»¶å›è°ƒå‡½æ•°æ˜¯event_handler
         conn *c = conn_new(item->sfd, item->init_state, item->event_flags,
                            item->read_buffer_size, item->transport, me->base);
         if (c == NULL) {
@@ -494,14 +494,14 @@ static void thread_libevent_process(int fd, short which, void *arg) {
         cqi_free(item);
     }
         break;
-    //switch_item_lock_type´¥·¢×ßµ½ÕâÀï
+    //switch_item_lock_typeè§¦å‘èµ°åˆ°è¿™é‡Œ
     /* we were told to flip the lock type and report in */
-    case 'l': //²Î¿¼switch_item_lock_type //ÇĞ»»itemµ½¶Î¼¶±ğ  
-    //»½ĞÑË¯ÃßÔÚinit_condÌõ¼ş±äÁ¿ÉÏµÄÇ¨ÒÆÏß³Ì  
+    case 'l': //å‚è€ƒswitch_item_lock_type //åˆ‡æ¢itemåˆ°æ®µçº§åˆ«  
+    //å”¤é†’ç¡çœ åœ¨init_condæ¡ä»¶å˜é‡ä¸Šçš„è¿ç§»çº¿ç¨‹  
     me->item_lock_type = ITEM_LOCK_GRANULAR;
     register_thread_initialized();
         break;
-    case 'g'://ÇĞ»»itemËøµ½È«¾Ö¼¶±ğ  
+    case 'g'://åˆ‡æ¢itemé”åˆ°å…¨å±€çº§åˆ«  
     me->item_lock_type = ITEM_LOCK_GLOBAL;
     register_thread_initialized();
         break;
@@ -518,15 +518,15 @@ static int last_thread = -1;
  */
 
 /*
-Ã¿¸öÏß³Ì¶¼ÊÇÒ»¸öµ¥¶ÀµÄlibeventÊµÀı,Ö÷Ïß³Ìeventloop¸ºÔğ´¦Àí¼àÌıfd£¬¼àÌı¿Í»§¶ËµÄ½¨Á¢Á¬½ÓÇëÇó£¬ÒÔ¼°
-acceptÁ¬½Ó£¬½«ÒÑ½¨Á¢µÄÁ¬½Óround robinµ½¸÷¸öworker¡£workersÏß³Ì¸ºÔğ´¦ÀíÒÑ¾­½¨Á¢ºÃµÄÁ¬½ÓµÄ¶ÁĞ´µÈÊÂ¼ş
+æ¯ä¸ªçº¿ç¨‹éƒ½æ˜¯ä¸€ä¸ªå•ç‹¬çš„libeventå®ä¾‹,ä¸»çº¿ç¨‹eventloopè´Ÿè´£å¤„ç†ç›‘å¬fdï¼Œç›‘å¬å®¢æˆ·ç«¯çš„å»ºç«‹è¿æ¥è¯·æ±‚ï¼Œä»¥åŠ
+acceptè¿æ¥ï¼Œå°†å·²å»ºç«‹çš„è¿æ¥round robinåˆ°å„ä¸ªworkerã€‚workersçº¿ç¨‹è´Ÿè´£å¤„ç†å·²ç»å»ºç«‹å¥½çš„è¿æ¥çš„è¯»å†™ç­‰äº‹ä»¶
 */
 
  
-//¹¤×÷×ÓÏß³Ì¶Á¹ÜµÀÓĞÊı¾İµ½À´£¬thread_libevent_process´Ó¶Á¹ÜµÀ¶ÁÈ¡µ½ĞÅÏ¢  
-//¶ÔÓ¦µÄÖ÷Ïß³ÌĞ´¹ÜµÀÔÚdispatch_conn_new»òÕßswitch_item_lock_type
+//å·¥ä½œå­çº¿ç¨‹è¯»ç®¡é“æœ‰æ•°æ®åˆ°æ¥ï¼Œthread_libevent_processä»è¯»ç®¡é“è¯»å–åˆ°ä¿¡æ¯  
+//å¯¹åº”çš„ä¸»çº¿ç¨‹å†™ç®¡é“åœ¨dispatch_conn_newæˆ–è€…switch_item_lock_type
 
-//Ö÷Ïß³Ì¼ì²éµ½ÓĞĞÂµÄÁ´½Óµ½À´£¬ÔòÍ¨¹ı¹ÜµÀÍ¨Öª×ÓÏß³Ì
+//ä¸»çº¿ç¨‹æ£€æŸ¥åˆ°æœ‰æ–°çš„é“¾æ¥åˆ°æ¥ï¼Œåˆ™é€šè¿‡ç®¡é“é€šçŸ¥å­çº¿ç¨‹
 void dispatch_conn_new(int sfd, enum conn_states init_state, int event_flags,
                        int read_buffer_size, enum network_transport transport) {
     CQ_ITEM *item = cqi_new();
@@ -537,10 +537,10 @@ void dispatch_conn_new(int sfd, enum conn_states init_state, int event_flags,
         fprintf(stderr, "Failed to allocate memory for connection object\n");
         return ;
     }
-	//ÂÖÑ¯µÄ·½Ê½Ñ¡¶¨Ò»¸öworkerÏß³Ì
+	//è½®è¯¢çš„æ–¹å¼é€‰å®šä¸€ä¸ªworkerçº¿ç¨‹
     int tid = (last_thread + 1) % settings.num_threads;
 
-    LIBEVENT_THREAD *thread = threads + tid; //ÂÖÑ¯Ñ¡ÔñÓÉÄÇ¸ö¹¤×÷ÏÖ³¡À´´¦Àí
+    LIBEVENT_THREAD *thread = threads + tid; //è½®è¯¢é€‰æ‹©ç”±é‚£ä¸ªå·¥ä½œç°åœºæ¥å¤„ç†
 
     last_thread = tid;
 
@@ -549,12 +549,12 @@ void dispatch_conn_new(int sfd, enum conn_states init_state, int event_flags,
     item->event_flags = event_flags;
     item->read_buffer_size = read_buffer_size;
     item->transport = transport;
-	//°ÑÕâ¸öitem·Åµ½Ñ¡¶¨µÄworkerÏß³ÌµÄCQ¶ÓÁĞÖĞ
+	//æŠŠè¿™ä¸ªitemæ”¾åˆ°é€‰å®šçš„workerçº¿ç¨‹çš„CQé˜Ÿåˆ—ä¸­
     cq_push(thread->new_conn_queue, item);
 
     MEMCACHED_CONN_DISPATCH(sfd, thread->thread_id);
     buf[0] = 'c';
-	// Í¨ÖªworkerÏß³Ì£¬ÓĞĞÂ¿Í»§µ¥Á¬½Óµ½À´
+	// é€šçŸ¥workerçº¿ç¨‹ï¼Œæœ‰æ–°å®¢æˆ·å•è¿æ¥åˆ°æ¥
     if (write(thread->notify_send_fd, buf, 1) != 1) {
         perror("Writing to thread notify pipe");
     }
@@ -634,15 +634,15 @@ void item_remove(item *item) {
  * Replaces one item with another in the hashtable.
  * Unprotected by a mutex lock since the core server does not require
  * it to be thread-safe.
- *///°Ñ¾ÉµÄÉ¾³ı£¬²åÈëĞÂµÄ¡£replaceÃüÁî»áµ÷ÓÃ±¾º¯Êı.  
-//ÎŞÂÛ¾ÉitemÊÇ·ñÓĞÆäËûworkerÏß³ÌÔÚÒıÓÃ£¬¶¼ÊÇÖ±½Ó½«Ö®´Ó¹şÏ£±íºÍLRU¶ÓÁĞÖĞÉ¾³ı  
-int item_replace(item *old_it, item *new_it, const uint32_t hv) { //ÕâÀïÃæ»áunlink old_it,È»ºólink new_it
-    return do_item_replace(old_it, new_it, hv); //×¢ÒâÕâÀïÃæold_it->refcount»á¼õ1£¬new_it»áÔö1
+ *///æŠŠæ—§çš„åˆ é™¤ï¼Œæ’å…¥æ–°çš„ã€‚replaceå‘½ä»¤ä¼šè°ƒç”¨æœ¬å‡½æ•°.  
+//æ— è®ºæ—§itemæ˜¯å¦æœ‰å…¶ä»–workerçº¿ç¨‹åœ¨å¼•ç”¨ï¼Œéƒ½æ˜¯ç›´æ¥å°†ä¹‹ä»å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—ä¸­åˆ é™¤  
+int item_replace(item *old_it, item *new_it, const uint32_t hv) { //è¿™é‡Œé¢ä¼šunlink old_it,ç„¶ålink new_it
+    return do_item_replace(old_it, new_it, hv); //æ³¨æ„è¿™é‡Œé¢old_it->refcountä¼šå‡1ï¼Œnew_itä¼šå¢1
 }
 
 /*
  * Unlinks an item from the LRU and hashtable.
- */ //È¡ÏûitemºÍLRUÓëhashtableµÄ¹ØÁª
+ */ //å–æ¶ˆitemå’ŒLRUä¸hashtableçš„å…³è”
 void item_unlink(item *item) {
     uint32_t hv;
     hv = hash(ITEM_key(item), item->nkey);
@@ -665,7 +665,7 @@ void item_update(item *item) {
 
 /*
  * Does arithmetic on a numeric item value.
- */ //incºÍdecÃüÁî´¦Àí
+ */ //incå’Œdecå‘½ä»¤å¤„ç†
 enum delta_result_type add_delta(conn *c, const char *key,
                                  const size_t nkey, int incr,
                                  const int64_t delta, char *buf,
@@ -683,7 +683,7 @@ enum delta_result_type add_delta(conn *c, const char *key,
 /*
  * Stores an item in the cache (high level, obeys set/add/replace semantics)
  */
-enum store_item_type store_item(item *item, int comm, conn* c) { //×¢Òâ¸Ãº¯ÊıÍâ²ãÔÚ¸Ãº¯ÊıÖ´ĞĞÍêºóÒ»°ã»áµ÷ÓÃÒ»´Îitem_remove
+enum store_item_type store_item(item *item, int comm, conn* c) { //æ³¨æ„è¯¥å‡½æ•°å¤–å±‚åœ¨è¯¥å‡½æ•°æ‰§è¡Œå®Œåä¸€èˆ¬ä¼šè°ƒç”¨ä¸€æ¬¡item_remove
     enum store_item_type ret;
     uint32_t hv;
 
@@ -910,13 +910,13 @@ void slab_stats_aggregate(struct thread_stats *stats, struct slab_stats *out) {
  * nthreads  Number of worker event handler threads to spawn
  * main_base Event base for main thread
  */
- //²ÎÊınthreadÊÇwokerÏß³ÌµÄÊıÁ¿¡£main_baseÔòÊÇÖ÷Ïß³ÌµÄevent_base
- //Ö÷Ïß³ÌÔÚmainº¯Êıµ÷ÓÃ±¾º¯Êı£¬´´½¨nthreads¸öworkerÏß³Ì
+ //å‚æ•°nthreadæ˜¯wokerçº¿ç¨‹çš„æ•°é‡ã€‚main_baseåˆ™æ˜¯ä¸»çº¿ç¨‹çš„event_base
+ //ä¸»çº¿ç¨‹åœ¨mainå‡½æ•°è°ƒç”¨æœ¬å‡½æ•°ï¼Œåˆ›å»ºnthreadsä¸ªworkerçº¿ç¨‹
 void thread_init(int nthreads, struct event_base *main_base) {
     int         i;
     int         power;
 
-	//ÉêÇëÒ»¸öCQ_ITEMÊ±ĞèÒª¼ÓËø
+	//ç”³è¯·ä¸€ä¸ªCQ_ITEMæ—¶éœ€è¦åŠ é”
     pthread_mutex_init(&cache_lock, NULL);
     pthread_mutex_init(&stats_lock, NULL);
 
@@ -941,7 +941,7 @@ void thread_init(int nthreads, struct event_base *main_base) {
     item_lock_count = hashsize(power);
     item_lock_hashpower = power;
 
-    //¹şÏ£±íÖĞ¶Î¼¶±ğµÄËø¡£²¢²»ÊÇÒ»¸öÍ°¾Í¶ÔÓ¦ÓĞÒ»¸öËø¡£¶øÊÇ¶à¸öÍ°¹²ÓÃÒ»¸öËø  
+    //å“ˆå¸Œè¡¨ä¸­æ®µçº§åˆ«çš„é”ã€‚å¹¶ä¸æ˜¯ä¸€ä¸ªæ¡¶å°±å¯¹åº”æœ‰ä¸€ä¸ªé”ã€‚è€Œæ˜¯å¤šä¸ªæ¡¶å…±ç”¨ä¸€ä¸ªé”  
     item_locks = calloc(item_lock_count, sizeof(pthread_mutex_t));
     if (! item_locks) {
         perror("Can't allocate item locks");
@@ -953,21 +953,21 @@ void thread_init(int nthreads, struct event_base *main_base) {
     pthread_key_create(&item_lock_type_key, NULL);
     pthread_mutex_init(&item_global_lock, NULL);
 
-	//ÉêÇë¾ßÓĞnthreads¸öÔªËØµÄLIBEVENT_THREADÊı¾İ
+	//ç”³è¯·å…·æœ‰nthreadsä¸ªå…ƒç´ çš„LIBEVENT_THREADæ•°æ®
     threads = calloc(nthreads, sizeof(LIBEVENT_THREAD));
     if (! threads) {
         perror("Can't allocate thread descriptors");
         exit(1);
     }
 
-    //Ö÷Ïß³Ì¶ÔÓ¦µÄ
+    //ä¸»çº¿ç¨‹å¯¹åº”çš„
     dispatcher_thread.base = main_base;
     dispatcher_thread.thread_id = pthread_self();
 
-    //×ÓÏß³ÌµÄ
+    //å­çº¿ç¨‹çš„
     for (i = 0; i < nthreads; i++) {
         int fds[2];
-		//ÎªÃ¿¸öworkerÏß³Ì·ÖÅäÒ»¸ö¹ÜµÀ£¬ÓÃÓÚÍ¨ÖªworkerÏß³Ì
+		//ä¸ºæ¯ä¸ªworkerçº¿ç¨‹åˆ†é…ä¸€ä¸ªç®¡é“ï¼Œç”¨äºé€šçŸ¥workerçº¿ç¨‹
         if (pipe(fds)) {
             perror("Can't create notify pipe");
             exit(1);
@@ -975,8 +975,8 @@ void thread_init(int nthreads, struct event_base *main_base) {
 
         threads[i].notify_receive_fd = fds[0];
         threads[i].notify_send_fd = fds[1];
-		//Ã¿Ò»¸öÏß³ÌÅäÒ»¸öevent_base£¬²¢ÉèÖÃevent¼àÌınotify_receive_fdµÄ¶ÁÊÂ¼ş
-		//Í¬Ê±»¹ÎªÕâ¸öÏß³Ì·ÖÅäÒ»¸öconn_queue¶ÓÁĞ
+		//æ¯ä¸€ä¸ªçº¿ç¨‹é…ä¸€ä¸ªevent_baseï¼Œå¹¶è®¾ç½®eventç›‘å¬notify_receive_fdçš„è¯»äº‹ä»¶
+		//åŒæ—¶è¿˜ä¸ºè¿™ä¸ªçº¿ç¨‹åˆ†é…ä¸€ä¸ªconn_queueé˜Ÿåˆ—
         setup_thread(&threads[i]);
         /* Reserve three fds for the libevent base, and two for the pipe */
         stats.reserved_fds += 5;
@@ -984,13 +984,13 @@ void thread_init(int nthreads, struct event_base *main_base) {
 
     /* Create threads after we've done all the libevent setup. */
     for (i = 0; i < nthreads; i++) {
-		//´´½¨Ïß³Ì£¬Ïß³Ìº¯ÊıÎªworker_libevent£¬Ïß³Ì²ÎÊıÎª&thread[i]
+		//åˆ›å»ºçº¿ç¨‹ï¼Œçº¿ç¨‹å‡½æ•°ä¸ºworker_libeventï¼Œçº¿ç¨‹å‚æ•°ä¸º&thread[i]
         create_worker(worker_libevent, &threads[i]);
     }
     
     /* Wait for all the threads to set themselves up before returning. */
     pthread_mutex_lock(&init_lock);
-    wait_for_thread_registration(nthreads); //Ö÷Ïß³Ì×èÈûµÈ´ıÊÂ¼şµ½À´
+    wait_for_thread_registration(nthreads); //ä¸»çº¿ç¨‹é˜»å¡ç­‰å¾…äº‹ä»¶åˆ°æ¥
     pthread_mutex_unlock(&init_lock);
 }
 

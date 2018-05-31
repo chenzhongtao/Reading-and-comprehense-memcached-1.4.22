@@ -34,27 +34,27 @@ typedef  unsigned       char ub1;   /* unsigned 1-byte quantities */
 /* how many powers of 2's worth of buckets we use */
 unsigned int hashpower = HASHPOWER_DEFAULT;
 
-//hashsize(2)Îª2µÄÃİ£¬ËùÒÔhashmaskµÄÖµµÄ¶ş½øÖÆĞÎÊ½¾ÍÊÇºóÃæÈ«Îª1µÄÊı¡£Õâ¾ÍºÜÏñÎ»²Ù×÷ÀïÃæµÄ&
-//value & hashmask(n)µÄ½á¹û¿Ï¶¨±Èhashsize(n)Ğ¡µÄÒ»¸öÊı×Ö£¬¼´½á¹ûÔÚhash±íÀïÃæ
+//hashsize(2)ä¸º2çš„å¹‚ï¼Œæ‰€ä»¥hashmaskçš„å€¼çš„äºŒè¿›åˆ¶å½¢å¼å°±æ˜¯åé¢å…¨ä¸º1çš„æ•°ã€‚è¿™å°±å¾ˆåƒä½æ“ä½œé‡Œé¢çš„&
+//value & hashmask(n)çš„ç»“æœè‚¯å®šæ¯”hashsize(n)å°çš„ä¸€ä¸ªæ•°å­—ï¼Œå³ç»“æœåœ¨hashè¡¨é‡Œé¢
 #define hashsize(n) ((ub4)1<<(n))
-//hashmask(n)Ò²¿ÉÒÔ³ÆÎª¹şÏ£ÑÚÂë
+//hashmask(n)ä¹Ÿå¯ä»¥ç§°ä¸ºå“ˆå¸Œæ©ç 
 #define hashmask(n) (hashsize(n)-1)
 
 /* Main hash table. This is where we look except during expansion. */
-//¹şÏ£±íÊı×éÖ¸Õë  µ±½øĞĞhashÀ©Õ¹µÄÊ±ºò£¬¿ª±ÙĞÂµÄhash¿Õ¼ä£¬¼ûassoc_expand  Ö®Ç°µÄ¾Éhash·ÅÈëold_hashtable
+//å“ˆå¸Œè¡¨æ•°ç»„æŒ‡é’ˆ  å½“è¿›è¡Œhashæ‰©å±•çš„æ—¶å€™ï¼Œå¼€è¾Ÿæ–°çš„hashç©ºé—´ï¼Œè§assoc_expand  ä¹‹å‰çš„æ—§hashæ”¾å…¥old_hashtable
 static item** primary_hashtable = 0;
 
 /*
  * Previous hash table. During expansion, we look here for keys that haven't
  * been moved over to the primary yet.
- */ //µ±½øĞĞhashÀ©Õ¹µÄÊ±ºò£¬¿ª±ÙĞÂµÄhash¿Õ¼ä£¬¼ûassoc_expand  Ö®Ç°µÄ¾Éhash·ÅÈëold_hashtable
+ */ //å½“è¿›è¡Œhashæ‰©å±•çš„æ—¶å€™ï¼Œå¼€è¾Ÿæ–°çš„hashç©ºé—´ï¼Œè§assoc_expand  ä¹‹å‰çš„æ—§hashæ”¾å…¥old_hashtable
 static item** old_hashtable = 0;
 
 /* Number of items in the hash table. */
 static unsigned int hash_items = 0;
 
 /* Flag: Are we in the middle of expanding now? */
-static bool expanding = false; //hashÀ©Õ¹µÄÊ±ºòÖÃ1£¬¼ûassoc_expand
+static bool expanding = false; //hashæ‰©å±•çš„æ—¶å€™ç½®1ï¼Œè§assoc_expand
 static bool started_expanding = false;
 
 /*
@@ -63,18 +63,18 @@ static bool started_expanding = false;
  */
 static unsigned int expand_bucket = 0;
 
-//Ä¬ÈÏ²ÎÊıÎª0.±¾º¯ÊıÓÉmainº¯Êıµ÷ÓÃ£¬²ÎÊıµÄÄ¬ÈÏÖµÎª0
+//é»˜è®¤å‚æ•°ä¸º0.æœ¬å‡½æ•°ç”±mainå‡½æ•°è°ƒç”¨ï¼Œå‚æ•°çš„é»˜è®¤å€¼ä¸º0
 void assoc_init(const int hashtable_init) {
     if (hashtable_init) {
         hashpower = hashtable_init;
     }
-	//ÒòÎª¹şÏ£±í»áÂıÂıÔö´ó£¬ËùÒÔÒªÊ¹ÓÃ¶¯Ì¬ÄÚ´æ·ÖÅä¡£¹şÏ£±í´æ´¢µÄÊı¾İÊÇÒ»¸ö
-	//Ö¸Õë£¬ÕâÑù¸üÊ¡¿Õ¼ä¡£
-	//hashsize(hashpower)¾ÍÊÇ¹şÏ£±íµÄ³¤¶ÈÁË
+	//å› ä¸ºå“ˆå¸Œè¡¨ä¼šæ…¢æ…¢å¢å¤§ï¼Œæ‰€ä»¥è¦ä½¿ç”¨åŠ¨æ€å†…å­˜åˆ†é…ã€‚å“ˆå¸Œè¡¨å­˜å‚¨çš„æ•°æ®æ˜¯ä¸€ä¸ª
+	//æŒ‡é’ˆï¼Œè¿™æ ·æ›´çœç©ºé—´ã€‚
+	//hashsize(hashpower)å°±æ˜¯å“ˆå¸Œè¡¨çš„é•¿åº¦äº†
     primary_hashtable = calloc(hashsize(hashpower), sizeof(void *));
     if (! primary_hashtable) {
         fprintf(stderr, "Failed to init hashtable.\n");
-        exit(EXIT_FAILURE);//¹şÏ£±íÊÇmemcached¹¤×÷µÄ»ù´¡£¬Èç¹ûÊ§°ÜÖ»ÄÜÍË³öÔËĞĞ
+        exit(EXIT_FAILURE);//å“ˆå¸Œè¡¨æ˜¯memcachedå·¥ä½œçš„åŸºç¡€ï¼Œå¦‚æœå¤±è´¥åªèƒ½é€€å‡ºè¿è¡Œ
     }
     STATS_LOCK();
     stats.hash_power_level = hashpower;
@@ -82,10 +82,10 @@ void assoc_init(const int hashtable_init) {
     STATS_UNLOCK();
 }
 
-//ÓÉÓÚ¹şÏ£ÖµÖ»ÄÜÈ·¶¨ÊÇÔÚ¹şÏ£±íÖĞµÄÄÄ¸öÍ°(bucket)£¬µ«Ò»¸öÍ°ÀïÃæÊÇÓĞÒ»Ìõ³åÍ»Á´µÄ
-//´ËÊ±ĞèÒªÓÃµ½¾ßÌåµÄ¼üÖµ±éÀú²¢Ò»Ò»±È½Ï³åÍ»Á´ÉÏµÄËùÓĞ½Úµã¡£ËäÈ»keyÊÇÒÔ'\0'½áÎ²µÄ
-//×Ö·û´®£¬µ«µ÷ÓÃstrlen»¹ÊÇÓĞµãºÄÊ±(ĞèÒª±éÀú¼üÖµ×Ö·û´®)¡£ËùÒÔĞèÒªÁíÍâÒ»¸ö²ÎÊınkey
-//Ö¸Ã÷Õâ¸ökeyµÄ³¤¶È       ÓÃÓÚ¿ìËÙ²éÕÒ¸Ãkey¶ÔÓ¦µÄitem£¬¼ûassoc_find   item²åÈëhash±íº¯Êıassoc_insert
+//ç”±äºå“ˆå¸Œå€¼åªèƒ½ç¡®å®šæ˜¯åœ¨å“ˆå¸Œè¡¨ä¸­çš„å“ªä¸ªæ¡¶(bucket)ï¼Œä½†ä¸€ä¸ªæ¡¶é‡Œé¢æ˜¯æœ‰ä¸€æ¡å†²çªé“¾çš„
+//æ­¤æ—¶éœ€è¦ç”¨åˆ°å…·ä½“çš„é”®å€¼éå†å¹¶ä¸€ä¸€æ¯”è¾ƒå†²çªé“¾ä¸Šçš„æ‰€æœ‰èŠ‚ç‚¹ã€‚è™½ç„¶keyæ˜¯ä»¥'\0'ç»“å°¾çš„
+//å­—ç¬¦ä¸²ï¼Œä½†è°ƒç”¨strlenè¿˜æ˜¯æœ‰ç‚¹è€—æ—¶(éœ€è¦éå†é”®å€¼å­—ç¬¦ä¸²)ã€‚æ‰€ä»¥éœ€è¦å¦å¤–ä¸€ä¸ªå‚æ•°nkey
+//æŒ‡æ˜è¿™ä¸ªkeyçš„é•¿åº¦       ç”¨äºå¿«é€ŸæŸ¥æ‰¾è¯¥keyå¯¹åº”çš„itemï¼Œè§assoc_find   itemæ’å…¥hashè¡¨å‡½æ•°assoc_insert
 item *assoc_find(const char *key, const size_t nkey, const uint32_t hv) {
     item *it;
     unsigned int oldbucket;
@@ -95,15 +95,15 @@ item *assoc_find(const char *key, const size_t nkey, const uint32_t hv) {
     {
         it = old_hashtable[oldbucket];
     } else {
-    	//ÓÉ¹şÏ£ÖµÅĞ¶ÏÕâ¸ökeyÊÇÊôÓÚÄÄ¸öÍ°µÄ
+    	//ç”±å“ˆå¸Œå€¼åˆ¤æ–­è¿™ä¸ªkeyæ˜¯å±äºå“ªä¸ªæ¡¶çš„
         it = primary_hashtable[hv & hashmask(hashpower)];
     }
 
-	//µ½ÕâÀï£¬ÒÑ¾­È·¶¨Õâ¸ökeyÊÇÊôÓÚÄÄ¸öÍ°µÄ£¬±éÀú¶ÔÓ¦Í°µÄ³åÍ»Á´¼´¿É
+	//åˆ°è¿™é‡Œï¼Œå·²ç»ç¡®å®šè¿™ä¸ªkeyæ˜¯å±äºå“ªä¸ªæ¡¶çš„ï¼Œéå†å¯¹åº”æ¡¶çš„å†²çªé“¾å³å¯
     item *ret = NULL;
     int depth = 0;
     while (it) {
-		//³¤¶ÈÏàÍ¬µÄÇé¿öÏÂ²Åµ÷ÓÃmemcmp±È½Ï£¬¸ü¸ßĞ§
+		//é•¿åº¦ç›¸åŒçš„æƒ…å†µä¸‹æ‰è°ƒç”¨memcmpæ¯”è¾ƒï¼Œæ›´é«˜æ•ˆ
         if ((nkey == it->nkey) && (memcmp(key, ITEM_key(it), nkey) == 0)) {
             ret = it;
             break;
@@ -117,44 +117,44 @@ item *assoc_find(const char *key, const size_t nkey, const uint32_t hv) {
 
 /* returns the address of the item pointer before the key.  if *item == 0,
    the item wasn't found */
-//²éÕÒitem¡£·µ»ØÇ°Çı½áµãµÄh_next³ÉÔ±µØÖ·£¬Èç¹û²éÕÒÊ§°ÜÄÇÃ´¾Í·µ»Ø³åÍ»Á´ÖĞ×îºó
-//Ò»¸ö½ÚµãµÄh_next³ÉÔ±µØÖ·¡£ÒòÎª×îºóÒ»¸ö½ÚµãµÄh_nextµÄÖµÎªNULL¡£Í¨¹ı¶Ô·µ»ØÖµ
-//Ê¹ÓÃ*ÔËËã¼´¿ÉÖªµÀÓĞÃ»ÓĞ²éÕÒ³É¹¦
+//æŸ¥æ‰¾itemã€‚è¿”å›å‰é©±ç»“ç‚¹çš„h_nextæˆå‘˜åœ°å€ï¼Œå¦‚æœæŸ¥æ‰¾å¤±è´¥é‚£ä¹ˆå°±è¿”å›å†²çªé“¾ä¸­æœ€å
+//ä¸€ä¸ªèŠ‚ç‚¹çš„h_nextæˆå‘˜åœ°å€ã€‚å› ä¸ºæœ€åä¸€ä¸ªèŠ‚ç‚¹çš„h_nextçš„å€¼ä¸ºNULLã€‚é€šè¿‡å¯¹è¿”å›å€¼
+//ä½¿ç”¨*è¿ç®—å³å¯çŸ¥é“æœ‰æ²¡æœ‰æŸ¥æ‰¾æˆåŠŸ
 static item** _hashitem_before (const char *key, const size_t nkey, const uint32_t hv) {
     item **pos;
     unsigned int oldbucket;
 
-    if (expanding && //ÕıÔÚÀ©Õ¹¹şÏ£±í
+    if (expanding && //æ­£åœ¨æ‰©å±•å“ˆå¸Œè¡¨
         (oldbucket = (hv & hashmask(hashpower - 1))) >= expand_bucket)
     {
         pos = &old_hashtable[oldbucket];
     } else {
-    	//ÕÒµ½¹şÏ£±íÖĞ¶ÔÓ¦µÄÍ°µÄÎ»ÖÃ
+    	//æ‰¾åˆ°å“ˆå¸Œè¡¨ä¸­å¯¹åº”çš„æ¡¶çš„ä½ç½®
         pos = &primary_hashtable[hv & hashmask(hashpower)];
     }
 
-	//±éÀúÍ°µÄ³åÍ»Á´²éÕÒitem
+	//éå†æ¡¶çš„å†²çªé“¾æŸ¥æ‰¾item
     while (*pos && ((nkey != (*pos)->nkey) || memcmp(key, ITEM_key(*pos), nkey))) {
         pos = &(*pos)->h_next;
     }
-	//*pos¾Í¿ÉÒÔÖªµÀÓĞÃ»ÓĞ²éÕÒ³É¹¦¡£Èç¹û*posµÈÓÚNULLÄÇÃ´²éÕÒÊ§°Ü£¬·ñÔò²éÕÒ³É¹¦
+	//*poså°±å¯ä»¥çŸ¥é“æœ‰æ²¡æœ‰æŸ¥æ‰¾æˆåŠŸã€‚å¦‚æœ*posç­‰äºNULLé‚£ä¹ˆæŸ¥æ‰¾å¤±è´¥ï¼Œå¦åˆ™æŸ¥æ‰¾æˆåŠŸ
     return pos;
 }
 
 /* grows the hashtable to the next power of 2. */
-//À©´ó¹şÏ£±íµÄ±í³¤
+//æ‰©å¤§å“ˆå¸Œè¡¨çš„è¡¨é•¿
 static void assoc_expand(void) {
     old_hashtable = primary_hashtable;
 
-	//ÉêÇëÒ»¸öĞÂ¹şÏ£±í£¬²¢ÓÃold_hashtableÖ¸Ïò¾É¹şÏ£±í
+	//ç”³è¯·ä¸€ä¸ªæ–°å“ˆå¸Œè¡¨ï¼Œå¹¶ç”¨old_hashtableæŒ‡å‘æ—§å“ˆå¸Œè¡¨
     primary_hashtable = calloc(hashsize(hashpower + 1), sizeof(void *));
     if (primary_hashtable) {
         if (settings.verbose > 1)
             fprintf(stderr, "Hash table expansion starting\n");
         hashpower++;
-		//±êÃ÷ÒÑ¾­½øÈëÀ©Õ¹×´Ì¬
+		//æ ‡æ˜å·²ç»è¿›å…¥æ‰©å±•çŠ¶æ€
         expanding = true;
-		//´Ó0ºÅÍ°¿ªÊ¼Êı¾İÇ¨ÒÆ
+		//ä»0å·æ¡¶å¼€å§‹æ•°æ®è¿ç§»
         expand_bucket = 0;
         STATS_LOCK();
         stats.hash_power_level = hashpower;
@@ -167,7 +167,7 @@ static void assoc_expand(void) {
     }
 }
 
-//assoc_insertº¯Êı»áµ÷ÓÃ±¾º¯Êı£¬µ±itemÊıÁ¿µ½ÁË¹şÏ£±í±í³¤µÄ1.5±»²Å»áµ÷ÓÃ 
+//assoc_insertå‡½æ•°ä¼šè°ƒç”¨æœ¬å‡½æ•°ï¼Œå½“itemæ•°é‡åˆ°äº†å“ˆå¸Œè¡¨è¡¨é•¿çš„1.5è¢«æ‰ä¼šè°ƒç”¨ 
 static void assoc_start_expand(void) {
     if (started_expanding)
         return;
@@ -176,25 +176,25 @@ static void assoc_start_expand(void) {
 }
 
 /* Note: this isn't an assoc_update.  The key must not already exist to call this */
-//hvÊÇÕâ¸öitem¼üÖµµÄ¹şÏ£Öµ£¬ÓÃÓÚ¿ìËÙ²éÕÒ¸Ãkey¶ÔÓ¦µÄitem£¬¼ûassoc_find   item²åÈëhash±íº¯Êıassoc_insert
+//hvæ˜¯è¿™ä¸ªitemé”®å€¼çš„å“ˆå¸Œå€¼ï¼Œç”¨äºå¿«é€ŸæŸ¥æ‰¾è¯¥keyå¯¹åº”çš„itemï¼Œè§assoc_find   itemæ’å…¥hashè¡¨å‡½æ•°assoc_insert
 int assoc_insert(item *it, const uint32_t hv) {
-    unsigned int oldbucket; // ²åÈëhash±íº¯ÊıÎªassoc_insert  ²åÈëlru¶ÓÁĞµÄº¯ÊıÎªitem_link_q
+    unsigned int oldbucket; // æ’å…¥hashè¡¨å‡½æ•°ä¸ºassoc_insert  æ’å…¥lrué˜Ÿåˆ—çš„å‡½æ•°ä¸ºitem_link_q
 
 //    assert(assoc_find(ITEM_key(it), it->nkey) == 0);  /* shouldn't have duplicately named things defined */
-	//Ê¹ÓÃÍ·²å·¨£¬²åÈëÒ»¸öitem
-	//µÚÒ»´Î¿´±¾º¯Êı£¬Ö±½Ó¿´else²¿·Ö
+	//ä½¿ç”¨å¤´æ’æ³•ï¼Œæ’å…¥ä¸€ä¸ªitem
+	//ç¬¬ä¸€æ¬¡çœ‹æœ¬å‡½æ•°ï¼Œç›´æ¥çœ‹elseéƒ¨åˆ†
     if (expanding &&
         (oldbucket = (hv & hashmask(hashpower - 1))) >= expand_bucket)
     {
         it->h_next = old_hashtable[oldbucket];
         old_hashtable[oldbucket] = it;
     } else {
-    	//Ê¹ÓÃÍ·²å·¨²åÈë¹şÏ£±íÖĞ
+    	//ä½¿ç”¨å¤´æ’æ³•æ’å…¥å“ˆå¸Œè¡¨ä¸­
         it->h_next = primary_hashtable[hv & hashmask(hashpower)];
         primary_hashtable[hv & hashmask(hashpower)] = it;
     }
 
-    hash_items++;//¹şÏ£±íµÄitemÊıÁ¿¼ÓÒ»
+    hash_items++;//å“ˆå¸Œè¡¨çš„itemæ•°é‡åŠ ä¸€
     if (! expanding && hash_items > (hashsize(hashpower) * 3) / 2) {
         assoc_start_expand();
     }
@@ -204,10 +204,10 @@ int assoc_insert(item *it, const uint32_t hv) {
 }
 
 void assoc_delete(const char *key, const size_t nkey, const uint32_t hv) {
-	//µÃµ½Ç°Çı½áµãµÄh_next³ÉÔ±µØÖ·
+	//å¾—åˆ°å‰é©±ç»“ç‚¹çš„h_nextæˆå‘˜åœ°å€
     item **before = _hashitem_before(key, nkey, hv);
 
-    if (*before) {//²éÕÒ³É¹¦
+    if (*before) {//æŸ¥æ‰¾æˆåŠŸ
         item *nxt;
         hash_items--;
         /* The DTrace probe cannot be triggered as the last instruction
@@ -215,10 +215,10 @@ void assoc_delete(const char *key, const size_t nkey, const uint32_t hv) {
          */
         MEMCACHED_ASSOC_DELETE(key, nkey, hash_items);
 
-		//ÒòÎªbeforeÊÇÒ»¸ö¶ş¼¶Ö¸Õë£¬ÆäÖµÎªËù²éÕÒitemµÄÇ°ÇıitemµÄh_next³ÉÔ±µØÖ·
-		//ËùÒÔ*beforeÖ¸ÏòµÄÊÇËù²éÕÒµÄitem¡£ÒòÎªbeforeÊÇÒ»¸ö¶ş¼¶Ö¸Õë£¬ËùÒÔ*before
-		//×÷Îª×óÖµÊ±£¬¿ÉÒÔ¸øh_next³ÉÔ±±äÁ¿¸³Öµ¡£ËùÒÔÏÂÃæÈıĞĞ´úÂëÊÇ
-		//Ê¹µÃÉ¾³ıÖĞ¼äµÄitemºó£¬Ç°ºóµÄitem»¹ÄÜÁ¬½ÓÆğÀ´¡£
+		//å› ä¸ºbeforeæ˜¯ä¸€ä¸ªäºŒçº§æŒ‡é’ˆï¼Œå…¶å€¼ä¸ºæ‰€æŸ¥æ‰¾itemçš„å‰é©±itemçš„h_nextæˆå‘˜åœ°å€
+		//æ‰€ä»¥*beforeæŒ‡å‘çš„æ˜¯æ‰€æŸ¥æ‰¾çš„itemã€‚å› ä¸ºbeforeæ˜¯ä¸€ä¸ªäºŒçº§æŒ‡é’ˆï¼Œæ‰€ä»¥*before
+		//ä½œä¸ºå·¦å€¼æ—¶ï¼Œå¯ä»¥ç»™h_nextæˆå‘˜å˜é‡èµ‹å€¼ã€‚æ‰€ä»¥ä¸‹é¢ä¸‰è¡Œä»£ç æ˜¯
+		//ä½¿å¾—åˆ é™¤ä¸­é—´çš„itemåï¼Œå‰åçš„itemè¿˜èƒ½è¿æ¥èµ·æ¥ã€‚
 		
         nxt = (*before)->h_next;
         (*before)->h_next = 0;   /* probably pointless, but whatever. */
@@ -236,23 +236,23 @@ static volatile int do_run_maintenance_thread = 1;
 #define DEFAULT_HASH_BULK_MOVE 1
 int hash_bulk_move = DEFAULT_HASH_BULK_MOVE;
 
-//Êı¾İÇ¨ÒÆÏß³Ì»Øµ÷º¯Êı
+//æ•°æ®è¿ç§»çº¿ç¨‹å›è°ƒå‡½æ•°
 static void *assoc_maintenance_thread(void *arg) {
 
-	//do_run_maintenance_thread ÊÇÈ«¾Ö±äÁ¿£¬³õÊ¼ÖµÎª1£¬ÔÚstop_assoc_mainternance_thread
-	//º¯ÊıÖĞ»á±»¸³Öµ0£¬Ö®ÖĞÇ¨ÒÆÏß³Ì
+	//do_run_maintenance_thread æ˜¯å…¨å±€å˜é‡ï¼Œåˆå§‹å€¼ä¸º1ï¼Œåœ¨stop_assoc_mainternance_thread
+	//å‡½æ•°ä¸­ä¼šè¢«èµ‹å€¼0ï¼Œä¹‹ä¸­è¿ç§»çº¿ç¨‹
     while (do_run_maintenance_thread) {
         int ii = 0;
 
         /* Lock the cache, and bulk move multiple buckets to the new
          * hash table. */
-         //ÉÏËø
-        item_lock_global();//ËøÉÏÈ«¾Ö¼¶±ğµÄËø£¬È«²¿µÄitem¶¼ÔÚÈ«¾ÖËøµÄ¿ØÖÆÖ®ÏÂ  
-        //Ëø×¡¹şÏ£±íÀïÃæµÄitem¡£²»È»±ğµÄÏß³Ì¶Ô¹şÏ£±í½øĞĞÔöÉ¾²Ù×÷Ê±£¬»á³öÏÖ  
-        //Êı¾İ²»Ò»ÖÂµÄÇé¿ö.ÔÚitem.cµÄdo_item_linkºÍdo_item_unlink¿ÉÒÔ¿´µ½  
-        //ÆäÄÚ²¿Ò²»áËø×¡cache_lockËø.  
+         //ä¸Šé”
+        item_lock_global();//é”ä¸Šå…¨å±€çº§åˆ«çš„é”ï¼Œå…¨éƒ¨çš„iteméƒ½åœ¨å…¨å±€é”çš„æ§åˆ¶ä¹‹ä¸‹  
+        //é”ä½å“ˆå¸Œè¡¨é‡Œé¢çš„itemã€‚ä¸ç„¶åˆ«çš„çº¿ç¨‹å¯¹å“ˆå¸Œè¡¨è¿›è¡Œå¢åˆ æ“ä½œæ—¶ï¼Œä¼šå‡ºç°  
+        //æ•°æ®ä¸ä¸€è‡´çš„æƒ…å†µ.åœ¨item.cçš„do_item_linkå’Œdo_item_unlinkå¯ä»¥çœ‹åˆ°  
+        //å…¶å†…éƒ¨ä¹Ÿä¼šé”ä½cache_locké”.  
         mutex_lock(&cache_lock);
-		//½øĞĞitemÇ¨ÒÆ
+		//è¿›è¡Œitemè¿ç§»
         for (ii = 0; ii < hash_bulk_move && expanding; ++ii) {
             item *it, *next;
             int bucket;
@@ -280,51 +280,51 @@ static void *assoc_maintenance_thread(void *arg) {
             }
         }
 
-		//±éÀúÍê¾ÍÊÍ·ÅËø
+		//éå†å®Œå°±é‡Šæ”¾é”
         mutex_unlock(&cache_lock);
         item_unlock_global();
 		
-		//²»ĞèÒªÇ¨ÒÆÊı¾İÁË
+		//ä¸éœ€è¦è¿ç§»æ•°æ®äº†
         if (!expanding) { 
             /*
-                Ç¨ÒÆÏß³ÌÎªÊ²Ã´ÒªÕâÃ´ÓØ»ØÇúÕÛµØÇĞ»»workersÏß³ÌµÄËøÀàĞÍÄØ£¿Ö±½ÓĞŞ¸ÄËùÓĞÏß³ÌµÄLIBEVENT_THREAD½á¹¹µÄitem_lock_type
-             ³ÉÔ±±äÁ¿²»¾ÍĞĞÁËÂğ£¿
-                ÕâÖ÷ÒªÊÇÒòÎªÇ¨ÒÆÏß³Ì²»ÖªµÀworkerÏß³Ì´Ë¿ÌÔÚ¸ÉĞ©Ê²Ã´¡£Èç¹ûworkerÏß³ÌÕıÔÚ·ÃÎÊitem£¬²¢ÇÀÕ¼ÁË¶Î¼¶±ğËø¡£´ËÊ±Äã°Ñworker
-             Ïß³ÌµÄËøÇĞ»»µ½È«¾ÖËø£¬µÈworkerÏß³Ì½âËøµÄÊ±ºò¾Í»á½âÈ«¾ÖËø(²Î¿¼Ç°ÃæµÄitem_lockºÍitem_unlock´úÂë)£¬ÕâÑù³ÌĞò¾Í±ÀÀ£ÁË¡£
-             ËùÒÔ²»ÄÜÇ¨ÒÆÏß³ÌÈ¥ÇĞ»»£¬Ö»ÄÜÇ¨ÒÆÏß³ÌÍ¨ÖªworkerÏß³Ì£¬È»ºóworkerÏß³Ì×Ô¼ºÈ¥ÇĞ»»¡£µ±È»ÊÇÒªworkerÏß³ÌÃ¦ÍêÁËÊÖÍ·ÉÏµÄÊÂÇé
-             ºó£¬²Å»áÈ¥ĞŞ¸ÄÇĞ»»µÄ¡£ËùÒÔÇ¨ÒÆÏß³ÌÔÚÍ¨ÖªÍêËùÓĞµÄworkerÏß³Ìºó£¬»áµ÷ÓÃwait_for_thread_registrationº¯ÊıĞİÃßµÈ´ıËùÓĞµÄ
-             workerÏß³Ì¶¼ÇĞ»»µ½Ö¸¶¨µÄËøÀàĞÍºó²ÅĞÑÀ´¡£
+                è¿ç§»çº¿ç¨‹ä¸ºä»€ä¹ˆè¦è¿™ä¹ˆè¿‚å›æ›²æŠ˜åœ°åˆ‡æ¢workersçº¿ç¨‹çš„é”ç±»å‹å‘¢ï¼Ÿç›´æ¥ä¿®æ”¹æ‰€æœ‰çº¿ç¨‹çš„LIBEVENT_THREADç»“æ„çš„item_lock_type
+             æˆå‘˜å˜é‡ä¸å°±è¡Œäº†å—ï¼Ÿ
+                è¿™ä¸»è¦æ˜¯å› ä¸ºè¿ç§»çº¿ç¨‹ä¸çŸ¥é“workerçº¿ç¨‹æ­¤åˆ»åœ¨å¹²äº›ä»€ä¹ˆã€‚å¦‚æœworkerçº¿ç¨‹æ­£åœ¨è®¿é—®itemï¼Œå¹¶æŠ¢å äº†æ®µçº§åˆ«é”ã€‚æ­¤æ—¶ä½ æŠŠworker
+             çº¿ç¨‹çš„é”åˆ‡æ¢åˆ°å…¨å±€é”ï¼Œç­‰workerçº¿ç¨‹è§£é”çš„æ—¶å€™å°±ä¼šè§£å…¨å±€é”(å‚è€ƒå‰é¢çš„item_lockå’Œitem_unlockä»£ç )ï¼Œè¿™æ ·ç¨‹åºå°±å´©æºƒäº†ã€‚
+             æ‰€ä»¥ä¸èƒ½è¿ç§»çº¿ç¨‹å»åˆ‡æ¢ï¼Œåªèƒ½è¿ç§»çº¿ç¨‹é€šçŸ¥workerçº¿ç¨‹ï¼Œç„¶åworkerçº¿ç¨‹è‡ªå·±å»åˆ‡æ¢ã€‚å½“ç„¶æ˜¯è¦workerçº¿ç¨‹å¿™å®Œäº†æ‰‹å¤´ä¸Šçš„äº‹æƒ…
+             åï¼Œæ‰ä¼šå»ä¿®æ”¹åˆ‡æ¢çš„ã€‚æ‰€ä»¥è¿ç§»çº¿ç¨‹åœ¨é€šçŸ¥å®Œæ‰€æœ‰çš„workerçº¿ç¨‹åï¼Œä¼šè°ƒç”¨wait_for_thread_registrationå‡½æ•°ä¼‘çœ ç­‰å¾…æ‰€æœ‰çš„
+             workerçº¿ç¨‹éƒ½åˆ‡æ¢åˆ°æŒ‡å®šçš„é”ç±»å‹åæ‰é†’æ¥ã€‚
             */
             /* finished expanding. tell all threads to use fine-grained locks */
 
-            //½øÈëµ½ÕâÀï£¬ËµÃ÷ÒÑ¾­²»ĞèÒªÇ¨ÒÆÊı¾İ(Í£Ö¹À©Õ¹ÁË)¡£  
-            //¸æËßËùÓĞµÄworkersÏß³Ì£¬·ÃÎÊitemÊ±£¬ÇĞ»»µ½¶Î¼¶±ğµÄËø¡£  
-            //»á×èÈûµ½ËùÓĞworkersÏß³Ì¶¼ÇĞ»»µ½¶Î¼¶±ğµÄËø  
+            //è¿›å…¥åˆ°è¿™é‡Œï¼Œè¯´æ˜å·²ç»ä¸éœ€è¦è¿ç§»æ•°æ®(åœæ­¢æ‰©å±•äº†)ã€‚  
+            //å‘Šè¯‰æ‰€æœ‰çš„workersçº¿ç¨‹ï¼Œè®¿é—®itemæ—¶ï¼Œåˆ‡æ¢åˆ°æ®µçº§åˆ«çš„é”ã€‚  
+            //ä¼šé˜»å¡åˆ°æ‰€æœ‰workersçº¿ç¨‹éƒ½åˆ‡æ¢åˆ°æ®µçº§åˆ«çš„é”  
             switch_item_lock_type(ITEM_LOCK_GRANULAR);
             slabs_rebalancer_resume();
             /* We are done expanding.. just wait for next invocation */
             mutex_lock(&cache_lock);
-			// ÖØÖÃ
+			// é‡ç½®
             started_expanding = false;
 
-			//¹ÒÆğÇ¨ÒÆÏß³Ì£¬Ö±µ½workerÏß³Ì²åÈëÊı¾İºó·¢ÏÖitemÊıÁ¿ÒÑ¾­µ½ÁË1.5±»¹şÏ£±í´óĞ¡£¬
-			//´ËÊ±µ÷ÓÃworkerÏß³Ìµ÷ÓÃassoc_start_expandº¯Êı£¬¸Ãº¯Êı»áµ÷ÓÃpthread_cond_signal»½ĞÑÇ¨ÒÆÏß³Ì
+			//æŒ‚èµ·è¿ç§»çº¿ç¨‹ï¼Œç›´åˆ°workerçº¿ç¨‹æ’å…¥æ•°æ®åå‘ç°itemæ•°é‡å·²ç»åˆ°äº†1.5è¢«å“ˆå¸Œè¡¨å¤§å°ï¼Œ
+			//æ­¤æ—¶è°ƒç”¨workerçº¿ç¨‹è°ƒç”¨assoc_start_expandå‡½æ•°ï¼Œè¯¥å‡½æ•°ä¼šè°ƒç”¨pthread_cond_signalå”¤é†’è¿ç§»çº¿ç¨‹
             pthread_cond_wait(&maintenance_cond, &cache_lock);
             /* Before doing anything, tell threads to use a global lock */
             mutex_unlock(&cache_lock);
             slabs_rebalancer_pause();
 
-            //´Ómaintenance_condÌõ¼ş±äÁ¿ÖĞĞÑÀ´£¬ËµÃ÷ÓÖÒª¿ªÊ¼À©Õ¹¹şÏ£±íºÍÇ¨ÒÆÊı¾İÁË¡£  
-            //Ç¨ÒÆÏß³ÌÔÚÇ¨ÒÆÒ»¸öÍ°µÄÊı¾İÊ±ÊÇËøÉÏÈ«¾Ö¼¶±ğµÄËø.  
-            //´ËÊ±workersÏß³Ì²»ÄÜÊ¹ÓÃ¶Î¼¶±ğµÄËø£¬¶øÊÇÒªÊ¹ÓÃÈ«¾Ö¼¶±ğµÄËø£¬  
-            //ËùÓĞµÄworkersÏß³ÌºÍÇ¨ÒÆÏß³ÌÒ»Æğ£¬ÕùÇÀÈ«¾Ö¼¶±ğµÄËø.  
-            //ÄÄ¸öÏß³ÌÇÀµ½ÁË£¬²ÅÓĞÈ¨Àû·ÃÎÊitem.  
-            //ÏÂÃæÒ»ĞĞ´úÂë¾ÍÊÇÍ¨ÖªËùÓĞµÄworkersÏß³Ì£¬°ÑÄãÃÇ·ÃÎÊitemµÄËøÇĞ»»  
-            //µ½È«¾Ö¼¶±ğµÄËø¡£switch_item_lock_type»áÍ¨¹ıÌõ¼ş±äÁ¿ĞİÃßµÈ´ı£¬  
-            //Ö±µ½£¬ËùÓĞµÄworkersÏß³Ì¶¼ÇĞ»»µ½È«¾Ö¼¶±ğµÄËø£¬²Å»áĞÑÀ´¹ı  
+            //ä»maintenance_condæ¡ä»¶å˜é‡ä¸­é†’æ¥ï¼Œè¯´æ˜åˆè¦å¼€å§‹æ‰©å±•å“ˆå¸Œè¡¨å’Œè¿ç§»æ•°æ®äº†ã€‚  
+            //è¿ç§»çº¿ç¨‹åœ¨è¿ç§»ä¸€ä¸ªæ¡¶çš„æ•°æ®æ—¶æ˜¯é”ä¸Šå…¨å±€çº§åˆ«çš„é”.  
+            //æ­¤æ—¶workersçº¿ç¨‹ä¸èƒ½ä½¿ç”¨æ®µçº§åˆ«çš„é”ï¼Œè€Œæ˜¯è¦ä½¿ç”¨å…¨å±€çº§åˆ«çš„é”ï¼Œ  
+            //æ‰€æœ‰çš„workersçº¿ç¨‹å’Œè¿ç§»çº¿ç¨‹ä¸€èµ·ï¼Œäº‰æŠ¢å…¨å±€çº§åˆ«çš„é”.  
+            //å“ªä¸ªçº¿ç¨‹æŠ¢åˆ°äº†ï¼Œæ‰æœ‰æƒåˆ©è®¿é—®item.  
+            //ä¸‹é¢ä¸€è¡Œä»£ç å°±æ˜¯é€šçŸ¥æ‰€æœ‰çš„workersçº¿ç¨‹ï¼ŒæŠŠä½ ä»¬è®¿é—®itemçš„é”åˆ‡æ¢  
+            //åˆ°å…¨å±€çº§åˆ«çš„é”ã€‚switch_item_lock_typeä¼šé€šè¿‡æ¡ä»¶å˜é‡ä¼‘çœ ç­‰å¾…ï¼Œ  
+            //ç›´åˆ°ï¼Œæ‰€æœ‰çš„workersçº¿ç¨‹éƒ½åˆ‡æ¢åˆ°å…¨å±€çº§åˆ«çš„é”ï¼Œæ‰ä¼šé†’æ¥è¿‡  
             switch_item_lock_type(ITEM_LOCK_GLOBAL);
             mutex_lock(&cache_lock);
-			//ÉêÇë¸ü´óµÄ¹şÏ£±í£¬²¢½«expandingÉèÖÃÎªtrue
+			//ç”³è¯·æ›´å¤§çš„å“ˆå¸Œè¡¨ï¼Œå¹¶å°†expandingè®¾ç½®ä¸ºtrue
             assoc_expand();
             mutex_unlock(&cache_lock);
         }
@@ -332,15 +332,15 @@ static void *assoc_maintenance_thread(void *arg) {
     return NULL;
 }
 
-//Êı¾İÇ¨ÒÆÏß³Ì
+//æ•°æ®è¿ç§»çº¿ç¨‹
 static pthread_t maintenance_tid;
 
-//mainº¯Êı»áµ÷ÓÃ±¾º¯Êı£¬Æô¶¯Êı¾İÇ¨ÒÆÏß³Ì
+//mainå‡½æ•°ä¼šè°ƒç”¨æœ¬å‡½æ•°ï¼Œå¯åŠ¨æ•°æ®è¿ç§»çº¿ç¨‹
 int start_assoc_maintenance_thread() {
     int ret;
     char *env = getenv("MEMCACHED_HASH_BULK_MOVE");
     if (env != NULL) {
-		//hash_bulk_moveµÄ×÷ÓÃÔÚºóÃæ»áËµµ½¡£ÕâÀïÊÇÍ¨¹ı»·¾³±äÁ¿¸øhash_bulk_move¸³Öµ
+		//hash_bulk_moveçš„ä½œç”¨åœ¨åé¢ä¼šè¯´åˆ°ã€‚è¿™é‡Œæ˜¯é€šè¿‡ç¯å¢ƒå˜é‡ç»™hash_bulk_moveèµ‹å€¼
         hash_bulk_move = atoi(env);
         if (hash_bulk_move == 0) {
             hash_bulk_move = DEFAULT_HASH_BULK_MOVE;

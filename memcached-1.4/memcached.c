@@ -104,16 +104,16 @@ static void conn_free(conn *c);
 struct stats_t stats;
 struct settings_s settings;
 time_t process_started;     /* when the process was started */
-conn **conns; //connÊı×é£¬ÌáÇ°·ÖÅäºÃ£¬¼ûconn_init
+conn **conns; //connæ•°ç»„ï¼Œæå‰åˆ†é…å¥½ï¼Œè§conn_init
 
-//°ÑĞèÒª½øĞĞÖØ·ÖÒ³µÄÏà¹Ø×´Ì¬¼ÇÂ¼ÏÂÀ´µÄÔ­ÒòÊÇ£¬Èç¹û¶Ôsrc½øĞĞÁËÒÆ¶¯£¬µ«ÊÇ¿Í»§¶Ë¸ÕºÃ»ñÈ¡µÄkey¾Í
-//ÔÚ¸Ãslabclass[src]ÖĞ£¬ÔòĞèÒª×öÌØÊâ´¦Àí£¬¼ûdo_item_get
-struct slab_rebalance slab_rebal; //ÕæÕı½øĞĞ·ÖÒ³²Ù×÷ÔÚº¯Êıslab_rebalance_move
-//ÔÚÒ»¿ªÊ¼slab_rebalance_signalÊÇµÈÓÚ0µÄ£¬µ±ĞèÒª½øĞĞÄÚ´æÒ³ÖØ·ÖÅä¾Í»á°Ñslab_rebalance_signal±äÁ¿¸³ÖµÎª1¡£
+//æŠŠéœ€è¦è¿›è¡Œé‡åˆ†é¡µçš„ç›¸å…³çŠ¶æ€è®°å½•ä¸‹æ¥çš„åŸå› æ˜¯ï¼Œå¦‚æœå¯¹srcè¿›è¡Œäº†ç§»åŠ¨ï¼Œä½†æ˜¯å®¢æˆ·ç«¯åˆšå¥½è·å–çš„keyå°±
+//åœ¨è¯¥slabclass[src]ä¸­ï¼Œåˆ™éœ€è¦åšç‰¹æ®Šå¤„ç†ï¼Œè§do_item_get
+struct slab_rebalance slab_rebal; //çœŸæ­£è¿›è¡Œåˆ†é¡µæ“ä½œåœ¨å‡½æ•°slab_rebalance_move
+//åœ¨ä¸€å¼€å§‹slab_rebalance_signalæ˜¯ç­‰äº0çš„ï¼Œå½“éœ€è¦è¿›è¡Œå†…å­˜é¡µé‡åˆ†é…å°±ä¼šæŠŠslab_rebalance_signalå˜é‡èµ‹å€¼ä¸º1ã€‚
 volatile int slab_rebalance_signal;
 
 /** file scope variables **/
-//Ö¸ÏòËùÓĞµÄip:port¶ÔÓ¦µÄlisten conn½á¹¹
+//æŒ‡å‘æ‰€æœ‰çš„ip:portå¯¹åº”çš„listen connç»“æ„
 static conn *listen_conn = NULL;
 static int max_fds;
 static struct event_base *main_base;
@@ -148,8 +148,8 @@ static void maxconns_handler(const int fd, const short which, void *arg) {
     }
 }
 
-//Èç¹ûÉèÖÃµÄ¹ıÆÚÊ±¼äÎª30ÌìÒÔÉÏ£¬ÀıÈçÎª31ÌìµÄÃëÊ±¼ä 31*86400£¬Èç¹û¸ÃÖµĞ¡ÓÚ½ø³ÌÆô¶¯Ê±ºòµÄÊ±¼ä´Á£¬ÔòÖ±½Ó°Ñ¹ıÆÚÊ±¼äÉèÖÃÎª1s
-//Èç¹û´óÓÚ³ÌĞòÆô¶¯Ê±¼ä£¬Ôò¹ıÆÚÊ±¼äÎ»Ïà¶ÔÊ±¼äµÄÃëÊı²îÖµ
+//å¦‚æœè®¾ç½®çš„è¿‡æœŸæ—¶é—´ä¸º30å¤©ä»¥ä¸Šï¼Œä¾‹å¦‚ä¸º31å¤©çš„ç§’æ—¶é—´ 31*86400ï¼Œå¦‚æœè¯¥å€¼å°äºè¿›ç¨‹å¯åŠ¨æ—¶å€™çš„æ—¶é—´æˆ³ï¼Œåˆ™ç›´æ¥æŠŠè¿‡æœŸæ—¶é—´è®¾ç½®ä¸º1s
+//å¦‚æœå¤§äºç¨‹åºå¯åŠ¨æ—¶é—´ï¼Œåˆ™è¿‡æœŸæ—¶é—´ä½ç›¸å¯¹æ—¶é—´çš„ç§’æ•°å·®å€¼
 #define REALTIME_MAXDELTA 60*60*24*30
 
 /*
@@ -162,7 +162,7 @@ static rel_time_t realtime(const time_t exptime) {
 
     if (exptime == 0) return 0; /* 0 means never expire */
 
-    if (exptime > REALTIME_MAXDELTA) { //Èç¹ûÉèÖÃµÄ¹ıÆÚÊ±¼äÎª30ÌìÒÔÉÏ£¬ÀıÈçÎª31ÌìµÄÃëÊ±¼ä 31*86400£¬Èç¹û¸ÃÖµĞ¡ÓÚ½ø³ÌÆô¶¯Ê±ºòµÄÊ±¼ä´Á£¬ÔòÖ±½Ó°Ñ¹ıÆÚÊ±¼äÉèÖÃÎª1s
+    if (exptime > REALTIME_MAXDELTA) { //å¦‚æœè®¾ç½®çš„è¿‡æœŸæ—¶é—´ä¸º30å¤©ä»¥ä¸Šï¼Œä¾‹å¦‚ä¸º31å¤©çš„ç§’æ—¶é—´ 31*86400ï¼Œå¦‚æœè¯¥å€¼å°äºè¿›ç¨‹å¯åŠ¨æ—¶å€™çš„æ—¶é—´æˆ³ï¼Œåˆ™ç›´æ¥æŠŠè¿‡æœŸæ—¶é—´è®¾ç½®ä¸º1s
         /* if item expiration is at/before the server started, give it an
            expiration time of 1 second after the server started.
            (because 0 means don't expire).  without this, we'd
@@ -171,7 +171,7 @@ static rel_time_t realtime(const time_t exptime) {
            really expiring never */
         if (exptime <= process_started)
             return (rel_time_t)1;
-        return (rel_time_t)(exptime - process_started); //·ñÔò×ª»»ÎªÏà¶ÔÊ±¼äÃëÊı±È½Ï
+        return (rel_time_t)(exptime - process_started); //å¦åˆ™è½¬æ¢ä¸ºç›¸å¯¹æ—¶é—´ç§’æ•°æ¯”è¾ƒ
     } else {
         return (rel_time_t)(exptime + current_time);
     }
@@ -213,101 +213,101 @@ static void stats_reset(void) {
 }
 
 static void settings_init(void) {
-	//¿ªÆôCASÒµÎñ£¬Èç¹û¿ªÆôÁËÄÇÃ´ÔÚitemÀïÃæ¾Í»á¶àÒ»¸öÓÃÓÚCASµÄ×Ö¶Î¡£¿ÉÒÔÔÚÆô¶¯memcachedµÄÊ±ºòÍ¨¹ı-CÑ¡Ïî½ûÓÃ
+	//å¼€å¯CASä¸šåŠ¡ï¼Œå¦‚æœå¼€å¯äº†é‚£ä¹ˆåœ¨itemé‡Œé¢å°±ä¼šå¤šä¸€ä¸ªç”¨äºCASçš„å­—æ®µã€‚å¯ä»¥åœ¨å¯åŠ¨memcachedçš„æ—¶å€™é€šè¿‡-Cé€‰é¡¹ç¦ç”¨
     settings.use_cas = true;
 
-	//unix socketµÄÈ¨ÏŞĞÅÏ¢
+	//unix socketçš„æƒé™ä¿¡æ¯
 	settings.access = 0700;
 
-	//memcached¼àÌıµÄtcp¶Ë¿Ú
+	//memcachedç›‘å¬çš„tcpç«¯å£
 	settings.port = 11211;
     //
-    //memcached¼àÌıµÄudp¶Ë¿Ú
+    //memcachedç›‘å¬çš„udpç«¯å£
     settings.udpport = 11211;
     /* By default this string should be NULL for getaddrinfo() */
-	//memcached°ó¶¨µÄipµØÖ·¡£Èç¹û¸ÃÖµÎªNULL£¬ÄÇÃ´¾ÍÊÇINADDR_ANY¡£·ñÔò¸ÃÖµÖ¸ÏòÒ»¸öip×Ö·û´®
+	//memcachedç»‘å®šçš„ipåœ°å€ã€‚å¦‚æœè¯¥å€¼ä¸ºNULLï¼Œé‚£ä¹ˆå°±æ˜¯INADDR_ANYã€‚å¦åˆ™è¯¥å€¼æŒ‡å‘ä¸€ä¸ªipå­—ç¬¦ä¸²
     settings.inter = NULL;
 
-	//memcachedÄÜ¹»Ê¹ÓÃµÄ×î´óÄÚ´æ
+	//memcachedèƒ½å¤Ÿä½¿ç”¨çš„æœ€å¤§å†…å­˜
     settings.maxbytes = 64 * 1024 * 1024; /* default is 64MB */
-	//×î¶àÔÊĞí¶àÉÙ¸ö¿Í»§¶ËÍ¬Ê±ÔÚÏß¡£²»Í¬ÓÚsetting.backlog
+	//æœ€å¤šå…è®¸å¤šå°‘ä¸ªå®¢æˆ·ç«¯åŒæ—¶åœ¨çº¿ã€‚ä¸åŒäºsetting.backlog
     settings.maxconns = 1024;         /* to limit connections-related memory to about 5MB */
 
-	//ÔËĞĞĞÅÏ¢µÄÊä³ö¼¶±ğ¡£¸ÃÖµÔ½´óÊä³öµÄĞÅÏ¢¾ÍÔ½ÏêÏ¸
+	//è¿è¡Œä¿¡æ¯çš„è¾“å‡ºçº§åˆ«ã€‚è¯¥å€¼è¶Šå¤§è¾“å‡ºçš„ä¿¡æ¯å°±è¶Šè¯¦ç»†
     settings.verbose = 0;
 
-	//flush_allÃüÁîµÄÊ±¼ä½çÏŞ¡£²åÈëÊ±¼äĞ¡ÓÚÕâ¸öÊ±¼äµÄitemÉ¾³ı
+	//flush_allå‘½ä»¤çš„æ—¶é—´ç•Œé™ã€‚æ’å…¥æ—¶é—´å°äºè¿™ä¸ªæ—¶é—´çš„itemåˆ é™¤
     settings.oldest_live = 0;
 
-	//±ê¼ÇmemcachedÊÇ·ñÔÊĞíLRUÌÔÌ­»úÖÆ¡£Ä¬ÈÏÊÇ¿ÉÒÔµÄ¡£¿ÉÒÔÍ¨¹ı-MÑ¡Ïî½ûÖ¹
+	//æ ‡è®°memcachedæ˜¯å¦å…è®¸LRUæ·˜æ±°æœºåˆ¶ã€‚é»˜è®¤æ˜¯å¯ä»¥çš„ã€‚å¯ä»¥é€šè¿‡-Mé€‰é¡¹ç¦æ­¢
     settings.evict_to_free = 1;       /* push old items out of cache when memory runs out */
 
-	//unix_socket¼àÌıµÄsocketÂ·¾¶£¬Ä¬ÈÏ²»Ê¹ÓÃunix_socket
+	//unix_socketç›‘å¬çš„socketè·¯å¾„ï¼Œé»˜è®¤ä¸ä½¿ç”¨unix_socket
     settings.socketpath = NULL;       /* by default, not using a unix socket */
 
-	//itemµÄÀ©ÈİÒò×Ó
+	//itemçš„æ‰©å®¹å› å­
     settings.factor = 1.25;
 	
-	//×îĞ¡µÄÒ»¸öitemÄÜ´æ´¢¶àÉÙ×Ö½ÚµÄÊı¾İ(set¡¢addÃüÁîÖĞµÄÊı¾İ)
+	//æœ€å°çš„ä¸€ä¸ªitemèƒ½å­˜å‚¨å¤šå°‘å­—èŠ‚çš„æ•°æ®(setã€addå‘½ä»¤ä¸­çš„æ•°æ®)
     settings.chunk_size = 48;         /* space for a modest key and value */
 	
-	//workerÏß³ÌµÄ¸öÊı
+	//workerçº¿ç¨‹çš„ä¸ªæ•°
     settings.num_threads = 4;         /* N workers */
 	
-	//¶àÉÙ¸öworkerÏß³ÌÎªÒ»¸öudp socket·şÎñ
+	//å¤šå°‘ä¸ªworkerçº¿ç¨‹ä¸ºä¸€ä¸ªudp socketæœåŠ¡
     settings.num_threads_per_udp = 0;
 
-	//·Ö¸ô·û
+	//åˆ†éš”ç¬¦
     settings.prefix_delimiter = ':';
 
-	//ÊÇ·ñ×Ô¶¯ÊÕ¼¯×´Ì¬ĞÅÏ¢
+	//æ˜¯å¦è‡ªåŠ¨æ”¶é›†çŠ¶æ€ä¿¡æ¯
     settings.detail_enabled = 0;
 
-	//workerÏß³ÌÁ¬ĞøÎªÄ³¸ö¿Í»§¶ËÖ´ĞĞÃüÁîµÄ×î´óÃüÁîÊı¡£ÕâÖ÷ÒªÊÇÎªÁË·ÀÖ¹Ò»¸ö¿Í»§¶Ë°ÔÕ¼Õû¸öworkerÏß³Ì
+	//workerçº¿ç¨‹è¿ç»­ä¸ºæŸä¸ªå®¢æˆ·ç«¯æ‰§è¡Œå‘½ä»¤çš„æœ€å¤§å‘½ä»¤æ•°ã€‚è¿™ä¸»è¦æ˜¯ä¸ºäº†é˜²æ­¢ä¸€ä¸ªå®¢æˆ·ç«¯éœ¸å æ•´ä¸ªworkerçº¿ç¨‹
     settings.reqs_per_event = 20;
 
-	//listenº¯ÊıµÄµÚ¶ş¸ö²ÎÊı£¬²»Í¬ÓÚsettings.maxconns
+	//listenå‡½æ•°çš„ç¬¬äºŒä¸ªå‚æ•°ï¼Œä¸åŒäºsettings.maxconns
 	settings.backlog = 1024;
 
-	//ÓÃ»§ÃüÁîĞ­Òé£¬ÓĞÎÄ¼şºÍ¶ş½øÖÆÁ½ÖÖ¡£negotiating_portÊÇĞ­ÉÌ£¬×Ô¶¯¸ù¾İÃüÁîÄÚÈİÅĞ¶Ï
+	//ç”¨æˆ·å‘½ä»¤åè®®ï¼Œæœ‰æ–‡ä»¶å’ŒäºŒè¿›åˆ¶ä¸¤ç§ã€‚negotiating_portæ˜¯åå•†ï¼Œè‡ªåŠ¨æ ¹æ®å‘½ä»¤å†…å®¹åˆ¤æ–­
     settings.binding_protocol = negotiating_prot;
 
-	//slabµÄÄÚ´æÒ³´óĞ¡¡£µ¥Î»ÊÇ×Ö½Ú
+	//slabçš„å†…å­˜é¡µå¤§å°ã€‚å•ä½æ˜¯å­—èŠ‚
     settings.item_size_max = 1024 * 1024; /* The famous 1MB upper limit. */
 
-	//Èç¹ûÁ¬ĞøÊı³¬¹ıÁË×î´óÍ¬Ê±ÔÚÏßÊı(ÓÉ-CÑ¡ÏîÖ¸¶¨)£¬ÊÇ·ñÁ¢¼´¹Ø±ÕĞÂÁ¬½ÓÁ¬½ÓÉÏµÄ¿Í»§¶Ë
+	//å¦‚æœè¿ç»­æ•°è¶…è¿‡äº†æœ€å¤§åŒæ—¶åœ¨çº¿æ•°(ç”±-Cé€‰é¡¹æŒ‡å®š)ï¼Œæ˜¯å¦ç«‹å³å…³é—­æ–°è¿æ¥è¿æ¥ä¸Šçš„å®¢æˆ·ç«¯
     settings.maxconns_fast = false;
 
 
-	//ÓÃÓÚÖ¸Ã÷memcachedÊÇ·ñÆô¶¯ÁËLRUÅÀ³æÏß³Ì¡£Ä¬ÈÏÖµÎªfalse£¬²»Æô¶¯LRUÅÀ³æÏß³Ì¡£
-	//¿ÉÒÔÔÚÆô¶¯memcachedÊ±Í¨¹ı-o lru_crawler½«±äÁ¿µÄ¸³ÖµÎªtrue£¬Æô¶¯LRUÅÀ³æÏß³Ì
+	//ç”¨äºæŒ‡æ˜memcachedæ˜¯å¦å¯åŠ¨äº†LRUçˆ¬è™«çº¿ç¨‹ã€‚é»˜è®¤å€¼ä¸ºfalseï¼Œä¸å¯åŠ¨LRUçˆ¬è™«çº¿ç¨‹ã€‚
+	//å¯ä»¥åœ¨å¯åŠ¨memcachedæ—¶é€šè¿‡-o lru_crawlerå°†å˜é‡çš„èµ‹å€¼ä¸ºtrueï¼Œå¯åŠ¨LRUçˆ¬è™«çº¿ç¨‹
 	settings.lru_crawler = false;
 
-	//LRUÅÀ³æÏß³Ì¹¤×÷Ê±µÄĞİÃß¼ä¸ô¡£µ¥Î»ÊÇÎ¢Ãî
+	//LRUçˆ¬è™«çº¿ç¨‹å·¥ä½œæ—¶çš„ä¼‘çœ é—´éš”ã€‚å•ä½æ˜¯å¾®å¦™
     settings.lru_crawler_sleep = 100;
 
-	//LRUÅÀ³æ¼ì²âÃ¿ÌõLRU¶ÓÁĞÖĞµÄ¶àÉÙ¸öitem£¬Èç¹ûÏëÈÃLRUÅÀ³æ¹¤×÷±ØĞëĞŞ¸ÄÕâ¸öÖµ
+	//LRUçˆ¬è™«æ£€æµ‹æ¯æ¡LRUé˜Ÿåˆ—ä¸­çš„å¤šå°‘ä¸ªitemï¼Œå¦‚æœæƒ³è®©LRUçˆ¬è™«å·¥ä½œå¿…é¡»ä¿®æ”¹è¿™ä¸ªå€¼
     settings.lru_crawler_tocrawl = 0;
 
-	//¹şÏ£±íµÄ³¤¶ÈÊÇ2^n¡£Õâ¸öÖµÊÇnµÄ³õÊ¼Öµ¡£¿ÉÒÔÔÚÆô¶¯memcachedµÄÊ±ºòÍ¨¹ı-o hashpower_initÉèÖÃ
-	//ÉèÖÃµÄÖµÒªÔÚ[12,64]Ö®¼ä¡£Èç¹û²»ÉèÖÃ£¬¸ÃÖµÎª0.¹şÏ£±íµÄÃİ½«È¡Ä¬ÈÏÖµ16
+	//å“ˆå¸Œè¡¨çš„é•¿åº¦æ˜¯2^nã€‚è¿™ä¸ªå€¼æ˜¯nçš„åˆå§‹å€¼ã€‚å¯ä»¥åœ¨å¯åŠ¨memcachedçš„æ—¶å€™é€šè¿‡-o hashpower_initè®¾ç½®
+	//è®¾ç½®çš„å€¼è¦åœ¨[12,64]ä¹‹é—´ã€‚å¦‚æœä¸è®¾ç½®ï¼Œè¯¥å€¼ä¸º0.å“ˆå¸Œè¡¨çš„å¹‚å°†å–é»˜è®¤å€¼16
     settings.hashpower_init = 0;
 
-	//ÊÇ·ñ¿ªÆôµ÷½Ú²»Í¬ÀàĞÍitemËùÕ¼ÓÃµÄÄÚ´æÊı¡£¿ÉÒÔÍ¨¹ı-o slab_reassignÑ¡Ïî¿ªÆô
+	//æ˜¯å¦å¼€å¯è°ƒèŠ‚ä¸åŒç±»å‹itemæ‰€å ç”¨çš„å†…å­˜æ•°ã€‚å¯ä»¥é€šè¿‡-o slab_reassigné€‰é¡¹å¼€å¯
     settings.slab_reassign = false;
 
-	//×Ô¶¯¼ì²âÊÇ·ñĞèÒª½øĞĞ²»Í¬ÀàĞÍitemµÄÄÚ´æµ÷Õû£¬ÒÀÀµÓÚsetting.slab_reassignµÄ¿ªÆô
+	//è‡ªåŠ¨æ£€æµ‹æ˜¯å¦éœ€è¦è¿›è¡Œä¸åŒç±»å‹itemçš„å†…å­˜è°ƒæ•´ï¼Œä¾èµ–äºsetting.slab_reassignçš„å¼€å¯
     settings.slab_automove = 0;
 
-	//ÊÇ·ñÖ§³Ö¿Í»§¶ËµÄ¹Ø±ÕÃüÁî£¬¸ÃÃüÁî»á¹Ø±Õmemcached½ø³Ì
+	//æ˜¯å¦æ”¯æŒå®¢æˆ·ç«¯çš„å…³é—­å‘½ä»¤ï¼Œè¯¥å‘½ä»¤ä¼šå…³é—­memcachedè¿›ç¨‹
     settings.shutdown_command = false;
 
-	//ÓÃÓÚĞŞ¸´itemµÄÒıÓÃÊı¡£Èç¹ûÒ»¸öworkerÏß³ÌÒıÓÃÁËÄ³¸öitem£¬»¹Ã»À´µÃ¼°½â³ıÒıÓÃÕâ¸öÏß³Ì¾Í¹ÒÁË
-	//ÄÇÃ´Õâ¸öitem¾ÍÓÀÔ¶±»Õâ¸öÒÑËÀµÄÏß³ÌËùÒıÓÃ¶ø²»ÄÜÊÍ·Å¡£memcachedÓÃÕâ¸öÖµÀ´¼ì²âÊÇ·ñ³öÏÖÕâÖÖ
-	//Çé¿ö¡£ÒòÎªÕâÖÖÇé¿öºÜÉÙ·¢Éú£¬ËùÒÔ¸Ã±äÁ¿µÄÄ¬ÈÏÖµÎª0£¬¼´²»½øĞĞ¼ì²â
+	//ç”¨äºä¿®å¤itemçš„å¼•ç”¨æ•°ã€‚å¦‚æœä¸€ä¸ªworkerçº¿ç¨‹å¼•ç”¨äº†æŸä¸ªitemï¼Œè¿˜æ²¡æ¥å¾—åŠè§£é™¤å¼•ç”¨è¿™ä¸ªçº¿ç¨‹å°±æŒ‚äº†
+	//é‚£ä¹ˆè¿™ä¸ªitemå°±æ°¸è¿œè¢«è¿™ä¸ªå·²æ­»çš„çº¿ç¨‹æ‰€å¼•ç”¨è€Œä¸èƒ½é‡Šæ”¾ã€‚memcachedç”¨è¿™ä¸ªå€¼æ¥æ£€æµ‹æ˜¯å¦å‡ºç°è¿™ç§
+	//æƒ…å†µã€‚å› ä¸ºè¿™ç§æƒ…å†µå¾ˆå°‘å‘ç”Ÿï¼Œæ‰€ä»¥è¯¥å˜é‡çš„é»˜è®¤å€¼ä¸º0ï¼Œå³ä¸è¿›è¡Œæ£€æµ‹
     settings.tail_repair_time = TAIL_REPAIR_TIME_DEFAULT;
 
-	//ÊÇ·ñÔÊĞí¿Í»§¶ËÊ¹ÓÃflush_allÃüÁî 
+	//æ˜¯å¦å…è®¸å®¢æˆ·ç«¯ä½¿ç”¨flush_allå‘½ä»¤ 
     settings.flush_enabled = true;
 }
 
@@ -321,7 +321,7 @@ static int add_msghdr(conn *c)
     struct msghdr *msg;
 
     assert(c != NULL);
-	//ÒÑ¾­ÓÃÍêÁË
+	//å·²ç»ç”¨å®Œäº†
     if (c->msgsize == c->msgused) {
         msg = realloc(c->msglist, c->msgsize * 2 * sizeof(struct msghdr));
         if (! msg) {
@@ -333,14 +333,14 @@ static int add_msghdr(conn *c)
         c->msglist = msg;
         c->msgsize *= 2;
     }
-	//msgÖ¸Ïò¿ÕÏĞµÄ½áµã
+	//msgæŒ‡å‘ç©ºé—²çš„ç»“ç‚¹
     msg = c->msglist + c->msgused;
 
     /* this wipes msg_iovlen, msg_control, msg_controllen, and
        msg_flags, the last 3 of which aren't defined on solaris: */
     memset(msg, 0, sizeof(struct msghdr));
 
-	//Ö¸Ïò¿ÕÏĞµÄiovec
+	//æŒ‡å‘ç©ºé—²çš„iovec
     msg->msg_iov = &c->iov[c->iovused];
 
     if (IS_UDP(c->transport) && c->request_addr_size > 0) {
@@ -371,16 +371,16 @@ extern pthread_mutex_t conn_lock;
  * used for things other than connections, but that's worth it in exchange for
  * being able to directly index the conns array by FD.
  */
-static void conn_init(void) { //ÌáÇ°·ÖÅäºÃ×î´ófd¸öÊıµÄconn
+static void conn_init(void) { //æå‰åˆ†é…å¥½æœ€å¤§fdä¸ªæ•°çš„conn
     /* We're unlikely to see an FD much higher than maxconns. */
-	//ÒÑ¾­dup·µ»Øµ±Ç°Î´Ê¹ÓÃµÄ×îĞ¡ÕıÕûÊı£¬ËùÒÔnext_fdµÈÓÚ´Ë¿ÌÒÑ¾­ÏûºÄÁËµÄfd¸öÊı
+	//å·²ç»dupè¿”å›å½“å‰æœªä½¿ç”¨çš„æœ€å°æ­£æ•´æ•°ï¼Œæ‰€ä»¥next_fdç­‰äºæ­¤åˆ»å·²ç»æ¶ˆè€—äº†çš„fdä¸ªæ•°
     int next_fd = dup(1);
-	//Ô¤ÁôÒ»Ğ©ÎÄ¼şÃèÊö·û¡£Ò²¾ÍÊÇ¶àÉêÇëÒ»Ğ©conn½á¹¹Ìå¡£ÒÔÃâÓĞ±ğµÄĞèÒª°ÑÎÄ¼şÃèÊö·û
-	//¸øÕ¼ÁË¡£µ¼ÖÂsocket fdµÄÖµ´óÓÚÕâ¸öÊı×é³¤¶È
+	//é¢„ç•™ä¸€äº›æ–‡ä»¶æè¿°ç¬¦ã€‚ä¹Ÿå°±æ˜¯å¤šç”³è¯·ä¸€äº›connç»“æ„ä½“ã€‚ä»¥å…æœ‰åˆ«çš„éœ€è¦æŠŠæ–‡ä»¶æè¿°ç¬¦
+	//ç»™å äº†ã€‚å¯¼è‡´socket fdçš„å€¼å¤§äºè¿™ä¸ªæ•°ç»„é•¿åº¦
     int headroom = 10;      /* account for extra unexpected open FDs */
     struct rlimit rl;
 
-	//settings.maxconnµÄÄ¬ÈÏÖµÊÇ1024
+	//settings.maxconnçš„é»˜è®¤å€¼æ˜¯1024
     max_fds = settings.maxconns + headroom + next_fd;
 
     /* But if possible, get the actual highest FD we can possibly ever see. */
@@ -390,12 +390,12 @@ static void conn_init(void) { //ÌáÇ°·ÖÅäºÃ×î´ófd¸öÊıµÄconn
         fprintf(stderr, "Failed to query maximum file descriptor; "
                         "falling back to maxconns\n");
     }
-	//next_fdÖ»ÊÇÓÃÀ´¼ÆÊıµÄ£¬Ã»ÓĞÆäËûÓÃÍ¾
+	//next_fdåªæ˜¯ç”¨æ¥è®¡æ•°çš„ï¼Œæ²¡æœ‰å…¶ä»–ç”¨é€”
     close(next_fd);
 
-	//×¢Òâ£¬ÉêÇëµÄconn½á¹¹ÌåÊıÁ¿ÊÇ±Èsettings.maxconnÕâ¸ö¿Í»§¶ËÍ¬Ê±ÔÚÏßÊı»¹Òª´óµÄ¡£
-	//ÒòÎªmemcachedÊÇÖ±½ÓÓÃsocket fdµÄÖµ×÷ÎªÊı×éÏÂ±êµÄ¡£Ò²ÕâÊÇÕâ¸öÔ­Òò£¬Ç°ÃæĞèÒª
-	//Ê¹ÓÃheadrommÔ¤ÁôÒ»Ğ©¿Õ¼ä¸øÍ»·¢Çé¿ö
+	//æ³¨æ„ï¼Œç”³è¯·çš„connç»“æ„ä½“æ•°é‡æ˜¯æ¯”settings.maxconnè¿™ä¸ªå®¢æˆ·ç«¯åŒæ—¶åœ¨çº¿æ•°è¿˜è¦å¤§çš„ã€‚
+	//å› ä¸ºmemcachedæ˜¯ç›´æ¥ç”¨socket fdçš„å€¼ä½œä¸ºæ•°ç»„ä¸‹æ ‡çš„ã€‚ä¹Ÿè¿™æ˜¯è¿™ä¸ªåŸå› ï¼Œå‰é¢éœ€è¦
+	//ä½¿ç”¨headrommé¢„ç•™ä¸€äº›ç©ºé—´ç»™çªå‘æƒ…å†µ
     if ((conns = calloc(max_fds, sizeof(conn *))) == NULL) {
         fprintf(stderr, "Failed to allocate connection structures\n");
         /* This is unrecoverable so bail out early. */
@@ -419,11 +419,11 @@ static const char *prot_text(enum protocol prot) {
     return rv;
 }
 
-//thread_libevent_processÕâ¸ö¹ÜµÀÊÂ¼ş»Øµ÷Ê¹ÓÃÓÚÖ÷Ïß³Ì½ÓÊÜµ½¿Í»§¶ËÁ¬½ÓºóÍ¨Öª¹¤×÷×ÓÏß³ÌÖØĞÂ´´½¨Ò»¸öĞÂµÄ
-//conn£¬ÔÚconn_newÖØĞÂÉèÖÃÍøÂçÊÂ¼ş»Øµ÷º¯Êıconn_new->event_handler
+//thread_libevent_processè¿™ä¸ªç®¡é“äº‹ä»¶å›è°ƒä½¿ç”¨äºä¸»çº¿ç¨‹æ¥å—åˆ°å®¢æˆ·ç«¯è¿æ¥åé€šçŸ¥å·¥ä½œå­çº¿ç¨‹é‡æ–°åˆ›å»ºä¸€ä¸ªæ–°çš„
+//connï¼Œåœ¨conn_newé‡æ–°è®¾ç½®ç½‘ç»œäº‹ä»¶å›è°ƒå‡½æ•°conn_new->event_handler
 
-//Îªsfd·ÖÅäÒ»¸öconn½á¹¹Ìå£¬²¢ÇÒÎªÕâ¸ösfd½¨Á¢Ò»¸öevent£¬È»ºóbase¼àÌıÕâ¸öevent
-//ÕâÀïÃæ»áÉèÖÃÍøÂçÊÂ¼ş»Øµ÷º¯Êıconn_new->event_handler
+//ä¸ºsfdåˆ†é…ä¸€ä¸ªconnç»“æ„ä½“ï¼Œå¹¶ä¸”ä¸ºè¿™ä¸ªsfdå»ºç«‹ä¸€ä¸ªeventï¼Œç„¶åbaseç›‘å¬è¿™ä¸ªevent
+//è¿™é‡Œé¢ä¼šè®¾ç½®ç½‘ç»œäº‹ä»¶å›è°ƒå‡½æ•°conn_new->event_handler
 conn *conn_new(const int sfd, enum conn_states init_state,
                 const int event_flags,
                 const int read_buffer_size, enum network_transport transport,
@@ -431,10 +431,10 @@ conn *conn_new(const int sfd, enum conn_states init_state,
     conn *c;
 
     assert(sfd >= 0 && sfd < max_fds);
-	//Ö±½ÓÊ¹ÓÃÏÂ±ê
+	//ç›´æ¥ä½¿ç”¨ä¸‹æ ‡
     c = conns[sfd];
 
-	//Ö®Ç°Ã»ÓĞÄÄ¸öÁ¬½ÓÓÃ¹ıÕâ¸ösfdÖµ£¬ĞèÒªÉêÇëÒ»¸öconn½á¹¹Ìå
+	//ä¹‹å‰æ²¡æœ‰å“ªä¸ªè¿æ¥ç”¨è¿‡è¿™ä¸ªsfdå€¼ï¼Œéœ€è¦ç”³è¯·ä¸€ä¸ªconnç»“æ„ä½“
     if (NULL == c) {
         if (!(c = (conn *)calloc(1, sizeof(conn)))) {
             STATS_LOCK();
@@ -444,7 +444,7 @@ conn *conn_new(const int sfd, enum conn_states init_state,
             return NULL;
         }
         MEMCACHED_CONN_CREATE(c);
-		//³õÊ¼»¯Ò»Ğ©³ÉÔ±±äÁ¿
+		//åˆå§‹åŒ–ä¸€äº›æˆå‘˜å˜é‡
         c->rbuf = c->wbuf = 0;
         c->ilist = 0;
         c->suffixlist = 0;
@@ -482,7 +482,7 @@ conn *conn_new(const int sfd, enum conn_states init_state,
         STATS_UNLOCK();
 
         c->sfd = sfd;
-		//½«Õâ¸ö½á¹¹Ìå½»ÓÉconnsÊı×é¹ÜÀí
+		//å°†è¿™ä¸ªç»“æ„ä½“äº¤ç”±connsæ•°ç»„ç®¡ç†
         conns[sfd] = c;
     }
 
@@ -525,7 +525,7 @@ conn *conn_new(const int sfd, enum conn_states init_state,
             assert(false);
         }
     }
-	//³õÊ¼»¯Ò»Ğ©³ÉÔ±±äÁ¿
+	//åˆå§‹åŒ–ä¸€äº›æˆå‘˜å˜é‡
     c->state = init_state;
     c->rlbytes = 0;
     c->cmd = -1;
@@ -547,7 +547,7 @@ conn *conn_new(const int sfd, enum conn_states init_state,
     c->item = 0;
 
     c->noreply = false;
-	//µÈÍ¬ÓÚevent_assign£¬»á×Ô¶¯¹ØÁªcurrent_base¡£eventµÄ»Øµ÷º¯ÊıÊÇevent_handler
+	//ç­‰åŒäºevent_assignï¼Œä¼šè‡ªåŠ¨å…³è”current_baseã€‚eventçš„å›è°ƒå‡½æ•°æ˜¯event_handler
     event_set(&c->event, sfd, event_flags, event_handler, (void *)c);
     event_base_set(base, &c->event);
     c->ev_flags = event_flags;
@@ -676,14 +676,14 @@ static void conn_close(conn *c) {
  * This should only be called in between requests since it can wipe output
  * buffers!
  */
- //ÊÕËõµ½³õÊ¼´óĞ¡
+ //æ”¶ç¼©åˆ°åˆå§‹å¤§å°
 static void conn_shrink(conn *c) {
     assert(c != NULL);
 
     if (IS_UDP(c->transport))
         return;
-	//c->rbytesÖ¸Ã÷ÁËµ±Ç°¶Á»º³åÇøÓĞĞ§Êı¾İµÄ³¤¶È¡£µ±ÆäĞ¡ÓÚDATA_BUFFER_SIZE
-	//²Å½øĞĞ¶Á»º³åÇøÊÕËõ£¬ËùÒÔ²»»áµ¼ÖÂ¿Í»§¶ËÃüÁîÊı¾İµÄ¶ªÊ§
+	//c->rbytesæŒ‡æ˜äº†å½“å‰è¯»ç¼“å†²åŒºæœ‰æ•ˆæ•°æ®çš„é•¿åº¦ã€‚å½“å…¶å°äºDATA_BUFFER_SIZE
+	//æ‰è¿›è¡Œè¯»ç¼“å†²åŒºæ”¶ç¼©ï¼Œæ‰€ä»¥ä¸ä¼šå¯¼è‡´å®¢æˆ·ç«¯å‘½ä»¤æ•°æ®çš„ä¸¢å¤±
     if (c->rsize > READ_BUFFER_HIGHWAT && c->rbytes < DATA_BUFFER_SIZE) {
         char *newbuf;
 
@@ -751,7 +751,7 @@ static const char *state_text(enum conn_states state) {
  * processing that needs to happen on certain state transitions can
  * happen here.
  */
- //ÉèÖÃconnµÄ×´Ì¬
+ //è®¾ç½®connçš„çŠ¶æ€
 static void conn_set_state(conn *c, enum conn_states state) {
     assert(c != NULL);
     assert(state >= conn_listening && state < conn_max_state);
@@ -779,7 +779,7 @@ static void conn_set_state(conn *c, enum conn_states state) {
 static int ensure_iov_space(conn *c) {
     assert(c != NULL);
 
-	//ÒÑ¾­Ê¹ÓÃÍêÁËÖ®Ç°ÉêÇëµÄ
+	//å·²ç»ä½¿ç”¨å®Œäº†ä¹‹å‰ç”³è¯·çš„
     if (c->iovused >= c->iovsize) {
         int i, iovnum;
         struct iovec *new_iov = (struct iovec *)realloc(c->iov,
@@ -794,8 +794,8 @@ static int ensure_iov_space(conn *c) {
         c->iovsize *= 2;
 
         /* Point all the msghdr structures at the new list. */
-		//ÒòÎªiovecÊı×éÒÑ¾­ÖØĞÂ·ÖÅäÔÚ±ğµÄ¿Õ¼äÁË£¬¶ømsglistÊı×éÔªËØÖ¸ÏòÕâ¸öiovec
-		//Êı×é£¬ËùÒÔĞèÒªĞŞ¸ÄmsglistÊı×éÔªËØµÄÖµ
+		//å› ä¸ºiovecæ•°ç»„å·²ç»é‡æ–°åˆ†é…åœ¨åˆ«çš„ç©ºé—´äº†ï¼Œè€Œmsglistæ•°ç»„å…ƒç´ æŒ‡å‘è¿™ä¸ªiovec
+		//æ•°ç»„ï¼Œæ‰€ä»¥éœ€è¦ä¿®æ”¹msglistæ•°ç»„å…ƒç´ çš„å€¼
         for (i = 0, iovnum = 0; i < c->msgused; i++) {
             c->msglist[i].msg_iov = &c->iov[iovnum];
             iovnum += c->msglist[i].msg_iovlen;
@@ -820,8 +820,8 @@ static int add_iov(conn *c, const void *buf, int len) {
 
     assert(c != NULL);
 
-	//ÔÚprocess_commandº¯ÊıÖĞ£¬Ò»¿ªÊ¼»áµ÷ÓÃadd_msghdrº¯Êı£¬¶øadd_msghdr»á°Ñ
-	//msgused++£¬ËùÒÔmsgused»áµÈÓÚ1£¬¼´Ê¹ÔÚconn_newº¯ÊıÖĞËü±»¸³ÖµÎª0
+	//åœ¨process_commandå‡½æ•°ä¸­ï¼Œä¸€å¼€å§‹ä¼šè°ƒç”¨add_msghdrå‡½æ•°ï¼Œè€Œadd_msghdrä¼šæŠŠ
+	//msgused++ï¼Œæ‰€ä»¥msgusedä¼šç­‰äº1ï¼Œå³ä½¿åœ¨conn_newå‡½æ•°ä¸­å®ƒè¢«èµ‹å€¼ä¸º0
     do {
         m = &c->msglist[c->msgused - 1];
 
@@ -832,13 +832,13 @@ static int add_iov(conn *c, const void *buf, int len) {
         limit_to_mtu = IS_UDP(c->transport) || (1 == c->msgused);
 
         /* We may need to start a new msghdr if this one is full. */
-        if (m->msg_iovlen == IOV_MAX || //Ò»¸ömsghdr×î¶àÖ»ÄÜÓĞIOV_MAX¸öiovec½á¹¹Ìå
+        if (m->msg_iovlen == IOV_MAX || //ä¸€ä¸ªmsghdræœ€å¤šåªèƒ½æœ‰IOV_MAXä¸ªiovecç»“æ„ä½“
             (limit_to_mtu && c->msgbytes >= UDP_MAX_PAYLOAD_SIZE)) {
             add_msghdr(c);
             m = &c->msglist[c->msgused - 1];
         }
-		//±£Ö¤iovecÊı×éÊÇ×ã¹»ÓÃµÄ¡£µ÷ÓÃadd_iovº¯ÊıÒ»´Î»áÏûºÄÒ»¸öiovec½á¹¹Ìå
-		//ËùÒÔ¿ÉÒÔÔÚ²åÈëÊı¾İÖ®Ç°±£Ö¤iovecÊı×éÊÇ×ã¹»ÓÃµÄ
+		//ä¿è¯iovecæ•°ç»„æ˜¯è¶³å¤Ÿç”¨çš„ã€‚è°ƒç”¨add_iovå‡½æ•°ä¸€æ¬¡ä¼šæ¶ˆè€—ä¸€ä¸ªiovecç»“æ„ä½“
+		//æ‰€ä»¥å¯ä»¥åœ¨æ’å…¥æ•°æ®ä¹‹å‰ä¿è¯iovecæ•°ç»„æ˜¯è¶³å¤Ÿç”¨çš„
         if (ensure_iov_space(c) != 0)
             return -1;
 
@@ -852,7 +852,7 @@ static int add_iov(conn *c, const void *buf, int len) {
 
         m = &c->msglist[c->msgused - 1];
 
-		//ÓÃÒ»¸öiovec½á¹¹ÌåÖ¸ÏòÒª»ØÓ¦µÄÊı¾İ
+		//ç”¨ä¸€ä¸ªiovecç»“æ„ä½“æŒ‡å‘è¦å›åº”çš„æ•°æ®
         m->msg_iov[m->msg_iovlen].iov_base = (void *)buf;
         m->msg_iov[m->msg_iovlen].iov_len = len;
 
@@ -919,10 +919,10 @@ static void out_string(conn *c, const char *str) {
 
     assert(c != NULL);
 
-    if (c->noreply) { //²»ĞèÒª»Ø¸´ĞÅÏ¢¸ø¿Í»§¶Ë  
+    if (c->noreply) { //ä¸éœ€è¦å›å¤ä¿¡æ¯ç»™å®¢æˆ·ç«¯  
         if (settings.verbose > 1)
             fprintf(stderr, ">%d NOREPLY %s\n", c->sfd, str);
-        c->noreply = false;//ÖØÖÃ  
+        c->noreply = false;//é‡ç½®  
         conn_set_state(c, conn_new_cmd);
         return;
     }
@@ -937,7 +937,7 @@ static void out_string(conn *c, const char *str) {
     add_msghdr(c);
 
     len = strlen(str);
-    if ((len + 2) > c->wsize) {///2ÊÇºóÃæµÄ\r\n  
+    if ((len + 2) > c->wsize) {///2æ˜¯åé¢çš„\r\n  
         /* ought to be always enough. just fail for simplicity */
         str = "SERVER_ERROR output line too long";
         len = strlen(str);
@@ -987,7 +987,7 @@ static void complete_nread_ascii(conn *c) {
     c->thread->stats.slab_stats[it->slabs_clsid].set_cmds++;
     pthread_mutex_unlock(&c->thread->stats.mutex);
 
-    if (strncmp(ITEM_data(it) + it->nbytes - 2, "\r\n", 2) != 0) { //value¶ÔÓ¦µÄdataºóÃæ±ØĞëĞ¯´ø\r\n2¸ö×Ö·û
+    if (strncmp(ITEM_data(it) + it->nbytes - 2, "\r\n", 2) != 0) { //valueå¯¹åº”çš„dataåé¢å¿…é¡»æºå¸¦\r\n2ä¸ªå­—ç¬¦
         out_string(c, "CLIENT_ERROR bad data chunk");
     } else {
       ret = store_item(it, comm, c);
@@ -2357,11 +2357,11 @@ static void reset_cmd_handler(conn *c) {
         c->item = NULL;
     }
     conn_shrink(c);
-	//ÎªÁË¼òµ¥£¬ÕâÀï¼ÙÉèÃ»ÓĞÊı¾İ
-    if (c->rbytes > 0) { //¶Á»º³åÇøÀïÃæÓĞÊı¾İ
-        conn_set_state(c, conn_parse_cmd);//½âÎö¶Áµ½µÄÊı¾İ
+	//ä¸ºäº†ç®€å•ï¼Œè¿™é‡Œå‡è®¾æ²¡æœ‰æ•°æ®
+    if (c->rbytes > 0) { //è¯»ç¼“å†²åŒºé‡Œé¢æœ‰æ•°æ®
+        conn_set_state(c, conn_parse_cmd);//è§£æè¯»åˆ°çš„æ•°æ®
     } else {
-        conn_set_state(c, conn_waiting);//·ñÔòµÈ´ıÊı¾İµÄµ½À´
+        conn_set_state(c, conn_waiting);//å¦åˆ™ç­‰å¾…æ•°æ®çš„åˆ°æ¥
     }
 }
 
@@ -2384,7 +2384,7 @@ static void complete_nread(conn *c) {
  * Returns the state of storage.
  */
 enum store_item_type do_store_item(item *it, int comm, conn *c, const uint32_t hv) {
-//×¢Òâ¸Ãº¯ÊıÍâ²ãÔÚ¸Ãº¯ÊıÖ´ĞĞÍêºóÒ»°ã»áµ÷ÓÃÒ»´Îitem_remove
+//æ³¨æ„è¯¥å‡½æ•°å¤–å±‚åœ¨è¯¥å‡½æ•°æ‰§è¡Œå®Œåä¸€èˆ¬ä¼šè°ƒç”¨ä¸€æ¬¡item_remove
     char *key = ITEM_key(it);
     item *old_it = do_item_get(key, it->nkey, hv);
     enum store_item_type stored = NOT_STORED;
@@ -2395,10 +2395,10 @@ enum store_item_type do_store_item(item *it, int comm, conn *c, const uint32_t h
     if(old_it)
         printf("yang test ...........refcount:%d............<FUNC:%s, line:%u>\n", (int)old_it->refcount, __FUNCTION__, __LINE__);
     if (old_it != NULL && comm == NREAD_ADD) { //
-        //ÒòÎªÒÑ¾­ÓĞÏàÍ¬¼üÖµµÄ¾ÉitemÁË£¬ËùÒÔaddÃüÁîÊ¹ÓÃÊ§°Ü¡£µ«  
-        //»¹ÊÇ»áË¢ĞÂ¾ÉitemµÄ·ÃÎÊÊ±¼äÒÔ¼°LRU¶ÓÁĞÖĞµÄÎ»ÖÃ  
+        //å› ä¸ºå·²ç»æœ‰ç›¸åŒé”®å€¼çš„æ—§itemäº†ï¼Œæ‰€ä»¥addå‘½ä»¤ä½¿ç”¨å¤±è´¥ã€‚ä½†  
+        //è¿˜æ˜¯ä¼šåˆ·æ–°æ—§itemçš„è®¿é—®æ—¶é—´ä»¥åŠLRUé˜Ÿåˆ—ä¸­çš„ä½ç½®  
         /* add only adds a nonexistent item, but promote to head of LRU */
-        do_item_update(old_it); //Èç¹ûaddÃüÁî¶ÔÓ¦µÄkeyÒÑ¾­´æÔÚÔò¸üĞÂ¸ÃkeyµÄ·ÃÎÊÊ±¼ä
+        do_item_update(old_it); //å¦‚æœaddå‘½ä»¤å¯¹åº”çš„keyå·²ç»å­˜åœ¨åˆ™æ›´æ–°è¯¥keyçš„è®¿é—®æ—¶é—´
     } else if (!old_it && (comm == NREAD_REPLACE
         || comm == NREAD_APPEND || comm == NREAD_PREPEND))
     {
@@ -2412,20 +2412,20 @@ enum store_item_type do_store_item(item *it, int comm, conn *c, const uint32_t h
             c->thread->stats.cas_misses++;
             pthread_mutex_unlock(&c->thread->stats.mutex);
         }
-        //Ö´ĞĞcas´æ´¢Ê±Ö´ĞĞµÄÅĞ¶ÏÂß¼­£¬  
+        //æ‰§è¡Œcaså­˜å‚¨æ—¶æ‰§è¡Œçš„åˆ¤æ–­é€»è¾‘ï¼Œ  
         else if (ITEM_get_cas(it) == ITEM_get_cas(old_it)) { 
-            // cas validates//°æ±¾ºÅcasÖµÒ»ÖÂ  
+            // cas validates//ç‰ˆæœ¬å·caså€¼ä¸€è‡´  
             // it and old_it may belong to different classes.
             // I'm updating the stats for the one that's getting pushed out
             pthread_mutex_lock(&c->thread->stats.mutex);
             c->thread->stats.slab_stats[old_it->slabs_clsid].cas_hits++;
             pthread_mutex_unlock(&c->thread->stats.mutex);
 
-            item_replace(old_it, it, hv);//Ö´ĞĞ´æ´¢Âß¼­  
+            item_replace(old_it, it, hv);//æ‰§è¡Œå­˜å‚¨é€»è¾‘  
             stored = STORED;
-        } else {//°æ±¾ºÅcasÖµ²»Ò»ÖÂ£¬²»½øĞĞÊµ¼ÊµÄ´æ´¢  
+        } else {//ç‰ˆæœ¬å·caså€¼ä¸ä¸€è‡´ï¼Œä¸è¿›è¡Œå®é™…çš„å­˜å‚¨  
             pthread_mutex_lock(&c->thread->stats.mutex);
-            c->thread->stats.slab_stats[old_it->slabs_clsid].cas_badval++;//¸üĞÂÍ³¼ÆĞÅÏ¢  
+            c->thread->stats.slab_stats[old_it->slabs_clsid].cas_badval++;//æ›´æ–°ç»Ÿè®¡ä¿¡æ¯  
             pthread_mutex_unlock(&c->thread->stats.mutex);
 
             if(settings.verbose > 1) {
@@ -2444,7 +2444,7 @@ enum store_item_type do_store_item(item *it, int comm, conn *c, const uint32_t h
             /*
              * Validate CAS
              */
-            if (ITEM_get_cas(it) != 0) { //Êµ¼ÊÉÏÖ»ÓĞcasÃüÁîprocess_update_commandÖĞ²Å»áÉèÖÃcas£¬Òò´ËÕâÀïÓ¦¸ÃÊÇ²»»á½øÀ´µÄ
+            if (ITEM_get_cas(it) != 0) { //å®é™…ä¸Šåªæœ‰caså‘½ä»¤process_update_commandä¸­æ‰ä¼šè®¾ç½®casï¼Œå› æ­¤è¿™é‡Œåº”è¯¥æ˜¯ä¸ä¼šè¿›æ¥çš„
                 // CAS much be equal
                 if (ITEM_get_cas(it) != ITEM_get_cas(old_it)) {
                     stored = EXISTS;
@@ -2456,7 +2456,7 @@ enum store_item_type do_store_item(item *it, int comm, conn *c, const uint32_t h
                 /* flags was already lost - so recover them from ITEM_suffix(it) */
 
                 flags = (int) strtol(ITEM_suffix(old_it), (char **) NULL, 10);
-                //ÒòÎªÊÇ×·¼ÓÊı¾İ£¬ÏÈÇ°·ÖÅäµÄitem¿ÉÄÜ²»¹»´ó£¬ËùÒÔÒªÖØĞÂÉêÇëitem  
+                //å› ä¸ºæ˜¯è¿½åŠ æ•°æ®ï¼Œå…ˆå‰åˆ†é…çš„itemå¯èƒ½ä¸å¤Ÿå¤§ï¼Œæ‰€ä»¥è¦é‡æ–°ç”³è¯·item  
                 new_it = do_item_alloc(key, it->nkey, flags, old_it->exptime, it->nbytes + old_it->nbytes - 2 /* CRLF */, hv);
 
                 if (new_it == NULL) {
@@ -2481,26 +2481,26 @@ enum store_item_type do_store_item(item *it, int comm, conn *c, const uint32_t h
                 //itt = it;
                 // slabs_get_curr(itt);
                 /*
-                  ÆäÊµÕâÀïµÄit»áÔÚÍâ²ã¸Ãº¯ÊıÍâ²ãµ÷ÓÃitem_removeÈ¥³ıºÍhash¼°lruµÄ¹ØÁª   old_itÔÚ¸ÃºóÃæµÄdo_item_removeÈ¡³öºÍHASH LRUµÄ¹ØÁª
+                  å…¶å®è¿™é‡Œçš„itä¼šåœ¨å¤–å±‚è¯¥å‡½æ•°å¤–å±‚è°ƒç”¨item_removeå»é™¤å’ŒhashåŠlruçš„å…³è”   old_itåœ¨è¯¥åé¢çš„do_item_removeå–å‡ºå’ŒHASH LRUçš„å…³è”
                   
-                  ÀıÈçÔÚÔ­ÓĞÓĞset yang aaa;(Õâ¸ö¾ÍÊÇold_item)£¬ÏÖÔÚÔÚÖ´ĞĞappend yang bbb(Õâ¸ö´æ´¢ÔÚ¸Ãº¯ÊıÖĞµÄit²ÎÊı)
-                  È»ºó»áÖØĞÂÉêÇëÒ»¸öitem£¬°ÑitÖ¸Ïò¸ÃĞÂµÄitem¡£item_replace»á°Ñaaa¶ÔÓ¦µÄold_item´ÓLRUºÍhashÖĞÕª³ı£¬È»ºó
-                  °Ñ×îÖÕµÄaaabbbÌí¼Óµ½hashºÍlruÖĞ¡£ µ«ÊÇÖ®Ç°´æ´¢bbbµÄitemÊµ¼ÊÉÏÊÇÃ»ÓĞÊÍ·ÅµÄ£¬Ò²´æ´¢ÔÚÄÚ´æitemÖĞ£¬
-                  µ«Ã»ÓĞÌí¼Óµ½LURºÍhashÖĞ,aaabbb¶ÔÓ¦µÄitem»á¼ÓÈëhashºÍlru,ËùÒÔ×îÖÕÖ»ÓĞaaabbbÌí¼Óµ½ÁËLRUºÍitemÖĞ¡£aaaºÍbbbµÄitem
+                  ä¾‹å¦‚åœ¨åŸæœ‰æœ‰set yang aaa;(è¿™ä¸ªå°±æ˜¯old_item)ï¼Œç°åœ¨åœ¨æ‰§è¡Œappend yang bbb(è¿™ä¸ªå­˜å‚¨åœ¨è¯¥å‡½æ•°ä¸­çš„itå‚æ•°)
+                  ç„¶åä¼šé‡æ–°ç”³è¯·ä¸€ä¸ªitemï¼ŒæŠŠitæŒ‡å‘è¯¥æ–°çš„itemã€‚item_replaceä¼šæŠŠaaaå¯¹åº”çš„old_itemä»LRUå’Œhashä¸­æ‘˜é™¤ï¼Œç„¶å
+                  æŠŠæœ€ç»ˆçš„aaabbbæ·»åŠ åˆ°hashå’Œlruä¸­ã€‚ ä½†æ˜¯ä¹‹å‰å­˜å‚¨bbbçš„itemå®é™…ä¸Šæ˜¯æ²¡æœ‰é‡Šæ”¾çš„ï¼Œä¹Ÿå­˜å‚¨åœ¨å†…å­˜itemä¸­ï¼Œ
+                  ä½†æ²¡æœ‰æ·»åŠ åˆ°LURå’Œhashä¸­,aaabbbå¯¹åº”çš„itemä¼šåŠ å…¥hashå’Œlru,æ‰€ä»¥æœ€ç»ˆåªæœ‰aaabbbæ·»åŠ åˆ°äº†LRUå’Œitemä¸­ã€‚aaaå’Œbbbçš„item
                   
                 */
-                it = new_it; //itÖØĞÂÖ¸Ïònew_it
+                it = new_it; //ité‡æ–°æŒ‡å‘new_it
             }
         }
 
-        //add¡¢set¡¢replaceÃüÁî»¹Ã»´¦Àí,µ«Ö®Ç°ÒÑ¾­´¦ÀíÁË²»ºÏÀíµÄÇé¿ö  
-        //¼´addÃüÁîÒÑ¾­È·±£ÁËÄ¿Ç°¹şÏ£±í»¹Ã»´æ´¢¶ÔÓ¦¼üÖµµÄitem£¬replaceÃüÁî  
-        //ÒÑ¾­±£Ö¤¹şÏ£±íÒÑ¾­´æ´¢ÁË¶ÔÓ¦¼üÖµµÄitem  
+        //addã€setã€replaceå‘½ä»¤è¿˜æ²¡å¤„ç†,ä½†ä¹‹å‰å·²ç»å¤„ç†äº†ä¸åˆç†çš„æƒ…å†µ  
+        //å³addå‘½ä»¤å·²ç»ç¡®ä¿äº†ç›®å‰å“ˆå¸Œè¡¨è¿˜æ²¡å­˜å‚¨å¯¹åº”é”®å€¼çš„itemï¼Œreplaceå‘½ä»¤  
+        //å·²ç»ä¿è¯å“ˆå¸Œè¡¨å·²ç»å­˜å‚¨äº†å¯¹åº”é”®å€¼çš„item  
         if (stored == NOT_STORED) {
-            if (old_it != NULL) {//replaceºÍset append preappendÃüÁî»á½øÈëÕâÀï
-                item_replace(old_it, it, hv); //ÕâÀïÃæ»áunlink old_it,È»ºólink it
-            } else {//addºÍsetÃüÁî»á½øÈëÕâÀï   
-                do_item_link(it, hv); //¶ÔÓÚÒ»¸öÃ»ÓĞ´æÔÚµÄkey£¬Ê¹ÓÃsetÃüÁî»áÀ´µ½ÕâÀï   ÕâÀïÃæ»áÔö¼Órefcount¼ÆÊı£¬ÉÏÃæµÄnew_itÒ²»áµ½ÕâÀï
+            if (old_it != NULL) {//replaceå’Œset append preappendå‘½ä»¤ä¼šè¿›å…¥è¿™é‡Œ
+                item_replace(old_it, it, hv); //è¿™é‡Œé¢ä¼šunlink old_it,ç„¶ålink it
+            } else {//addå’Œsetå‘½ä»¤ä¼šè¿›å…¥è¿™é‡Œ   
+                do_item_link(it, hv); //å¯¹äºä¸€ä¸ªæ²¡æœ‰å­˜åœ¨çš„keyï¼Œä½¿ç”¨setå‘½ä»¤ä¼šæ¥åˆ°è¿™é‡Œ   è¿™é‡Œé¢ä¼šå¢åŠ refcountè®¡æ•°ï¼Œä¸Šé¢çš„new_itä¹Ÿä¼šåˆ°è¿™é‡Œ
             }
             
             c->cas = ITEM_get_cas(it);
@@ -2511,7 +2511,7 @@ enum store_item_type do_store_item(item *it, int comm, conn *c, const uint32_t h
     
     if (old_it != NULL)
         do_item_remove(old_it);         /* release our reference */
-    if (new_it != NULL) //Ö»ÓĞÔÚ×·¼ÓµÄÊ±ºò£¬Ö®Ç°µÄitem¿Õ¼ä²»¹»²Å»á¿ªÅÌĞÂµÄ±ÈÖ®Ç°´óµÄitem
+    if (new_it != NULL) //åªæœ‰åœ¨è¿½åŠ çš„æ—¶å€™ï¼Œä¹‹å‰çš„itemç©ºé—´ä¸å¤Ÿæ‰ä¼šå¼€ç›˜æ–°çš„æ¯”ä¹‹å‰å¤§çš„item
         do_item_remove(new_it);
 
     if (stored == STORED) {
@@ -2552,12 +2552,12 @@ typedef struct token_s {
  *   }
  */
 
-//½«Ò»ÌõÃüÁî·Ö¸î³ÉÒ»¸ö¸öµÄtoken£¬²¢ÓÃtokensÊı×éÒ»Ò»¶ÔÓ¦µÄÖ¸Ïò
-//±ÈÈçÃüÁî"set tt 3 0 10"£¬½«±»·Ö¸î³É"set"¡¢"tt"¡¢"3"¡¢"0"¡¢"10"
-//²¢ÓÃtokensÊı×éµÄ5¸öÔªËØ¶ÔÓ¦Ö¸Ïò¡£token_tÀàĞÍµÄvalue³ÉÔ±Ö¸Ïò¶ÔÓ¦token
-//ÔÚcommand×Ö·û´®ÖĞµÄÎ»ÖÃ£¬lengthÔòÖ¸Ã÷¸ÃtokenµÄ³¤¶È
-//¸Ãº¯Êı·µ»ØtokenµÄÊıÁ¿£¬lengthÔòÖ¸Ã÷¸ÃtokenµÄ³¤¶È
-//ÉÏÃæµÄsetÃüÁîÀı×Ó£¬tokensize_command»á·µ»Ø6¡£×îºóÒ»¸ötokenÊÇÎŞÒâÒåµÄ
+//å°†ä¸€æ¡å‘½ä»¤åˆ†å‰²æˆä¸€ä¸ªä¸ªçš„tokenï¼Œå¹¶ç”¨tokensæ•°ç»„ä¸€ä¸€å¯¹åº”çš„æŒ‡å‘
+//æ¯”å¦‚å‘½ä»¤"set tt 3 0 10"ï¼Œå°†è¢«åˆ†å‰²æˆ"set"ã€"tt"ã€"3"ã€"0"ã€"10"
+//å¹¶ç”¨tokensæ•°ç»„çš„5ä¸ªå…ƒç´ å¯¹åº”æŒ‡å‘ã€‚token_tç±»å‹çš„valueæˆå‘˜æŒ‡å‘å¯¹åº”token
+//åœ¨commandå­—ç¬¦ä¸²ä¸­çš„ä½ç½®ï¼Œlengthåˆ™æŒ‡æ˜è¯¥tokençš„é•¿åº¦
+//è¯¥å‡½æ•°è¿”å›tokençš„æ•°é‡ï¼Œlengthåˆ™æŒ‡æ˜è¯¥tokençš„é•¿åº¦
+//ä¸Šé¢çš„setå‘½ä»¤ä¾‹å­ï¼Œtokensize_commandä¼šè¿”å›6ã€‚æœ€åä¸€ä¸ªtokenæ˜¯æ— æ„ä¹‰çš„
 static size_t tokenize_command(char *command, token_t *tokens, const size_t max_tokens) {
     char *s, *e;
     size_t ntokens = 0;
@@ -2653,9 +2653,9 @@ void append_stat(const char *name, ADD_STAT add_stats, conn *c,
 
 /*
 stats detail on | off | dump
-²ÎÊıÎªon£¬´ò¿ªÏêÏ¸²Ù×÷¼ÇÂ¼
-²ÎÊıÎªoff£¬¹Ø±ÕÏêÏ¸²Ù×÷¼ÇÂ¼
-²ÎÊıÎªdump£¬ÏÔÊ¾ÏêÏ¸²Ù×÷¼ÇÂ¼(Ã¿Ò»¸ö¼üÖµget¡¢set¡¢hit¡¢delµÄ´ÎÊı)
+å‚æ•°ä¸ºonï¼Œæ‰“å¼€è¯¦ç»†æ“ä½œè®°å½•
+å‚æ•°ä¸ºoffï¼Œå…³é—­è¯¦ç»†æ“ä½œè®°å½•
+å‚æ•°ä¸ºdumpï¼Œæ˜¾ç¤ºè¯¦ç»†æ“ä½œè®°å½•(æ¯ä¸€ä¸ªé”®å€¼getã€setã€hitã€delçš„æ¬¡æ•°)
  */
 inline static void process_stats_detail(conn *c, const char *command) {
     assert(c != NULL);
@@ -2794,7 +2794,7 @@ STAT lru_crawler_tocrawl 0
 STAT tail_repair_time 0
 STAT flush_enabled yes
 STAT hash_algorithm jenkins
-*/ //²é¿´settings²ÎÊı
+*/ //æŸ¥çœ‹settingså‚æ•°
 static void process_stat_settings(ADD_STAT add_stats, void *c) {
     assert(add_stats);
     APPEND_STAT("maxbytes", "%llu", (unsigned long long)settings.maxbytes);
@@ -2834,7 +2834,7 @@ static void process_stat_settings(ADD_STAT add_stats, void *c) {
     APPEND_STAT("hash_algorithm", "%s", settings.hash_algorithm);
 }
 
-//»ñÈ¡conn¶ÔÓ¦µÄIPµØÖ·ĞÅÏ¢ »òÕß ÓòÃûĞÅÏ¢µÈ
+//è·å–connå¯¹åº”çš„IPåœ°å€ä¿¡æ¯ æˆ–è€… åŸŸåä¿¡æ¯ç­‰
 static void conn_to_str(const conn *c, char *buf) {
     char addr_text[MAXPATHLEN];
 
@@ -2916,8 +2916,8 @@ static void conn_to_str(const conn *c, char *buf) {
 /*
 stats conns
 STAT 26:addr tcp:192.168.1.111:11211
-STAT 26:state conn_listening //´¦ÓÚlisten×´Ì¬
-STAT 26:secs_since_last_cmd 1027  //secs_since_last_cmd¸ÃÁ´½ÓºÍmemcachedÓĞ¶à¾ÃÃ»ÓĞÍ¨ĞÅÁË£¬Ò²¾ÍÊÇµ±Ç°Ê±¼ä¼õÈ¥×îºóÒ»´ÎÍ¨ĞÅµÄÊ±¼ä
+STAT 26:state conn_listening //å¤„äºlistençŠ¶æ€
+STAT 26:secs_since_last_cmd 1027  //secs_since_last_cmdè¯¥é“¾æ¥å’Œmemcachedæœ‰å¤šä¹…æ²¡æœ‰é€šä¿¡äº†ï¼Œä¹Ÿå°±æ˜¯å½“å‰æ—¶é—´å‡å»æœ€åä¸€æ¬¡é€šä¿¡çš„æ—¶é—´
 STAT 27:addr udp:192.168.1.111:11211
 STAT 27:state conn_read
 STAT 27:secs_since_last_cmd 1027
@@ -2935,7 +2935,7 @@ STAT 31:state conn_parse_cmd
 STAT 31:secs_since_last_cmd 0 
 END
 */
-//secs_since_last_cmd¸ÃÁ´½ÓºÍmemcachedÓĞ¶à¾ÃÃ»ÓĞÍ¨ĞÅÁË£¬Ò²¾ÍÊÇµ±Ç°Ê±¼ä¼õÈ¥×îºóÒ»´ÎÍ¨ĞÅµÄÊ±¼ä
+//secs_since_last_cmdè¯¥é“¾æ¥å’Œmemcachedæœ‰å¤šä¹…æ²¡æœ‰é€šä¿¡äº†ï¼Œä¹Ÿå°±æ˜¯å½“å‰æ—¶é—´å‡å»æœ€åä¸€æ¬¡é€šä¿¡çš„æ—¶é—´
 static void process_stats_conns(ADD_STAT add_stats, void *c) {
     int i;
     char key_str[STAT_KEY_LEN];
@@ -2959,7 +2959,7 @@ static void process_stats_conns(ADD_STAT add_stats, void *c) {
                 APPEND_NUM_STAT(i, "state", "%s",
                         state_text(conns[i]->state));
                 APPEND_NUM_STAT(i, "secs_since_last_cmd", "%d",
-                        current_time - conns[i]->last_cmd_time); //¸ÃÁ´½ÓºÍmemcachedÓĞ¶à¾ÃÃ»ÓĞÍ¨ĞÅÁË£¬Ò²¾ÍÊÇµ±Ç°Ê±¼ä¼õÈ¥×îºóÒ»´ÎÍ¨ĞÅµÄÊ±¼ä
+                        current_time - conns[i]->last_cmd_time); //è¯¥é“¾æ¥å’Œmemcachedæœ‰å¤šä¹…æ²¡æœ‰é€šä¿¡äº†ï¼Œä¹Ÿå°±æ˜¯å½“å‰æ—¶é—´å‡å»æœ€åä¸€æ¬¡é€šä¿¡çš„æ—¶é—´
             }
         }
     }
@@ -2974,7 +2974,7 @@ static void process_stat(conn *c, token_t *tokens, const size_t ntokens) {
         return;
     }
 
-    if (ntokens == 2) { //stats items | slabs | sizes ºÍstats×ÜĞÅÏ¢
+    if (ntokens == 2) { //stats items | slabs | sizes å’Œstatsæ€»ä¿¡æ¯
         server_stats(&append_stats, c);
         (void)get_stats(NULL, 0, &append_stats, c);
     } else if (strcmp(subcommand, "reset") == 0) {
@@ -2984,9 +2984,9 @@ static void process_stat(conn *c, token_t *tokens, const size_t ntokens) {
     } else if (strcmp(subcommand, "detail") == 0) { //stats detail on | off | dump
         /*
         stats detail on | off | dump
-        ²ÎÊıÎªon£¬´ò¿ªÏêÏ¸²Ù×÷¼ÇÂ¼
-        ²ÎÊıÎªoff£¬¹Ø±ÕÏêÏ¸²Ù×÷¼ÇÂ¼
-        ²ÎÊıÎªdump£¬ÏÔÊ¾ÏêÏ¸²Ù×÷¼ÇÂ¼(Ã¿Ò»¸ö¼üÖµget¡¢set¡¢hit¡¢delµÄ´ÎÊı)
+        å‚æ•°ä¸ºonï¼Œæ‰“å¼€è¯¦ç»†æ“ä½œè®°å½•
+        å‚æ•°ä¸ºoffï¼Œå…³é—­è¯¦ç»†æ“ä½œè®°å½•
+        å‚æ•°ä¸ºdumpï¼Œæ˜¾ç¤ºè¯¦ç»†æ“ä½œè®°å½•(æ¯ä¸€ä¸ªé”®å€¼getã€setã€hitã€delçš„æ¬¡æ•°)
          */
         /* NOTE: how to tackle detail with binary? */
         if (ntokens < 4)
@@ -3001,9 +3001,9 @@ static void process_stat(conn *c, token_t *tokens, const size_t ntokens) {
         char *buf;
         unsigned int bytes, id, limit = 0;
         /*
-        stats cachedump slab_id limit_num ÏÔÊ¾Ä³¸öslabÖĞµÄÇ°limit_num¸ökeyÁĞ±í£¬ÏÔÊ¾¸ñÊ½ÈçÏÂ
-        ITEM key_name [ value_length b; expire_time|access_time s] ÆäÖĞ£¬ÏÔÊ¾ ¹ıÆÚÊ±¼ä(timestamp) 
-        Èç¹ûÊÇÓÀ²»¹ıÆÚµÄkey£¬expire_time»áÏÔÊ¾Îª·şÎñÆ÷Æô¶¯µÄÊ±¼ä 
+        stats cachedump slab_id limit_num æ˜¾ç¤ºæŸä¸ªslabä¸­çš„å‰limit_numä¸ªkeyåˆ—è¡¨ï¼Œæ˜¾ç¤ºæ ¼å¼å¦‚ä¸‹
+        ITEM key_name [ value_length b; expire_time|access_time s] å…¶ä¸­ï¼Œæ˜¾ç¤º è¿‡æœŸæ—¶é—´(timestamp) 
+        å¦‚æœæ˜¯æ°¸ä¸è¿‡æœŸçš„keyï¼Œexpire_timeä¼šæ˜¾ç¤ºä¸ºæœåŠ¡å™¨å¯åŠ¨çš„æ—¶é—´ 
         */
         if (ntokens < 5) {
             out_string(c, "CLIENT_ERROR bad command line");
@@ -3064,16 +3064,16 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
     assert(c != NULL);
 
      //key_token->value != NULL  
-    //Óöµ½command½áÊø±êÊ¶·û'\0'Ê±Ìø³öÑ­»·  
+    //é‡åˆ°commandç»“æŸæ ‡è¯†ç¬¦'\0'æ—¶è·³å‡ºå¾ªç¯  
     do {
-		//ÒòÎªÒ»¸ögetÃüÁî¿ÉÒÔÍ¬Ê±»ñÈ¡¶àÌõ¼ÇÂ¼µÄÄÚÈİ
-		//±ÈÈçget key1 key2 key3
-        while(key_token->length != 0) {//Õë¶Ô¶à¸ökeyµÄÇé¿ö£¬Ò»¸ökey´¦Àí½áÊøÊ±Ìø³öÑ­»·  
+		//å› ä¸ºä¸€ä¸ªgetå‘½ä»¤å¯ä»¥åŒæ—¶è·å–å¤šæ¡è®°å½•çš„å†…å®¹
+		//æ¯”å¦‚get key1 key2 key3
+        while(key_token->length != 0) {//é’ˆå¯¹å¤šä¸ªkeyçš„æƒ…å†µï¼Œä¸€ä¸ªkeyå¤„ç†ç»“æŸæ—¶è·³å‡ºå¾ªç¯  
 
             key = key_token->value;
             nkey = key_token->length;
 
-            if(nkey > KEY_MAX_LENGTH) { //key×î´ó³¤¶È250  
+            if(nkey > KEY_MAX_LENGTH) { //keyæœ€å¤§é•¿åº¦250  
                 out_string(c, "CLIENT_ERROR bad command line format");
                 while (i-- > 0) {
                     item_remove(*(c->ilist + i));
@@ -3085,12 +3085,12 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
                 stats_prefix_record_get(key, nkey, NULL != it);
             }
             if (it) {
-                if (i >= c->isize) {//isize£ºilist´óĞ¡£¬³¬³öilist´óĞ¡Ê±ÖØĞÂ·ÖÅä  
+                if (i >= c->isize) {//isizeï¼šilistå¤§å°ï¼Œè¶…å‡ºilistå¤§å°æ—¶é‡æ–°åˆ†é…  
                     item **new_list = realloc(c->ilist, sizeof(item *) * c->isize * 2);
                     if (new_list) {
                         c->isize *= 2;
                         c->ilist = new_list;
-                    } else {//·ÖÅäÊ§°Ü£¬ÒÆ³ıit£¬·ÅÈë»ØÊÕ²ÛslotÖĞ¡£  
+                    } else {//åˆ†é…å¤±è´¥ï¼Œç§»é™¤itï¼Œæ”¾å…¥å›æ”¶æ§½slotä¸­ã€‚  
                         STATS_LOCK();
                         stats.malloc_fails++;
                         STATS_UNLOCK();
@@ -3106,9 +3106,9 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
                  *   key
                  *   " " + flags + " " + data length + "\r\n" + data (with \r\n)
                  */
-                //Ê¹ÓÃgetsÃüÁî  
+                //ä½¿ç”¨getså‘½ä»¤  
                 if (return_cas)
-                {//²»ÊÇcas  
+                {//ä¸æ˜¯cas  
                   MEMCACHED_COMMAND_GET(c->sfd, ITEM_key(it), it->nkey,
                                         it->nbytes, ITEM_get_cas(it));
                   /* Goofy mid-flight realloc. */
@@ -3140,18 +3140,18 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
                       return;
                   }
                   *(c->suffixlist + i) = suffix;
-                  //suffix£º´ú±ícasµÄ°æ±¾ºÅ£¬°üÀ¨\r\n 
+                  //suffixï¼šä»£è¡¨casçš„ç‰ˆæœ¬å·ï¼ŒåŒ…æ‹¬\r\n 
                   int suffix_len = snprintf(suffix, SUFFIX_SIZE,
                                             " %llu\r\n",
                                             (unsigned long long)ITEM_get_cas(it));
-				  //Ìî³äÒª·µ»ØµÄĞÅÏ¢ //ITEM_suffix(it),Ö¸Ïòflag£¬nsuffix°üÀ¨flag+data length + \r\n  
-                  if (add_iov(c, "VALUE ", 6) != 0 || //Èç¹ûadd_iov³É¹¦£¬Ôò·µ»Ø0
+				  //å¡«å……è¦è¿”å›çš„ä¿¡æ¯ //ITEM_suffix(it),æŒ‡å‘flagï¼ŒnsuffixåŒ…æ‹¬flag+data length + \r\n  
+                  if (add_iov(c, "VALUE ", 6) != 0 || //å¦‚æœadd_iovæˆåŠŸï¼Œåˆ™è¿”å›0
                       add_iov(c, ITEM_key(it), it->nkey) != 0 ||
-                      add_iov(c, ITEM_suffix(it), it->nsuffix - 2) != 0 ||  //¼õÈ¥\r\n£¬Ôò²»»»ĞĞ£¬°æ±¾ºÅ½ô¸ú×Åflags+length  
+                      add_iov(c, ITEM_suffix(it), it->nsuffix - 2) != 0 ||  //å‡å»\r\nï¼Œåˆ™ä¸æ¢è¡Œï¼Œç‰ˆæœ¬å·ç´§è·Ÿç€flags+length  
                       add_iov(c, suffix, suffix_len) != 0 ||
                       add_iov(c, ITEM_data(it), it->nbytes) != 0)
                       {
-                      	  //ÒıÓÃ¼ÆÊı¼õÒ»
+                      	  //å¼•ç”¨è®¡æ•°å‡ä¸€
                           item_remove(it);
                           break;
                       }
@@ -3184,13 +3184,13 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
                 c->thread->stats.slab_stats[it->slabs_clsid].get_hits++;
                 c->thread->stats.get_cmds++;
                 pthread_mutex_unlock(&c->thread->stats.mutex);
-				//Ë¢ĞÂÕâ¸öitemµÄ·ÃÎÊÊ±¼äÒÔ¼°ÔÚLRU¶ÓÁĞÖĞµÄÎ»ÖÃ
+				//åˆ·æ–°è¿™ä¸ªitemçš„è®¿é—®æ—¶é—´ä»¥åŠåœ¨LRUé˜Ÿåˆ—ä¸­çš„ä½ç½®
                 item_update(it);
 
-				//²¢²»»áÂíÉÏ·ÅÆú¶ÔÕâ¸öitemµÄÕ¼ÓÃ¡£ÒòÎªÔÚadd_iovº¯ÊıÖĞ£¬memcached
-				//²¢²»»á¸´ÖÆÒ»·İitem£¬¶øÊÇÖ±½ÓÊ¹ÓÃitem½á¹¹Ìå±¾ÉíµÄ½á¹¹¡£¹Ê²»ÄÜÂíÉÏ½â³ı¶Ô
-				//itemµÄÒıÓÃ£¬²»È»ÆäËûworkerÏß³Ì¾ÍÓĞ»ú»á°ÑÕâ¸öitemÊÍ·Å£¬µ¼ÖÂÒ°Ö¸Õë
-                *(c->ilist + i) = it; //°ÑÕâ¸öitem·Åµ½ilistÊı×éÖĞ£¬ÈÕºó»á½øĞĞÊÍ·ÅµÄ
+				//å¹¶ä¸ä¼šé©¬ä¸Šæ”¾å¼ƒå¯¹è¿™ä¸ªitemçš„å ç”¨ã€‚å› ä¸ºåœ¨add_iovå‡½æ•°ä¸­ï¼Œmemcached
+				//å¹¶ä¸ä¼šå¤åˆ¶ä¸€ä»½itemï¼Œè€Œæ˜¯ç›´æ¥ä½¿ç”¨itemç»“æ„ä½“æœ¬èº«çš„ç»“æ„ã€‚æ•…ä¸èƒ½é©¬ä¸Šè§£é™¤å¯¹
+				//itemçš„å¼•ç”¨ï¼Œä¸ç„¶å…¶ä»–workerçº¿ç¨‹å°±æœ‰æœºä¼šæŠŠè¿™ä¸ªitemé‡Šæ”¾ï¼Œå¯¼è‡´é‡æŒ‡é’ˆ
+                *(c->ilist + i) = it; //æŠŠè¿™ä¸ªitemæ”¾åˆ°ilistæ•°ç»„ä¸­ï¼Œæ—¥åä¼šè¿›è¡Œé‡Šæ”¾çš„
                 i++;
 
             } else {
@@ -3208,12 +3208,12 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
          * If the command string hasn't been fully processed, get the next set
          * of tokens.
          */
-        //ÒòÎªµ÷ÓÃÒ»´Îtokensize_command×î¶àÖ»¿ÉÒÔ½âÎöMAX_TOKENS-1¸ötoken£¬µ«
-        //getÃüÁîµÄ¼üÖµkey ¸öÊı¿ÉÒÔÓĞºÜ¶à¸ö£¬ËùÒÔ´ËÊ±¾Í»á³öÏÖºóÃæµÄ¼üÖµ
-        //²»ÔÚµÚÒ»´ÎtokensizeµÄtokensÊı×éÖĞ£¬´ËÊ±ĞèÒª¶à´Îµ÷ÓÃtokensize_command
-        //º¯Êı£¬°ÑËùÓĞµÄ¼üÖµ¶¼tokenize³öÀ´¡£×¢Òâ£¬´ËÊ±»¹ÊÇÔÚgetÃüÁîÖĞ¡£
-        //µ±È»ÔÚ¿´ÕâÀïµÄ´úÂëÊ±Ö±½ÓºöÂÔÕâÖÖÇé¿ö£¬ÎÒÃÇÖ»¿¼ÂÇ"get tk"ÃüÁî
-        if(key_token->value != NULL) { //get¶à¸ökeyÊ±£¬½âÎöÊ£ÓàµÄkey  
+        //å› ä¸ºè°ƒç”¨ä¸€æ¬¡tokensize_commandæœ€å¤šåªå¯ä»¥è§£æMAX_TOKENS-1ä¸ªtokenï¼Œä½†
+        //getå‘½ä»¤çš„é”®å€¼key ä¸ªæ•°å¯ä»¥æœ‰å¾ˆå¤šä¸ªï¼Œæ‰€ä»¥æ­¤æ—¶å°±ä¼šå‡ºç°åé¢çš„é”®å€¼
+        //ä¸åœ¨ç¬¬ä¸€æ¬¡tokensizeçš„tokensæ•°ç»„ä¸­ï¼Œæ­¤æ—¶éœ€è¦å¤šæ¬¡è°ƒç”¨tokensize_command
+        //å‡½æ•°ï¼ŒæŠŠæ‰€æœ‰çš„é”®å€¼éƒ½tokenizeå‡ºæ¥ã€‚æ³¨æ„ï¼Œæ­¤æ—¶è¿˜æ˜¯åœ¨getå‘½ä»¤ä¸­ã€‚
+        //å½“ç„¶åœ¨çœ‹è¿™é‡Œçš„ä»£ç æ—¶ç›´æ¥å¿½ç•¥è¿™ç§æƒ…å†µï¼Œæˆ‘ä»¬åªè€ƒè™‘"get tk"å‘½ä»¤
+        if(key_token->value != NULL) { //getå¤šä¸ªkeyæ—¶ï¼Œè§£æå‰©ä½™çš„key  
             ntokens = tokenize_command(key_token->value, tokens, MAX_TOKENS);
             key_token = tokens;
         }
@@ -3245,24 +3245,24 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
     }
 }
 
-//process_update_command¶ÁÈ¡µÚÒ»ĞĞ£¬complete_nread_ascii¶ÁÈ¡ÍêÊı¾İºó´¦Àí
+//process_update_commandè¯»å–ç¬¬ä¸€è¡Œï¼Œcomplete_nread_asciiè¯»å–å®Œæ•°æ®åå¤„ç†
 static void process_update_command(conn *c, token_t *tokens, const size_t ntokens, int comm, bool handle_cas) {
-    char *key; //¼üÖµ
-    size_t nkey; //¼üÖµ³¤¶È
-    unsigned int flags; //itemµÄflags
+    char *key; //é”®å€¼
+    size_t nkey; //é”®å€¼é•¿åº¦
+    unsigned int flags; //itemçš„flags
     int32_t exptime_int = 0; 
-    time_t exptime;//itemµÄ³¬Ê±
+    time_t exptime;//itemçš„è¶…æ—¶
     int vlen;
     uint64_t req_cas_id=0;
     item *it;
 
     assert(c != NULL);
 
-	//·şÎñÆ÷²»ĞèÒª»Ø¸´ĞÅÏ¢¸ø¿Í»§¶Ë£¬Õâ¿ÉÒÔ¼õÉÙÍøÂçIO½ø¶øÌá¸ßËÙ¶È
-	//ÕâÖÖÉèÖÃÊÇÒ»´ÎĞÔµÄ£¬²»Ó°ÏìÏÂÒ»ÌõÃüÁî
-    set_noreply_maybe(c, tokens, ntokens); //´¦ÀíÓÃ»§ÃüÁîÀïÃæµÄnoreply
+	//æœåŠ¡å™¨ä¸éœ€è¦å›å¤ä¿¡æ¯ç»™å®¢æˆ·ç«¯ï¼Œè¿™å¯ä»¥å‡å°‘ç½‘ç»œIOè¿›è€Œæé«˜é€Ÿåº¦
+	//è¿™ç§è®¾ç½®æ˜¯ä¸€æ¬¡æ€§çš„ï¼Œä¸å½±å“ä¸‹ä¸€æ¡å‘½ä»¤
+    set_noreply_maybe(c, tokens, ntokens); //å¤„ç†ç”¨æˆ·å‘½ä»¤é‡Œé¢çš„noreply
 
-	//¼üÖµµÄ³¤¶ÈÌ«³¤ÁË¡£KEY_MAX_LENGTHÎª250
+	//é”®å€¼çš„é•¿åº¦å¤ªé•¿äº†ã€‚KEY_MAX_LENGTHä¸º250
     if (tokens[KEY_TOKEN].length > KEY_MAX_LENGTH) {
         out_string(c, "CLIENT_ERROR bad command line format");
         return;
@@ -3276,8 +3276,8 @@ static void process_update_command(conn *c, token_t *tokens, const size_t ntoken
     key = tokens[KEY_TOKEN].value;
     nkey = tokens[KEY_TOKEN].length;
 
-	//½«×Ö·û´®×ª³Éunsigned long£¬»ñÈ¡false¡¢exptime_int¡¢vlen¡£
-	//ËüÃÇµÄ×Ö·û´®ĞÎÊ½±ØĞëÊÇ´¿Êı×Ö£¬·ñÔò×ª»»Ê§°Ü£¬·µ»Øfalse
+	//å°†å­—ç¬¦ä¸²è½¬æˆunsigned longï¼Œè·å–falseã€exptime_intã€vlenã€‚
+	//å®ƒä»¬çš„å­—ç¬¦ä¸²å½¢å¼å¿…é¡»æ˜¯çº¯æ•°å­—ï¼Œå¦åˆ™è½¬æ¢å¤±è´¥ï¼Œè¿”å›false
     if (! (safe_strtoul(tokens[2].value, (uint32_t *)&flags)
            && safe_strtol(tokens[3].value, &exptime_int)
            && safe_strtol(tokens[4].value, (int32_t *)&vlen))) {
@@ -3291,41 +3291,41 @@ static void process_update_command(conn *c, token_t *tokens, const size_t ntoken
     /* Negative exptimes can underflow and end up immortal. realtime() will
        immediately expire values that are greater than REALTIME_MAXDELTA, but less
        than process_started, so lets aim for that. */
-    if (exptime < 0) //´ËÊ±»áÁ¢¼´¹ıÆÚÊ§Ğ§
-        exptime = REALTIME_MAXDELTA + 1; //REALTIME_MAXDELTAµÈÓÚ30Ìì
+    if (exptime < 0) //æ­¤æ—¶ä¼šç«‹å³è¿‡æœŸå¤±æ•ˆ
+        exptime = REALTIME_MAXDELTA + 1; //REALTIME_MAXDELTAç­‰äº30å¤©
 
     // does cas value exist?
-    if (handle_cas) { //Ö»ÓĞcasÃüÁîÕâÀï²Å»áÂú×ãÌõ¼ş
+    if (handle_cas) { //åªæœ‰caså‘½ä»¤è¿™é‡Œæ‰ä¼šæ»¡è¶³æ¡ä»¶
 
         /*
         set yang 1 1 3 2
         abc
         STORED
-        µÚÒ»ĞĞÄ©Î²µÄ2ÊÇÊµ¼ÊĞèÒªµÄ
+        ç¬¬ä¸€è¡Œæœ«å°¾çš„2æ˜¯å®é™…éœ€è¦çš„
           */
         if (!safe_strtoull(tokens[5].value, &req_cas_id)) {
             out_string(c, "CLIENT_ERROR bad command line format");
             return;
         }
     }
-	//ÔÚ´æ´¢itemÊı¾İµÄÊ±ºò£¬¶¼»á×Ô¶¯ÔÚÊı¾İµÄ×îºó¼ÓÉÏ"\r\n"
-    vlen += 2; //+2ÊÇÒòÎªdataºóÃæ»¹Òª¼ÓÉÏ"\r\n"ÕâÁ½¸ö×Ö·û
+	//åœ¨å­˜å‚¨itemæ•°æ®çš„æ—¶å€™ï¼Œéƒ½ä¼šè‡ªåŠ¨åœ¨æ•°æ®çš„æœ€ååŠ ä¸Š"\r\n"
+    vlen += 2; //+2æ˜¯å› ä¸ºdataåé¢è¿˜è¦åŠ ä¸Š"\r\n"è¿™ä¸¤ä¸ªå­—ç¬¦
     if (vlen < 0 || vlen - 2 < 0) {
         out_string(c, "CLIENT_ERROR bad command line format");
         return;
     }
 
-	//¸ù¾İËùĞèµÄ´óĞ¡·ÖÅä¶ÔÓ¦µÄitem£¬²¢¸øÕâ¸öitem¸³Öµ
-	// ³ıÁËtimeºÍrefcount³ÉÔ±Íâ£¬ÆäËûµÄ¶¼¸³ÖµÁË¡£²¢°Ñ¼üÖµ¡¢flagÕâĞ©Öµ¶¼¿½±´
-	//µ½itemºóÃæµÄbuffÀïÃæÁË£¬ÖÁÓÚdata£¬ÒòÎªÏÖÔÚ¶¼»¹Ã»ÄÃµ½ËùÒÔ»¹Ã»¸³Öµ
-	//realtime(exptime)ÊÇÖ±½Ó¸³Öµ¸ø itemµÄexptime³ÉÔ±
+	//æ ¹æ®æ‰€éœ€çš„å¤§å°åˆ†é…å¯¹åº”çš„itemï¼Œå¹¶ç»™è¿™ä¸ªitemèµ‹å€¼
+	// é™¤äº†timeå’Œrefcountæˆå‘˜å¤–ï¼Œå…¶ä»–çš„éƒ½èµ‹å€¼äº†ã€‚å¹¶æŠŠé”®å€¼ã€flagè¿™äº›å€¼éƒ½æ‹·è´
+	//åˆ°itemåé¢çš„buffé‡Œé¢äº†ï¼Œè‡³äºdataï¼Œå› ä¸ºç°åœ¨éƒ½è¿˜æ²¡æ‹¿åˆ°æ‰€ä»¥è¿˜æ²¡èµ‹å€¼
+	//realtime(exptime)æ˜¯ç›´æ¥èµ‹å€¼ç»™ itemçš„exptimeæˆå‘˜
     it = item_alloc(key, nkey, flags, realtime(exptime), vlen);
 
     if (settings.detail_enabled) {
         stats_prefix_record_set(key, nkey);
     }
     
-    if (it == 0) {//Ã»ÄÚ´æÁË£¬»ñÈ¡itemÊ§°Ü
+    if (it == 0) {//æ²¡å†…å­˜äº†ï¼Œè·å–itemå¤±è´¥
         if (! item_size_ok(nkey, flags, vlen))
             out_string(c, "SERVER_ERROR object too large for cache");
         else
@@ -3336,7 +3336,7 @@ static void process_update_command(conn *c, token_t *tokens, const size_t ntoken
 
         /* Avoid stale data persisting in cache because we failed alloc.
          * Unacceptable for SET. Anywhere else too? */
-        if (comm == NREAD_SET) { //Õâ´Î´ÓĞ¡¶Ôkey½øĞĞset£¬µ«ÊÇÈ´Ã»ÓĞ³É¹¦£¬ÔòĞèÒªÉ¾³ıprimary_hashtableÖĞµÄ¸Ãkey
+        if (comm == NREAD_SET) { //è¿™æ¬¡ä»å°å¯¹keyè¿›è¡Œsetï¼Œä½†æ˜¯å´æ²¡æœ‰æˆåŠŸï¼Œåˆ™éœ€è¦åˆ é™¤primary_hashtableä¸­çš„è¯¥key
             it = item_get(key, nkey);
             if (it) {
                 item_unlink(it);
@@ -3347,16 +3347,16 @@ static void process_update_command(conn *c, token_t *tokens, const size_t ntoken
         return;
     }
 
-    //set casµÈÃüÁîĞĞÖĞµÄexpire±£´æµ½it->expire  cas±£´æÔÚit->data->caseÖĞµÄ
-    ITEM_set_cas(it, req_cas_id); //Ìî³äcas²¿·Ö
+    //set casç­‰å‘½ä»¤è¡Œä¸­çš„expireä¿å­˜åˆ°it->expire  casä¿å­˜åœ¨it->data->caseä¸­çš„
+    ITEM_set_cas(it, req_cas_id); //å¡«å……caséƒ¨åˆ†
 
-	//±¾º¯Êı²¢²»»á°Ñitem²åÈëµ½¹şÏ£±íºÍLRU¶ÓÁĞ£¬Õâ¸ö²åÈë¹¤×÷ÓÉ
-	//complete_nread_asciiº¯ÊıÍê³É  µ±´Ó¿Í»§¶Ë¶ÁÈ¡ÍæÊı¾İ²¿·ÖºóÔÙcomplete_nreadÖĞ°ÑitemÌí¼Óµ½hashºÍLRU¶ÓÁĞÖĞ
+	//æœ¬å‡½æ•°å¹¶ä¸ä¼šæŠŠitemæ’å…¥åˆ°å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—ï¼Œè¿™ä¸ªæ’å…¥å·¥ä½œç”±
+	//complete_nread_asciiå‡½æ•°å®Œæˆ  å½“ä»å®¢æˆ·ç«¯è¯»å–ç©æ•°æ®éƒ¨åˆ†åå†complete_nreadä¸­æŠŠitemæ·»åŠ åˆ°hashå’ŒLRUé˜Ÿåˆ—ä¸­
     c->item = it;
-    c->ritem = ITEM_data(it);//Êı¾İÖ±Í¨³µ 
-    c->rlbytes = it->nbytes; //µÈÓÚvlen(Òª±ÈÓÃ»§ÊäÈëµÄ³¤¶È´ó2£¬ÒòÎªÒª¼ÓÉÏ\r\n)
+    c->ritem = ITEM_data(it);//æ•°æ®ç›´é€šè½¦ 
+    c->rlbytes = it->nbytes; //ç­‰äºvlen(è¦æ¯”ç”¨æˆ·è¾“å…¥çš„é•¿åº¦å¤§2ï¼Œå› ä¸ºè¦åŠ ä¸Š\r\n)
     c->cmd = comm;  
-    conn_set_state(c, conn_nread); //¼ÌĞøÈ¥readÊı¾İ²¿·Ö+\r\n
+    conn_set_state(c, conn_nread); //ç»§ç»­å»readæ•°æ®éƒ¨åˆ†+\r\n
 }
 
 static void process_touch_command(conn *c, token_t *tokens, const size_t ntokens) {
@@ -3488,10 +3488,10 @@ enum delta_result_type do_add_delta(conn *c, const char *key, const size_t nkey,
         return NON_NUMERIC;
     }
 
-    if (incr) {//incÃüÁî£¬¼Ó
+    if (incr) {//incå‘½ä»¤ï¼ŒåŠ 
         value += delta;
         MEMCACHED_COMMAND_INCR(c->sfd, ITEM_key(it), it->nkey, value);
-    } else { //decÃüÁî-
+    } else { //decå‘½ä»¤-
         if(delta > value) {
             value = 0;
         } else {
@@ -3643,10 +3643,10 @@ static void process_slabs_automove_command(conn *c, token_t *tokens, const size_
 /*
 <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
 cas <key> <flags> <exptime> <bytes> <cas unique> [noreply]\r\n
-×¢ÒâÉÏÃæµÄÃüÁî²¿·ÖºóÃæÓĞ\r\n£¬È»ºó²ÅÊÇÊı¾İ²¿·Ö\r\n£¬ËùÒÔprocess_commandÊµ¼ÊÉÏ»áÖ´ĞĞÁ½´Î
+æ³¨æ„ä¸Šé¢çš„å‘½ä»¤éƒ¨åˆ†åé¢æœ‰\r\nï¼Œç„¶åæ‰æ˜¯æ•°æ®éƒ¨åˆ†\r\nï¼Œæ‰€ä»¥process_commandå®é™…ä¸Šä¼šæ‰§è¡Œä¸¤æ¬¡
 */
 
-//commandÖ¸ÏòÕâÌõÃüÁî(¸ÃÃüÁîÒÔ×Ö·û´®µÄĞÎÊ½±íÊ¾)
+//commandæŒ‡å‘è¿™æ¡å‘½ä»¤(è¯¥å‘½ä»¤ä»¥å­—ç¬¦ä¸²çš„å½¢å¼è¡¨ç¤º)
 static void process_command(conn *c, char *command) {
 
     token_t tokens[MAX_TOKENS];
@@ -3673,16 +3673,16 @@ static void process_command(conn *c, char *command) {
         return;
     }
 
-	//½«Ò»ÌõÃüÁî·Ö¸î³ÉÒ»¸ö¸öµÄtoken£¬²¢ÓÃtokensÊı×éÒ»Ò»¶ÔÓ¦µÄÖ¸Ïò
-	//±ÈÈçÃüÁî"set tt 3 0 10"£¬½«±»·Ö¸î³É"set"¡¢"tt"¡¢"3"¡¢"0"¡¢"10"
-	//²¢ÓÃtokensÊı×éµÄ5¸öÔªËØ¶ÔÓ¦Ö¸Ïò¡£token_tÀàĞÍµÄvalue³ÉÔ±Ö¸Ïò¶ÔÓ¦token
-	//ÔÚcommand×Ö·û´®ÖĞµÄÎ»ÖÃ£¬lengthÔòÖ¸Ã÷¸ÃtokenµÄ³¤¶È
-	//¸Ãº¯Êı·µ»ØtokenµÄÊıÁ¿£¬lengthÔòÖ¸Ã÷¸ÃtokenµÄ³¤¶È
-	//ÉÏÃæµÄsetÃüÁîÀı×Ó£¬tokensize_command»á·µ»Ø6¡£×îºóÒ»¸ötokenÊÇÎŞÒâÒåµÄ
-    ntokens = tokenize_command(command, tokens, MAX_TOKENS);//½«ÃüÁî¼ÇºÅ»¯
+	//å°†ä¸€æ¡å‘½ä»¤åˆ†å‰²æˆä¸€ä¸ªä¸ªçš„tokenï¼Œå¹¶ç”¨tokensæ•°ç»„ä¸€ä¸€å¯¹åº”çš„æŒ‡å‘
+	//æ¯”å¦‚å‘½ä»¤"set tt 3 0 10"ï¼Œå°†è¢«åˆ†å‰²æˆ"set"ã€"tt"ã€"3"ã€"0"ã€"10"
+	//å¹¶ç”¨tokensæ•°ç»„çš„5ä¸ªå…ƒç´ å¯¹åº”æŒ‡å‘ã€‚token_tç±»å‹çš„valueæˆå‘˜æŒ‡å‘å¯¹åº”token
+	//åœ¨commandå­—ç¬¦ä¸²ä¸­çš„ä½ç½®ï¼Œlengthåˆ™æŒ‡æ˜è¯¥tokençš„é•¿åº¦
+	//è¯¥å‡½æ•°è¿”å›tokençš„æ•°é‡ï¼Œlengthåˆ™æŒ‡æ˜è¯¥tokençš„é•¿åº¦
+	//ä¸Šé¢çš„setå‘½ä»¤ä¾‹å­ï¼Œtokensize_commandä¼šè¿”å›6ã€‚æœ€åä¸€ä¸ªtokenæ˜¯æ— æ„ä¹‰çš„
+    ntokens = tokenize_command(command, tokens, MAX_TOKENS);//å°†å‘½ä»¤è®°å·åŒ–
 
-	//¶ÔÓÚÃüÁî"get tk"£¬ÄÇÃ´token[0].valueµÈÓÚÖ¸Ïò"get"µÄ¿ªÊ¼Î»ÖÃ
-	//tokens[1].valueÔòÖ¸Ïò"tk"µÄ¿ªÊ¼Î»ÖÃ
+	//å¯¹äºå‘½ä»¤"get tk"ï¼Œé‚£ä¹ˆtoken[0].valueç­‰äºæŒ‡å‘"get"çš„å¼€å§‹ä½ç½®
+	//tokens[1].valueåˆ™æŒ‡å‘"tk"çš„å¼€å§‹ä½ç½®
 	if (ntokens >= 3 &&
         ((strcmp(tokens[COMMAND_TOKEN].value, "get") == 0) ||
          (strcmp(tokens[COMMAND_TOKEN].value, "bget") == 0))) {
@@ -3699,10 +3699,10 @@ static void process_command(conn *c, char *command) {
         process_update_command(c, tokens, ntokens, comm, false);
 
     } else if ((ntokens == 7 || ntokens == 8) && (strcmp(tokens[COMMAND_TOKEN].value, "cas") == 0 && (comm = NREAD_CAS))) {
-        //cas¿ÉÒÔ²Î¿¼http://www.linuxidc.com/Linux/2015-01/112507p12.htm
+        //caså¯ä»¥å‚è€ƒhttp://www.linuxidc.com/Linux/2015-01/112507p12.htm
         /*
-        "add" means "store this data, but only if the server *doesn't* already£»
-        ¡°cas¡± is a check and set operation which means ¡°store this data but only if no one else has updated since I last fetched it.¡± £»
+        "add" means "store this data, but only if the server *doesn't* alreadyï¼›
+        â€œcasâ€ is a check and set operation which means â€œstore this data but only if no one else has updated since I last fetched it.â€ ï¼›
         */
         process_update_command(c, tokens, ntokens, comm, true);
 
@@ -3791,24 +3791,24 @@ static void process_command(conn *c, char *command) {
 
     } else if (ntokens > 1 && strcmp(tokens[COMMAND_TOKEN].value, "slabs") == 0) {
         /*
-            ¿¼ÂÇÕâÑùµÄÒ»¸öÇé¾°£ºÔÚÒ»¿ªÊ¼£¬ÓÉÓÚÒµÎñÔ­ÒòÏòmemcached´æ´¢´óÁ¿³¤¶ÈÎª1KBµÄÊı¾İ£¬Ò²¾ÍÊÇËµmemcached·şÎñÆ÷½ø³Ì
-        ÀïÃæÓĞºÜ¶à´óĞ¡Îª1KBµÄitem¡£ÏÖÔÚÓÉÓÚÒµÎñµ÷ÕûĞèÒª´æ´¢´óÁ¿10KBµÄÊı¾İ£¬²¢ÇÒºÜÉÙÊ¹ÓÃ1KBµÄÄÇĞ©Êı¾İÁË¡£ÓÉÓÚÊı¾İÔ½
-        À´Ô½¶à£¬ÄÚ´æ¿ªÊ¼³Ô½ô¡£´óĞ¡Îª10KBµÄÄÇĞ©itemÆµ·±·ÃÎÊ£¬²¢ÇÒÓÉÓÚÄÚ´æ²»¹»ĞèÒªÊ¹ÓÃLRUÌÔÌ­Ò»Ğ©10KBµÄitem¡£
-        ¶ÔÓÚÉÏÃæµÄÇé¾°£¬»á²»»á¾õµÃ´óÁ¿1KBµÄitemÊµÔÚÌ«ÀË·ÑÁË¡£ÓÉÓÚºÜÉÙ·ÃÎÊÕâĞ©item£¬ËùÒÔ¼´Ê¹ËüÃÇ³¬Ê±¹ıÆÚÁË£¬»¹ÊÇ»á
-        Õ¼¾İ×Å¹şÏ£±íºÍLRU¶ÓÁĞ¡£LRU¶ÓÁĞ»¹ºÃ£¬²»Í¬´óĞ¡µÄitemÊ¹ÓÃ²»Í¬µÄLRU¶ÓÁĞ¡£µ«¶ÔÓÚ¹şÏ£±íÀ´Ëµ´óÁ¿µÄ½©Ê¬item»áÔö¼Ó
-        ¹şÏ£³åÍ»µÄ¿ÉÄÜĞÔ£¬²¢ÇÒÔÚÇ¨ÒÆ¹şÏ£±íµÄÊ±ºòÒ²ÀË·ÑÊ±¼ä¡£ÓĞÃ»ÓĞ°ì·¨¸ÉµôÕâĞ©item£¿Ê¹ÓÃLRUÅÀ³æ+lru_crawlerÃüÁîÊÇ
-        ¿ÉÒÔÇ¿ÖÆ¸ÉµôÕâĞ©½©Ê¬item¡£µ«¸ÉµôÕâĞ©½©Ê¬itemºó£¬ËüÃÇÕ¼¾İµÄÄÚ´æÊÇ¹é»¹µ½1KBµÄÄÇĞ©slab·ÖÅäÆ÷ÖĞ¡£1KBµÄslab·Ö
-        ÅäÆ÷²»»áÎª10KBµÄitem·ÖÅäÄÚ´æ¡£ËùÒÔ»¹ÊÇ¹¦¿÷Ò»óñ¡£
+            è€ƒè™‘è¿™æ ·çš„ä¸€ä¸ªæƒ…æ™¯ï¼šåœ¨ä¸€å¼€å§‹ï¼Œç”±äºä¸šåŠ¡åŸå› å‘memcachedå­˜å‚¨å¤§é‡é•¿åº¦ä¸º1KBçš„æ•°æ®ï¼Œä¹Ÿå°±æ˜¯è¯´memcachedæœåŠ¡å™¨è¿›ç¨‹
+        é‡Œé¢æœ‰å¾ˆå¤šå¤§å°ä¸º1KBçš„itemã€‚ç°åœ¨ç”±äºä¸šåŠ¡è°ƒæ•´éœ€è¦å­˜å‚¨å¤§é‡10KBçš„æ•°æ®ï¼Œå¹¶ä¸”å¾ˆå°‘ä½¿ç”¨1KBçš„é‚£äº›æ•°æ®äº†ã€‚ç”±äºæ•°æ®è¶Š
+        æ¥è¶Šå¤šï¼Œå†…å­˜å¼€å§‹åƒç´§ã€‚å¤§å°ä¸º10KBçš„é‚£äº›itemé¢‘ç¹è®¿é—®ï¼Œå¹¶ä¸”ç”±äºå†…å­˜ä¸å¤Ÿéœ€è¦ä½¿ç”¨LRUæ·˜æ±°ä¸€äº›10KBçš„itemã€‚
+        å¯¹äºä¸Šé¢çš„æƒ…æ™¯ï¼Œä¼šä¸ä¼šè§‰å¾—å¤§é‡1KBçš„itemå®åœ¨å¤ªæµªè´¹äº†ã€‚ç”±äºå¾ˆå°‘è®¿é—®è¿™äº›itemï¼Œæ‰€ä»¥å³ä½¿å®ƒä»¬è¶…æ—¶è¿‡æœŸäº†ï¼Œè¿˜æ˜¯ä¼š
+        å æ®ç€å“ˆå¸Œè¡¨å’ŒLRUé˜Ÿåˆ—ã€‚LRUé˜Ÿåˆ—è¿˜å¥½ï¼Œä¸åŒå¤§å°çš„itemä½¿ç”¨ä¸åŒçš„LRUé˜Ÿåˆ—ã€‚ä½†å¯¹äºå“ˆå¸Œè¡¨æ¥è¯´å¤§é‡çš„åƒµå°¸itemä¼šå¢åŠ 
+        å“ˆå¸Œå†²çªçš„å¯èƒ½æ€§ï¼Œå¹¶ä¸”åœ¨è¿ç§»å“ˆå¸Œè¡¨çš„æ—¶å€™ä¹Ÿæµªè´¹æ—¶é—´ã€‚æœ‰æ²¡æœ‰åŠæ³•å¹²æ‰è¿™äº›itemï¼Ÿä½¿ç”¨LRUçˆ¬è™«+lru_crawlerå‘½ä»¤æ˜¯
+        å¯ä»¥å¼ºåˆ¶å¹²æ‰è¿™äº›åƒµå°¸itemã€‚ä½†å¹²æ‰è¿™äº›åƒµå°¸itemåï¼Œå®ƒä»¬å æ®çš„å†…å­˜æ˜¯å½’è¿˜åˆ°1KBçš„é‚£äº›slabåˆ†é…å™¨ä¸­ã€‚1KBçš„slabåˆ†
+        é…å™¨ä¸ä¼šä¸º10KBçš„itemåˆ†é…å†…å­˜ã€‚æ‰€ä»¥è¿˜æ˜¯åŠŸäºä¸€ç¯‘ã€‚
 
-            ÄÇÓĞÃ»ÓĞ±ğµÄ°ì·¨ÄØ£¿ÊÇÓĞµÄ¡£memcachedÌá¹©µÄslab automove ºÍ rebalanceÁ½¸ö¶«Î÷¾ÍÊÇÍê³ÉÕâ¸ö¹¦ÄÜµÄ¡£ÔÚÄ¬ÈÏ
-        Çé¿öÏÂ£¬memcached²»Æô¶¯Õâ¸ö¹¦ÄÜ£¬ËùÒÔÒªÏëÊ¹ÓÃÕâ¸ö¹¦ÄÜ±ØĞëÔÚÆô¶¯memcachedµÄÊ±ºò¼ÓÉÏ²ÎÊı-o slab_reassign¡£
-        Ö®ºó¾Í¿ÉÒÔÔÚ¿Í»§¶Ë·¢ËÍÃüÁîslabs reassign <source class> <dest class>£¬ÊÖ¶¯½«source classµÄÄÚ´æÒ³·Ö¸ødest 
-        class¡£ºóÎÄ»á°ÑÕâ¸ö¹¤×÷³ÆÎªÄÚ´æÒ³ÖØ·ÖÅä¡£¶øÃüÁîslabs automoveÔòÊÇÈÃmemcached×Ô¶¯¼ì²âÊÇ·ñĞèÒª½øĞĞÄÚ´æÒ³ÖØ·ÖÅä£¬
-            Èç¹ûĞèÒªµÄ»°¾Í×Ô¶¯È¥²Ù×÷£¬ÕâÑùÒ»ÇĞ¶¼²»ĞèÒªÈË¹¤µÄ¸ÉÔ¤¡£
-        Èç¹ûÔÚÆô¶¯memcachedµÄÊ±ºòÊ¹ÓÃÁË²ÎÊı-o slab_reassign£¬ÄÇÃ´¾Í»á°Ñsettings.slab_reassign¸³ÖµÎªtrue(¸Ã±äÁ¿µÄÄ¬ÈÏÖµÎªfalse)¡£
-        »¹¼ÇµÃ¡¶slabÄÚ´æ·ÖÅäÆ÷¡·Ëµµ½µÄÃ¿Ò»¸öÄÚ´æÒ³µÄ´óĞ¡Âğ£¿ÔÚdo_slabs_newslabº¯ÊıÖĞ£¬Ò»¸öÄÚ´æÒ³µÄ´óĞ¡»á¸ù¾İ
-        settings.slab_reassignÊÇ·ñÎªtrue¶ø²»Í¬¡£
-         */ //²Î¿¼http://blog.csdn.net/luotuo44/article/details/43015129
+            é‚£æœ‰æ²¡æœ‰åˆ«çš„åŠæ³•å‘¢ï¼Ÿæ˜¯æœ‰çš„ã€‚memcachedæä¾›çš„slab automove å’Œ rebalanceä¸¤ä¸ªä¸œè¥¿å°±æ˜¯å®Œæˆè¿™ä¸ªåŠŸèƒ½çš„ã€‚åœ¨é»˜è®¤
+        æƒ…å†µä¸‹ï¼Œmemcachedä¸å¯åŠ¨è¿™ä¸ªåŠŸèƒ½ï¼Œæ‰€ä»¥è¦æƒ³ä½¿ç”¨è¿™ä¸ªåŠŸèƒ½å¿…é¡»åœ¨å¯åŠ¨memcachedçš„æ—¶å€™åŠ ä¸Šå‚æ•°-o slab_reassignã€‚
+        ä¹‹åå°±å¯ä»¥åœ¨å®¢æˆ·ç«¯å‘é€å‘½ä»¤slabs reassign <source class> <dest class>ï¼Œæ‰‹åŠ¨å°†source classçš„å†…å­˜é¡µåˆ†ç»™dest 
+        classã€‚åæ–‡ä¼šæŠŠè¿™ä¸ªå·¥ä½œç§°ä¸ºå†…å­˜é¡µé‡åˆ†é…ã€‚è€Œå‘½ä»¤slabs automoveåˆ™æ˜¯è®©memcachedè‡ªåŠ¨æ£€æµ‹æ˜¯å¦éœ€è¦è¿›è¡Œå†…å­˜é¡µé‡åˆ†é…ï¼Œ
+            å¦‚æœéœ€è¦çš„è¯å°±è‡ªåŠ¨å»æ“ä½œï¼Œè¿™æ ·ä¸€åˆ‡éƒ½ä¸éœ€è¦äººå·¥çš„å¹²é¢„ã€‚
+        å¦‚æœåœ¨å¯åŠ¨memcachedçš„æ—¶å€™ä½¿ç”¨äº†å‚æ•°-o slab_reassignï¼Œé‚£ä¹ˆå°±ä¼šæŠŠsettings.slab_reassignèµ‹å€¼ä¸ºtrue(è¯¥å˜é‡çš„é»˜è®¤å€¼ä¸ºfalse)ã€‚
+        è¿˜è®°å¾—ã€Šslabå†…å­˜åˆ†é…å™¨ã€‹è¯´åˆ°çš„æ¯ä¸€ä¸ªå†…å­˜é¡µçš„å¤§å°å—ï¼Ÿåœ¨do_slabs_newslabå‡½æ•°ä¸­ï¼Œä¸€ä¸ªå†…å­˜é¡µçš„å¤§å°ä¼šæ ¹æ®
+        settings.slab_reassignæ˜¯å¦ä¸ºtrueè€Œä¸åŒã€‚
+         */ //å‚è€ƒhttp://blog.csdn.net/luotuo44/article/details/43015129
         if (ntokens == 5 && strcmp(tokens[COMMAND_TOKEN + 1].value, "reassign") == 0) {
             int src, dst, rv;
 
@@ -3851,7 +3851,7 @@ static void process_command(conn *c, char *command) {
             out_string(c, "ERROR");
         }
     } else if (ntokens > 1 && strcmp(tokens[COMMAND_TOKEN].value, "lru_crawler") == 0) {
-        //ÅÀ³æÏß³ÌÏà¹ØÃüÁî
+        //çˆ¬è™«çº¿ç¨‹ç›¸å…³å‘½ä»¤
         if (ntokens == 4 && strcmp(tokens[COMMAND_TOKEN + 1].value, "crawl") == 0) {
             int rv;
             if (settings.lru_crawler == false) {
@@ -3859,7 +3859,7 @@ static void process_command(conn *c, char *command) {
                 return;
             }
 
-            rv = lru_crawler_crawl(tokens[2].value); //lru_crawler lru_crawler NUM·¢ËÍÌõ¼ş±äÁ¿À´ÆôÓÃÅÀ³æÏß³Ì
+            rv = lru_crawler_crawl(tokens[2].value); //lru_crawler lru_crawler NUMå‘é€æ¡ä»¶å˜é‡æ¥å¯ç”¨çˆ¬è™«çº¿ç¨‹
             switch(rv) {
             case CRAWLER_OK:
                 out_string(c, "OK");
@@ -3873,7 +3873,7 @@ static void process_command(conn *c, char *command) {
             }
             return;
         } else if (ntokens == 4 && strcmp(tokens[COMMAND_TOKEN + 1].value, "tocrawl") == 0) {
-            //Ç°ÃæËµµ½£¬¿ÉÒÔÓÃÃüÁîlru_crawler tocrawl numÖ¸¶¨Ã¿¸öLRU¶ÓÁĞ×î¶àÖ»¼ì²énum-1¸öitem¡£¿´Çå³şµã£¬ÊÇ¼ì²éÊı£¬²»ÊÇÉ¾³ıÊı£¬¶øÇÒÊÇnum-1¸ö¡£
+            //å‰é¢è¯´åˆ°ï¼Œå¯ä»¥ç”¨å‘½ä»¤lru_crawler tocrawl numæŒ‡å®šæ¯ä¸ªLRUé˜Ÿåˆ—æœ€å¤šåªæ£€æŸ¥num-1ä¸ªitemã€‚çœ‹æ¸…æ¥šç‚¹ï¼Œæ˜¯æ£€æŸ¥æ•°ï¼Œä¸æ˜¯åˆ é™¤æ•°ï¼Œè€Œä¸”æ˜¯num-1ä¸ªã€‚
             uint32_t tocrawl;
              if (!safe_strtoul(tokens[2].value, &tocrawl)) {
                 out_string(c, "CLIENT_ERROR bad command line format");
@@ -3926,12 +3926,12 @@ static void process_command(conn *c, char *command) {
 /*
 <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
 cas <key> <flags> <exptime> <bytes> <cas unique> [noreply]\r\n
-×¢ÒâÉÏÃæµÄÃüÁî²¿·ÖºóÃæÓĞ\r\n£¬È»ºó²ÅÊÇÊı¾İ²¿·Ö\r\n£¬ËùÒÔprocess_commandÊµ¼ÊÉÏ»áÖ´ĞĞÁ½´Î
+æ³¨æ„ä¸Šé¢çš„å‘½ä»¤éƒ¨åˆ†åé¢æœ‰\r\nï¼Œç„¶åæ‰æ˜¯æ•°æ®éƒ¨åˆ†\r\nï¼Œæ‰€ä»¥process_commandå®é™…ä¸Šä¼šæ‰§è¡Œä¸¤æ¬¡
 */
 
 /*
  * if we have a complete line in the buffer, process it.
- */ //½âÎö¿Í»§¶ËµÄÊı¾İ£¬½âÎö³öÃüÁîĞĞ½øĞĞ´¦Àí
+ */ //è§£æå®¢æˆ·ç«¯çš„æ•°æ®ï¼Œè§£æå‡ºå‘½ä»¤è¡Œè¿›è¡Œå¤„ç†
 static int try_read_command(conn *c) {
     assert(c != NULL);
     assert(c->rcurr <= (c->rbuf + c->rsize));
@@ -4017,24 +4017,24 @@ static int try_read_command(conn *c) {
             c->rbytes -= sizeof(c->binary_header);
             c->rcurr += sizeof(c->binary_header);
         }
-    } else {//·Ç¶ş½øÖÆÄ£Ê½µÄÃüÁî½âÎö 
+    } else {//éäºŒè¿›åˆ¶æ¨¡å¼çš„å‘½ä»¤è§£æ 
         char *el, *cont;
-        //Í¨¹ı\nÕâ¸ö»»ĞĞ·ûÀ´·Ö¸ôÊı¾İ±¨ÎÄÖĞµÄÃüÁî
+        //é€šè¿‡\nè¿™ä¸ªæ¢è¡Œç¬¦æ¥åˆ†éš”æ•°æ®æŠ¥æ–‡ä¸­çš„å‘½ä»¤
 
-        //Èç¹ûc->rbytes==0 ±íÊ¾bufÈİÆ÷ÖĞÃ»ÓĞ¿ÉÒÔ´¦ÀíµÄÃüÁî±¨ÎÄ£¬Ôò·µ»Ø0  
-        //0 ÊÇÈÃ³ÌĞò¼ÌĞøµÈ´ı½ÓÊÕĞÂµÄ¿Í»§¶Ë±¨ÎÄ  
+        //å¦‚æœc->rbytes==0 è¡¨ç¤ºbufå®¹å™¨ä¸­æ²¡æœ‰å¯ä»¥å¤„ç†çš„å‘½ä»¤æŠ¥æ–‡ï¼Œåˆ™è¿”å›0  
+        //0 æ˜¯è®©ç¨‹åºç»§ç»­ç­‰å¾…æ¥æ”¶æ–°çš„å®¢æˆ·ç«¯æŠ¥æ–‡  
         if (c->rbytes == 0)
             return 0;
 
-        //²éÕÒÃüÁîÖĞÊÇ·ñÓĞ\n£¬memcacheµÄÃüÁîÍ¨¹ı\nÀ´·Ö¸î  
-        //µ±¿Í»§¶ËµÄÊı¾İ±¨ÎÄ¹ıÀ´µÄÊ±ºò£¬MemcachedÍ¨¹ı²éÕÒ½ÓÊÕµ½µÄÊı¾İÖĞÊÇ·ñÓĞ\n»»ĞĞ·ûÀ´ÅĞ¶ÏÊÕµ½µÄÃüÁîÊı¾İ°üÊÇ·ñÍêÕû  
-        //ÀıÈçÃüÁî£ºset username 10234344 \n get username \n  
-        //Õâ¸öÃüÁî¾Í¿ÉÒÔ·Ö¸î³ÉÁ½¸öÃüÁî£¬·Ö±ğÊÇsetºÍgetµÄÃüÁî  
-        el = memchr(c->rcurr, '\n', c->rbytes);//el·µ»Ø\nµÄ×Ö·ûÖ¸ÕëµØÖ·  
+        //æŸ¥æ‰¾å‘½ä»¤ä¸­æ˜¯å¦æœ‰\nï¼Œmemcacheçš„å‘½ä»¤é€šè¿‡\næ¥åˆ†å‰²  
+        //å½“å®¢æˆ·ç«¯çš„æ•°æ®æŠ¥æ–‡è¿‡æ¥çš„æ—¶å€™ï¼ŒMemcachedé€šè¿‡æŸ¥æ‰¾æ¥æ”¶åˆ°çš„æ•°æ®ä¸­æ˜¯å¦æœ‰\næ¢è¡Œç¬¦æ¥åˆ¤æ–­æ”¶åˆ°çš„å‘½ä»¤æ•°æ®åŒ…æ˜¯å¦å®Œæ•´  
+        //ä¾‹å¦‚å‘½ä»¤ï¼šset username 10234344 \n get username \n  
+        //è¿™ä¸ªå‘½ä»¤å°±å¯ä»¥åˆ†å‰²æˆä¸¤ä¸ªå‘½ä»¤ï¼Œåˆ†åˆ«æ˜¯setå’Œgetçš„å‘½ä»¤  
+        el = memchr(c->rcurr, '\n', c->rbytes);//elè¿”å›\nçš„å­—ç¬¦æŒ‡é’ˆåœ°å€  
         if (!el) {
-			//c->rbytesÊÇ½ÓÊÕµ½µÄÊı¾İ°üµÄ³¤¶È  
-            //Õâ±ß·Ç³£ÓĞÈ¤£¬Èç¹ûÒ»´Î½ÓÊÕµÄÊı¾İ±¨ÎÄ´óÓÚÁË1K£¬ÔòMemcached»ØÈ¥ÅĞ¶ÏÕâ¸öÇëÇóÊÇ·ñÌ«´óÁË£¬ÊÇ·ñÓĞÎÊÌâ£¿  
-            //È»ºó»á¹Ø±ÕÕâ¸ö¿Í»§¶ËµÄÁ´½Ó  
+			//c->rbytesæ˜¯æ¥æ”¶åˆ°çš„æ•°æ®åŒ…çš„é•¿åº¦  
+            //è¿™è¾¹éå¸¸æœ‰è¶£ï¼Œå¦‚æœä¸€æ¬¡æ¥æ”¶çš„æ•°æ®æŠ¥æ–‡å¤§äºäº†1Kï¼Œåˆ™Memcachedå›å»åˆ¤æ–­è¿™ä¸ªè¯·æ±‚æ˜¯å¦å¤ªå¤§äº†ï¼Œæ˜¯å¦æœ‰é—®é¢˜ï¼Ÿ  
+            //ç„¶åä¼šå…³é—­è¿™ä¸ªå®¢æˆ·ç«¯çš„é“¾æ¥  
             if (c->rbytes > 1024) {
                 /*
                  * We didn't have a '\n' in the first k. This _has_ to be a
@@ -4052,38 +4052,38 @@ static int try_read_command(conn *c) {
                     return 1;
                 }
             }
-			//·µ»Ø0±íÊ¾ĞèÒª¼ÌĞø¶ÁÈ¡socketµÄÊı¾İ²ÅÄÜ½âÎöÃüÁî
+			//è¿”å›0è¡¨ç¤ºéœ€è¦ç»§ç»­è¯»å–socketçš„æ•°æ®æ‰èƒ½è§£æå‘½ä»¤
             return 0;
         }
 
-		//À´µ½ÕâÀï£¬ËµÃ÷ÒÑ¾­¶ÁÈ¡µ½ÖÁÉÙÒ»ÌõÍêÕûµÄÃüÁî
+		//æ¥åˆ°è¿™é‡Œï¼Œè¯´æ˜å·²ç»è¯»å–åˆ°è‡³å°‘ä¸€æ¡å®Œæ•´çš„å‘½ä»¤
 
-		//ÓÃcontÖ¸ÏòÏÂÒ»ĞĞµÄ¿ªÊ¼£¬ÎŞÂÛĞĞÎ²ÊÇ\n»¹ÊÇ\r\n
+		//ç”¨contæŒ‡å‘ä¸‹ä¸€è¡Œçš„å¼€å§‹ï¼Œæ— è®ºè¡Œå°¾æ˜¯\nè¿˜æ˜¯\r\n
 		cont = el + 1;
 
-		//²»Í¬µÄÆ½Ì¨¶ÔÓÚĞĞÎ²ÓĞ²»Í¬µÄ´¦Àí£¬ÓĞµÄÎª\r\nÓĞµÄÔòÊÇ\n¡£
-		//ËùÒÔmemcached»¹ÒªÅĞ¶ÏÒ»ÏÂ\nÇ°ÃæµÄÒ»¸ö×Ö·ûÊÇ·ñÎª\r
+		//ä¸åŒçš„å¹³å°å¯¹äºè¡Œå°¾æœ‰ä¸åŒçš„å¤„ç†ï¼Œæœ‰çš„ä¸º\r\næœ‰çš„åˆ™æ˜¯\nã€‚
+		//æ‰€ä»¥memcachedè¿˜è¦åˆ¤æ–­ä¸€ä¸‹\nå‰é¢çš„ä¸€ä¸ªå­—ç¬¦æ˜¯å¦ä¸º\r
         if ((el - c->rcurr) > 1 && *(el - 1) == '\r') {
-            el--; //Ö¸ÏòĞĞÎ²µÄ¿ªÊ¼×Ö·û
+            el--; //æŒ‡å‘è¡Œå°¾çš„å¼€å§‹å­—ç¬¦
         }
 
-		//'\0',CÓïÑÔ×Ö·û´®½áÎ²·ûºÅ¡£½áºÏc->rcurrÕâ¸ö¿ªÊ¼Î»ÖÃ£¬¾Í¿ÉÒÔÈ·¶¨
-		//Õâ¸öÃüÁî(ÏÖÔÚ±»¿´×öÒ»¸ö×Ö·û´®)µÄ¿ªÊ¼ºÍ½áÊøÎ»ÖÃ¡£rcurrÖ¸ÏòÁËÒ»¸ö×Ö·û´®
-		//×¢Òâ£¬ÏÂÒ»ÌõÃüÁîµÄ¿ªÊ¼Î»ÖÃÓÉÇ°ÃæµÄcontÖ¸Ã÷ÁË
+		//'\0',Cè¯­è¨€å­—ç¬¦ä¸²ç»“å°¾ç¬¦å·ã€‚ç»“åˆc->rcurrè¿™ä¸ªå¼€å§‹ä½ç½®ï¼Œå°±å¯ä»¥ç¡®å®š
+		//è¿™ä¸ªå‘½ä»¤(ç°åœ¨è¢«çœ‹åšä¸€ä¸ªå­—ç¬¦ä¸²)çš„å¼€å§‹å’Œç»“æŸä½ç½®ã€‚rcurræŒ‡å‘äº†ä¸€ä¸ªå­—ç¬¦ä¸²
+		//æ³¨æ„ï¼Œä¸‹ä¸€æ¡å‘½ä»¤çš„å¼€å§‹ä½ç½®ç”±å‰é¢çš„contæŒ‡æ˜äº†
         *el = '\0';
 
         assert(cont <= (c->rcurr + c->rbytes));
 
         c->last_cmd_time = current_time;
-		//´¦ÀíÕâ¸öÃüÁî
-        process_command(c, c->rcurr);//ÃüÁî×Ö·û´®µÄc->rcurrÖ¸Ïò
+		//å¤„ç†è¿™ä¸ªå‘½ä»¤
+        process_command(c, c->rcurr);//å‘½ä»¤å­—ç¬¦ä¸²çš„c->rcurræŒ‡å‘
 
         c->rbytes -= (cont - c->rcurr);
         c->rcurr = cont;
 
         assert(c->rcurr <= (c->rbuf + c->rsize));
     }
-	//·µ»Ø1±íÊ¾ÕıÔÚ´¦Àí¶ÁÈ¡µÄÒ»ÌõÃüÁî
+	//è¿”å›1è¡¨ç¤ºæ­£åœ¨å¤„ç†è¯»å–çš„ä¸€æ¡å‘½ä»¤
     return 1;
 }
 
@@ -4137,14 +4137,14 @@ static enum try_read_result try_read_udp(conn *c) {
  *
  * @return enum try_read_result
  */
- //¾¡¿ÉÄÜ°ÑsocketµÄËùÓĞÊı¾İ¶¼¶Á½øcÖ¸ÏòµÄÒ»¸ö»º³åÇøÀïÃæ
+ //å°½å¯èƒ½æŠŠsocketçš„æ‰€æœ‰æ•°æ®éƒ½è¯»è¿›cæŒ‡å‘çš„ä¸€ä¸ªç¼“å†²åŒºé‡Œé¢
 static enum try_read_result try_read_network(conn *c) {
     enum try_read_result gotdata = READ_NO_DATA_RECEIVED;
     int res;
     int num_allocs = 0;
     assert(c != NULL);
 
-    if (c->rcurr != c->rbuf) { //°ÑÎª½âÎöÍê³ÉµÄÊı¾İ¿½±´µ½rbuf¿Õ¼äÍ·²¿¿ªÊ¼´¦£¬ÔÙ´ÎreadµÄÊı¾İÆ´½ÓÔÚºóÃæ
+    if (c->rcurr != c->rbuf) { //æŠŠä¸ºè§£æå®Œæˆçš„æ•°æ®æ‹·è´åˆ°rbufç©ºé—´å¤´éƒ¨å¼€å§‹å¤„ï¼Œå†æ¬¡readçš„æ•°æ®æ‹¼æ¥åœ¨åé¢
         if (c->rbytes != 0) /* otherwise there's nothing to copy */
             memmove(c->rbuf, c->rcurr, c->rbytes);
         c->rcurr = c->rbuf;
@@ -4181,11 +4181,11 @@ static enum try_read_result try_read_network(conn *c) {
             pthread_mutex_unlock(&c->thread->stats.mutex);
             gotdata = READ_DATA_RECEIVED;
             c->rbytes += res;
-			//¿ÉÄÜ»¹ÓĞÊı¾İÃ»ÓĞ¶Á³öÀ´
+			//å¯èƒ½è¿˜æœ‰æ•°æ®æ²¡æœ‰è¯»å‡ºæ¥
             if (res == avail) {
                 continue;
             } else {
-            //socketÔİÊ±»¹Ã»ÓĞÊı¾İÁË(¼´ÒÑ¾­¶ÁÈ¡ÍêÁË)
+            //socketæš‚æ—¶è¿˜æ²¡æœ‰æ•°æ®äº†(å³å·²ç»è¯»å–å®Œäº†)
                 break;
             }
         }
@@ -4260,16 +4260,16 @@ void do_accept_new_conns(const bool do_accept) {
  *   TRANSMIT_SOFT_ERROR Can't write any more right now.
  *   TRANSMIT_HARD_ERROR Can't write (c->state is set to conn_closing)
  */
- //Í¨¹ıs->sfd°ÑÊı¾İĞ´µ½¶Ô¶Ë
+ //é€šè¿‡s->sfdæŠŠæ•°æ®å†™åˆ°å¯¹ç«¯
 static enum transmit_result transmit(conn *c) {
     assert(c != NULL);
 
     if (c->msgcurr < c->msgused &&
-            c->msglist[c->msgcurr].msg_iovlen == 0) { //msgcurrÖ¸ÏòµÄmsghdrÒÑ¾­·¢ËÍÍê±Ï
+            c->msglist[c->msgcurr].msg_iovlen == 0) { //msgcurræŒ‡å‘çš„msghdrå·²ç»å‘é€å®Œæ¯•
         /* Finished writing the current msg; advance to the next. */
         c->msgcurr++;
     }
-    if (c->msgcurr < c->msgused) { //ËùÓĞµÄÊı¾İ¶¼ÒÑ¾­·¢ËÍÍê±Ï
+    if (c->msgcurr < c->msgused) { //æ‰€æœ‰çš„æ•°æ®éƒ½å·²ç»å‘é€å®Œæ¯•
         ssize_t res;
         struct msghdr *m = &c->msglist[c->msgcurr];
 
@@ -4281,8 +4281,8 @@ static enum transmit_result transmit(conn *c) {
 
             /* We've written some of the data. Remove the completed
                iovec entries from the list of pending writes. */
-            //Í¨¹ısendmsg·µ»ØÖµÈ·¶¨ÒÑ¾­Ğ´ÁË¶àÉÙ¸öiovecÊı×é¡£Ñ­»·¼õÈ¥Ã¿Ò»¸öiovecÊı×éµÄÃ¿Ò»¸ö
-            //ÔªËØµÄÊı¾İ³¤¶È¼´¿É
+            //é€šè¿‡sendmsgè¿”å›å€¼ç¡®å®šå·²ç»å†™äº†å¤šå°‘ä¸ªiovecæ•°ç»„ã€‚å¾ªç¯å‡å»æ¯ä¸€ä¸ªiovecæ•°ç»„çš„æ¯ä¸€ä¸ª
+            //å…ƒç´ çš„æ•°æ®é•¿åº¦å³å¯
             while (m->msg_iovlen > 0 && res >= m->msg_iov->iov_len) {
                 res -= m->msg_iov->iov_len;
                 m->msg_iovlen--;
@@ -4291,7 +4291,7 @@ static enum transmit_result transmit(conn *c) {
 
             /* Might have written just part of the last iovec entry;
                adjust it so the next write will do the rest. */
-            //Ö»Ğ´ÁËiovec½á¹¹ÌåµÄ²¿·ÖÊı¾İ
+            //åªå†™äº†iovecç»“æ„ä½“çš„éƒ¨åˆ†æ•°æ®
             if (res > 0) {
                 m->msg_iov->iov_base = (caddr_t)m->msg_iov->iov_base + res;
                 m->msg_iov->iov_len -= res;
@@ -4322,8 +4322,8 @@ static enum transmit_result transmit(conn *c) {
     }
 }
 
-//Ö÷Ïß³Ì½ÓÊÕµ½¿Í»§¶ËÁ¬½Ó£¬Í¨¹ıevent_handler´¥·¢drive_machine·¢ËÍĞÅÏ¢"c"¸ø¹¤×÷×ÓÏß³Ì½øĞĞ´¦Àí
-//¹¤×÷×ÓÏß³Ì´Ó¶ÓÁĞÖĞÈ¡³öÖ÷Ïß³ÌacceptµÄfd,thread_libevent_processÖĞÈ¡³ö¸ÃCQ_ITEMºó£¬´´½¨ĞÂµÄconn½øĞĞÊÂ¼ş´¦Àí
+//ä¸»çº¿ç¨‹æ¥æ”¶åˆ°å®¢æˆ·ç«¯è¿æ¥ï¼Œé€šè¿‡event_handlerè§¦å‘drive_machineå‘é€ä¿¡æ¯"c"ç»™å·¥ä½œå­çº¿ç¨‹è¿›è¡Œå¤„ç†
+//å·¥ä½œå­çº¿ç¨‹ä»é˜Ÿåˆ—ä¸­å–å‡ºä¸»çº¿ç¨‹acceptçš„fd,thread_libevent_processä¸­å–å‡ºè¯¥CQ_ITEMåï¼Œåˆ›å»ºæ–°çš„connè¿›è¡Œäº‹ä»¶å¤„ç†
 static void drive_machine(conn *c) {
     bool stop = false;
     int sfd;
@@ -4339,12 +4339,12 @@ static void drive_machine(conn *c) {
 #endif
 
     assert(c != NULL);
-	//drive_machine±»µ÷ÓÃ»á½øĞĞ×´Ì¬ÅĞ¶Ï£¬²¢½øĞĞÒ»Ğ©´¦Àí¡£µ«Ò²¿ÉÄÜ·¢Éú×´Ì¬µÄ×ª»»
-	//´ËÊ±ĞèÒªÒ»¸öÑ­»·£¬µ±½øĞĞ×¨Ìâ×ª»»Ê±£¬Ò²ÄÜ´¦Àí
+	//drive_machineè¢«è°ƒç”¨ä¼šè¿›è¡ŒçŠ¶æ€åˆ¤æ–­ï¼Œå¹¶è¿›è¡Œä¸€äº›å¤„ç†ã€‚ä½†ä¹Ÿå¯èƒ½å‘ç”ŸçŠ¶æ€çš„è½¬æ¢
+	//æ­¤æ—¶éœ€è¦ä¸€ä¸ªå¾ªç¯ï¼Œå½“è¿›è¡Œä¸“é¢˜è½¬æ¢æ—¶ï¼Œä¹Ÿèƒ½å¤„ç†
     while (!stop) {
 
         switch(c->state) {
-        case conn_listening: //Ö»ÓĞÖ÷Ïß³Ì´¦ÓÚ¸Ã×´Ì¬
+        case conn_listening: //åªæœ‰ä¸»çº¿ç¨‹å¤„äºè¯¥çŠ¶æ€
             addrlen = sizeof(addr);
 #ifdef HAVE_ACCEPT4
             if (use_accept4) {
@@ -4392,16 +4392,16 @@ static void drive_machine(conn *c) {
                 stats.rejected_conns++;
                 STATS_UNLOCK();
             } else {
-            	//Ñ¡¶¨Ò»¸öworkerÏß³Ì£¬newÒ»¸öCQ_ITEM£¬°ÑÕâ¸öCQ_ITEMÈÓ¸øÕâ¸öÏß³Ì
+            	//é€‰å®šä¸€ä¸ªworkerçº¿ç¨‹ï¼Œnewä¸€ä¸ªCQ_ITEMï¼ŒæŠŠè¿™ä¸ªCQ_ITEMæ‰”ç»™è¿™ä¸ªçº¿ç¨‹
                 dispatch_conn_new(sfd, conn_new_cmd, EV_READ | EV_PERSIST,
                                      DATA_BUFFER_SIZE, tcp_transport);
             }
 
             stop = true;
             break;
-		//µÈ´ısocket±ä³É¿É¶ÁµÄ,¸Ã×´Ì¬¾ÍÊÇÌí¼ÓreadÊÂ¼ş£¬È»ºóÍË³öÑ­»·µÈ´ıÊı¾İµ½À´Í¨¹ılibevent»úÖÆµÄepoll´¥·¢ÔÙ´ÎÖ´ĞĞ¸Ãº¯Êı
+		//ç­‰å¾…socketå˜æˆå¯è¯»çš„,è¯¥çŠ¶æ€å°±æ˜¯æ·»åŠ readäº‹ä»¶ï¼Œç„¶åé€€å‡ºå¾ªç¯ç­‰å¾…æ•°æ®åˆ°æ¥é€šè¿‡libeventæœºåˆ¶çš„epollè§¦å‘å†æ¬¡æ‰§è¡Œè¯¥å‡½æ•°
         case conn_waiting:
-            if (!update_event(c, EV_READ | EV_PERSIST)) {//¸üĞÂ¼àÌıÊÂ¼şÊ§°Ü
+            if (!update_event(c, EV_READ | EV_PERSIST)) {//æ›´æ–°ç›‘å¬äº‹ä»¶å¤±è´¥
                 if (settings.verbose > 0)
                     fprintf(stderr, "Couldn't update event\n");
                 conn_set_state(c, conn_closing);
@@ -4409,8 +4409,8 @@ static void drive_machine(conn *c) {
             }
 
             conn_set_state(c, conn_read);
-			//¾ÓÈ»stopÑ­»·£¬²»¹ıÃ»¹ØÏµ£¬ÒòÎªeventµÄ¿É¶ÁÊÂ¼şÊÇË®Æ½´¥·¢µÄ
-			//ÂíÉÏÓÖ»áÔÙ´Î½øÈëÓĞÏŞ×´Ì¬»ú£¬²¢ÇÒ½øÈëÏÂÃæµÄconn_read_caseÖĞ
+			//å±…ç„¶stopå¾ªç¯ï¼Œä¸è¿‡æ²¡å…³ç³»ï¼Œå› ä¸ºeventçš„å¯è¯»äº‹ä»¶æ˜¯æ°´å¹³è§¦å‘çš„
+			//é©¬ä¸Šåˆä¼šå†æ¬¡è¿›å…¥æœ‰é™çŠ¶æ€æœºï¼Œå¹¶ä¸”è¿›å…¥ä¸‹é¢çš„conn_read_caseä¸­
             stop = true;
             break;
 
@@ -4421,7 +4421,7 @@ static void drive_machine(conn *c) {
             case READ_NO_DATA_RECEIVED:
                 conn_set_state(c, conn_waiting);
                 break;
-			//¶ÁÈ¡µ½ÁËÊı¾İ£¬½Ó×Å¾ÍÈ¥½âÎöÊı¾İ
+			//è¯»å–åˆ°äº†æ•°æ®ï¼Œæ¥ç€å°±å»è§£ææ•°æ®
             case READ_DATA_RECEIVED:
                 conn_set_state(c, conn_parse_cmd);
                 break;
@@ -4435,11 +4435,11 @@ static void drive_machine(conn *c) {
             break;
 
         case conn_parse_cmd :
-			//·µ»Ø1±íÊ¾ÕıÔÚ´¦Àí¶ÁÈ¡µÄÒ»ÌõÃüÁî
-			//·µ»Ø0±íÊ¾ĞèÒª¼ÌĞø¶ÁÈ¡socketµÄÊı¾İ²ÅÄÜ½âÎöÃüÁî
-			//Èç¹û¶ÁÈ¡µ½ÁËÒ»ÌõÍêÕûµÄÃüÁî£¬ÄÇÃ´º¯ÊıÄÚ²¿»áÈ¥½âÎö
-			//²¢½øĞĞµ÷ÓÃprocess_commandº¯Êı½øĞĞÒ»Ğ©´¦Àí
-			//Ïñset¡¢add¡¢replace¡¢getÕâĞ©ÃüÁî£¬»áÔÚ´¦ÀíµÄÊ±ºòµ÷ÓÃ
+			//è¿”å›1è¡¨ç¤ºæ­£åœ¨å¤„ç†è¯»å–çš„ä¸€æ¡å‘½ä»¤
+			//è¿”å›0è¡¨ç¤ºéœ€è¦ç»§ç»­è¯»å–socketçš„æ•°æ®æ‰èƒ½è§£æå‘½ä»¤
+			//å¦‚æœè¯»å–åˆ°äº†ä¸€æ¡å®Œæ•´çš„å‘½ä»¤ï¼Œé‚£ä¹ˆå‡½æ•°å†…éƒ¨ä¼šå»è§£æ
+			//å¹¶è¿›è¡Œè°ƒç”¨process_commandå‡½æ•°è¿›è¡Œä¸€äº›å¤„ç†
+			//åƒsetã€addã€replaceã€getè¿™äº›å‘½ä»¤ï¼Œä¼šåœ¨å¤„ç†çš„æ—¶å€™è°ƒç”¨
 			
             if (try_read_command(c) == 0) {
                 /* wee need more data! */
@@ -4454,8 +4454,8 @@ static void drive_machine(conn *c) {
 
             --nreqs;
             if (nreqs >= 0) {
-				//Èç¹û¸ÃconnµÄ¶Á»º³åÇøÃ»ÓĞÊı¾İ£¬ÄÇÃ´½«×´Ì¬¸ÄÎªconn_waiting
-				//Èç¹û¸ÃconnµÄ¶Á»º³åÇøÓĞÊı¾İ£¬ÄÇÃ´½«×´Ì¬¸Ä³Éconn_pase_cmd
+				//å¦‚æœè¯¥connçš„è¯»ç¼“å†²åŒºæ²¡æœ‰æ•°æ®ï¼Œé‚£ä¹ˆå°†çŠ¶æ€æ”¹ä¸ºconn_waiting
+				//å¦‚æœè¯¥connçš„è¯»ç¼“å†²åŒºæœ‰æ•°æ®ï¼Œé‚£ä¹ˆå°†çŠ¶æ€æ”¹æˆconn_pase_cmd
                 reset_cmd_handler(c);
             } else {
                 pthread_mutex_lock(&c->thread->stats.mutex);
@@ -4480,7 +4480,7 @@ static void drive_machine(conn *c) {
             break;
 
         case conn_nread:
-            if (c->rlbytes == 0) { //Êı¾İ²¿·Ö¿½±´µ½itemÍê±Ï£¬Ôò¿ªÊ¼½øĞĞhashºÍlruÌí¼Ó´¦Àí
+            if (c->rlbytes == 0) { //æ•°æ®éƒ¨åˆ†æ‹·è´åˆ°itemå®Œæ¯•ï¼Œåˆ™å¼€å§‹è¿›è¡Œhashå’Œlruæ·»åŠ å¤„ç†
                 complete_nread(c);
                 break;
             }
@@ -4499,20 +4499,20 @@ static void drive_machine(conn *c) {
                 /*
                     <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
                     cas <key> <flags> <exptime> <bytes> <cas unique> [noreply]\r\n
-                    ×¢ÒâÉÏÃæµÄÃüÁî²¿·ÖºóÃæÓĞ\r\n£¬È»ºó²ÅÊÇÊı¾İ²¿·Ö\r\n£¬ËùÒÔprocess_commandÊµ¼ÊÉÏ»áÖ´ĞĞÁ½´Î
+                    æ³¨æ„ä¸Šé¢çš„å‘½ä»¤éƒ¨åˆ†åé¢æœ‰\r\nï¼Œç„¶åæ‰æ˜¯æ•°æ®éƒ¨åˆ†\r\nï¼Œæ‰€ä»¥process_commandå®é™…ä¸Šä¼šæ‰§è¡Œä¸¤æ¬¡
                     */
                 int tocopy = c->rbytes > c->rlbytes ? c->rlbytes : c->rbytes;
-                if (c->ritem != c->rcurr) { //°ÑÊı¾İ²¿·Ö¿½±´µ½itemÖĞ£¬item¸ñÊ½²Î¿¼  ÕæÕı´æ´¢ÔÚslabclass[id]ÖĞµÄtunckÖĞµÄÊı¾İ¸ñÊ½¼ûitem_make_header
+                if (c->ritem != c->rcurr) { //æŠŠæ•°æ®éƒ¨åˆ†æ‹·è´åˆ°itemä¸­ï¼Œitemæ ¼å¼å‚è€ƒ  çœŸæ­£å­˜å‚¨åœ¨slabclass[id]ä¸­çš„tunckä¸­çš„æ•°æ®æ ¼å¼è§item_make_header
                     memmove(c->ritem, c->rcurr, tocopy);
                 }
-                c->ritem += tocopy; //item´æ´¢¹ı³ÌÖĞÊı¾İ²¿·ÖÌî³äÄ©Î²´¦
-                c->rlbytes -= tocopy; //Êı¾İ²¿·Ö»¹²î¶àÉÙ²ÅÌîÂú
+                c->ritem += tocopy; //itemå­˜å‚¨è¿‡ç¨‹ä¸­æ•°æ®éƒ¨åˆ†å¡«å……æœ«å°¾å¤„
+                c->rlbytes -= tocopy; //æ•°æ®éƒ¨åˆ†è¿˜å·®å¤šå°‘æ‰å¡«æ»¡
 
-                //ÒÑ¾­½âÎöµÄÊı¾İ²¿·ÖÌî³äºó½øĞĞÒÆÎ»
+                //å·²ç»è§£æçš„æ•°æ®éƒ¨åˆ†å¡«å……åè¿›è¡Œç§»ä½
                 c->rcurr += tocopy;
                 c->rbytes -= tocopy;
-                if (c->rlbytes == 0) { //ËµÃ÷itemÊı¾İ²¿·ÖÌî³äÍê±Ï
-                    //breakºó¼ÌĞø´Ó¸ÃcaseÖĞµÄif (c->rlbytes == 0) {  complete_nread(c);}½øĞĞ´¦Àí
+                if (c->rlbytes == 0) { //è¯´æ˜itemæ•°æ®éƒ¨åˆ†å¡«å……å®Œæ¯•
+                    //breakåç»§ç»­ä»è¯¥caseä¸­çš„if (c->rlbytes == 0) {  complete_nread(c);}è¿›è¡Œå¤„ç†
                     break;
                 }
             }
@@ -4625,10 +4625,10 @@ static void drive_machine(conn *c) {
             conn_set_state(c, conn_closing);
             break;
           }
-            switch (transmit(c)) { //·¢ËÍÊı¾İ¸øc->sfdÖ¸Ã÷µÄ¿Í»§¶Ë
-            case TRANSMIT_COMPLETE: //·¢ËÍÊı¾İÍê±Ï
+            switch (transmit(c)) { //å‘é€æ•°æ®ç»™c->sfdæŒ‡æ˜çš„å®¢æˆ·ç«¯
+            case TRANSMIT_COMPLETE: //å‘é€æ•°æ®å®Œæ¯•
                 if (c->state == conn_mwrite) {
-                    conn_release_items(c);//ÊÍ·ÅitemµÄÕ¼ÓÃ
+                    conn_release_items(c);//é‡Šæ”¾itemçš„å ç”¨
                     /* XXX:  I don't know why this wasn't the general case */
                     if(c->protocol == binary_prot) {
                         conn_set_state(c, c->write_and_go);
@@ -4641,14 +4641,14 @@ static void drive_machine(conn *c) {
                         c->write_and_free = 0;
                     }
                     conn_set_state(c, c->write_and_go);
-                } else { //ÎÒÃÇÖ»¿¼ÂÇÎÄ±¾Ğ­Òé
+                } else { //æˆ‘ä»¬åªè€ƒè™‘æ–‡æœ¬åè®®
                     if (settings.verbose > 0)
                         fprintf(stderr, "Unexpected state %d\n", c->state);
-                    conn_set_state(c, conn_closing);//ÓÖ»Øµ½ÁËÒ»¿ªÊ¼µÄconn_new_cmd×´Ì¬
+                    conn_set_state(c, conn_closing);//åˆå›åˆ°äº†ä¸€å¼€å§‹çš„conn_new_cmdçŠ¶æ€
                 }
                 break;
 
-            case TRANSMIT_INCOMPLETE://»¹Ã»·¢ËÍÍê±Ï
+            case TRANSMIT_INCOMPLETE://è¿˜æ²¡å‘é€å®Œæ¯•
             case TRANSMIT_HARD_ERROR:
                 break;                   /* Continue in state machine. */
 
@@ -4763,8 +4763,8 @@ static void maximize_sndbuf(const int sfd) {
  *        when they are successfully added to the list of ports we
  *        listen on.
  */
- //ÉèÖÃÍøÂçÊÂ¼ş»Øµ÷º¯Êıconn_new->event_handler
- //interfaceÊÇÒ»¸öip¡¢hostname»òÕßNULL¡£Õâ¸öip×Ö·û´®ºóÃæÃ»ÓĞ¶Ë¿ÚºÅ¡£¶Ë¿ÚºÅÓÉ²ÎÊıportÖ¸³ö
+ //è®¾ç½®ç½‘ç»œäº‹ä»¶å›è°ƒå‡½æ•°conn_new->event_handler
+ //interfaceæ˜¯ä¸€ä¸ªipã€hostnameæˆ–è€…NULLã€‚è¿™ä¸ªipå­—ç¬¦ä¸²åé¢æ²¡æœ‰ç«¯å£å·ã€‚ç«¯å£å·ç”±å‚æ•°portæŒ‡å‡º
 static int server_socket(const char *interface,
                          int port,
                          enum network_transport transport,
@@ -4794,11 +4794,11 @@ static int server_socket(const char *interface,
           perror("getaddrinfo()");
         return 1;
     }
-	//Èç¹ûinterfaceÊÇÒ»¸öhostname£¬ÄÇÃ´¿ÉÄÜ¾ÍÓĞ¶à¸öip
+	//å¦‚æœinterfaceæ˜¯ä¸€ä¸ªhostnameï¼Œé‚£ä¹ˆå¯èƒ½å°±æœ‰å¤šä¸ªip
     for (next= ai; next; next= next->ai_next) {
         conn *listen_conn_add;
-		//´´½¨Ò»¸öÌ×½Ó×Ö£¬È»ºóÉèÖÃÎª·Ç×èÈûµÄ
-		//µ÷ÓÃsocketº¯Êı
+		//åˆ›å»ºä¸€ä¸ªå¥—æ¥å­—ï¼Œç„¶åè®¾ç½®ä¸ºéé˜»å¡çš„
+		//è°ƒç”¨socketå‡½æ•°
         if ((sfd = new_socket(next)) == -1) {
             /* getaddrinfo can return "junk" addresses,
              * we make sure at least one works before erroring.
@@ -4902,7 +4902,7 @@ static int server_socket(const char *interface,
                 fprintf(stderr, "failed to create listening connection\n");
                 exit(EXIT_FAILURE);
             }
-			//½«Òª¼àÌıµÄ¶à¸öconn·Åµ½Ò»¸ö¼àÌı¶ÓÁĞÀïÃæ £¬listenµÄ¶à¸öip:portĞÅÏ¢Ìí¼Óµ½listen_connÁ´±í
+			//å°†è¦ç›‘å¬çš„å¤šä¸ªconnæ”¾åˆ°ä¸€ä¸ªç›‘å¬é˜Ÿåˆ—é‡Œé¢ ï¼Œlistençš„å¤šä¸ªip:portä¿¡æ¯æ·»åŠ åˆ°listen_conné“¾è¡¨
             listen_conn_add->next = listen_conn;
             listen_conn = listen_conn_add;
         }
@@ -4913,35 +4913,35 @@ static int server_socket(const char *interface,
     /* Return zero iff we detected no errors in starting up connections */
     return success == 0;
 }
-//´´½¨¶àÉÙ¸öTCPÌ×½Ó×Ö¾Í»á´´½¨¶àÉÙ¸öudpÌ×½Ó×Ö£¬IPµØÖ·¶¼ÊÇÒ»ÑùµÄ
+//åˆ›å»ºå¤šå°‘ä¸ªTCPå¥—æ¥å­—å°±ä¼šåˆ›å»ºå¤šå°‘ä¸ªudpå¥—æ¥å­—ï¼ŒIPåœ°å€éƒ½æ˜¯ä¸€æ ·çš„
 
-//portÊÇÄ¬ÈÏµÄ11211»òÕßÓÃ»§Ê¹ÓÃ-pÑ¡ÏîÉèÖÃµÄ¶Ë¿ÚºÅ
-//Ö÷Ïß³ÌÔÚmainº¯Êı»áµ÷ÓÃ±¾º¯Êı
+//portæ˜¯é»˜è®¤çš„11211æˆ–è€…ç”¨æˆ·ä½¿ç”¨-pé€‰é¡¹è®¾ç½®çš„ç«¯å£å·
+//ä¸»çº¿ç¨‹åœ¨mainå‡½æ•°ä¼šè°ƒç”¨æœ¬å‡½æ•°
 static int server_sockets(int port, enum network_transport transport,
                           FILE *portnumber_file) {
     if (settings.inter == NULL) {
         return server_socket(settings.inter, port, transport, portnumber_file);
     } else {
         // tokenize them and bind to each one of them..
-        //settings.interÀïÃæ¿ÉÄÜÓĞ¶à¸öIPµØÖ·£¬Èç¹ûÓĞ¶à¸öÄÇÃ´½«ÓÃ¶ººÅ·Ö¸ô
+        //settings.interé‡Œé¢å¯èƒ½æœ‰å¤šä¸ªIPåœ°å€ï¼Œå¦‚æœæœ‰å¤šä¸ªé‚£ä¹ˆå°†ç”¨é€—å·åˆ†éš”
         char *b;
         int ret = 0;
-		//¸´ÖÆÒ»¸ö×Ö·û´®£¬±ÜÃâÏÂÃæµÄstrtok_rº¯ÊıĞŞ¸ÄÈ«¾Ö±äÁ¿settings.inter
+		//å¤åˆ¶ä¸€ä¸ªå­—ç¬¦ä¸²ï¼Œé¿å…ä¸‹é¢çš„strtok_rå‡½æ•°ä¿®æ”¹å…¨å±€å˜é‡settings.inter
         char *list = strdup(settings.inter);
 
         if (list == NULL) {
             fprintf(stderr, "Failed to allocate memory for parsing server interface string\n");
             return 1;
         }
-		//ÕâÊÇÑ­»·Ö÷Òª´¦Àí¶à¸öIPµÄÇé¿ö
-		//·Ö¸ô³öÒ»¸ö¸öµÄip£¬Ê¹ÓÃ·ÖºÅ;×÷Îª·Ö¸ô·û
+		//è¿™æ˜¯å¾ªç¯ä¸»è¦å¤„ç†å¤šä¸ªIPçš„æƒ…å†µ
+		//åˆ†éš”å‡ºä¸€ä¸ªä¸ªçš„ipï¼Œä½¿ç”¨åˆ†å·;ä½œä¸ºåˆ†éš”ç¬¦
         for (char *p = strtok_r(list, ";,", &b);
              p != NULL;
              p = strtok_r(NULL, ";,", &b)) {
             int the_port = port;
-			//Æô¶¯Ê±¿ÉÄÜÊ¹ÓÃ-l ip:port²ÎÊıĞÎÊ½
+			//å¯åŠ¨æ—¶å¯èƒ½ä½¿ç”¨-l ip:portå‚æ•°å½¢å¼
             char *s = strchr(p, ':');
-			//´ËÊ±²ÉÓÃipºóÃæµÄ¶Ë¿ÚºÅ£¬¶ø²»ÊÇ²ÉÓÃ-pÖ¸¶¨µÄ¶Ë¿ÚºÅ
+			//æ­¤æ—¶é‡‡ç”¨ipåé¢çš„ç«¯å£å·ï¼Œè€Œä¸æ˜¯é‡‡ç”¨-pæŒ‡å®šçš„ç«¯å£å·
             if (s != NULL) {
                 *s = '\0';
                 ++s;
@@ -4953,7 +4953,7 @@ static int server_sockets(int port, enum network_transport transport,
             if (strcmp(p, "*") == 0) {
                 p = NULL;
             }
-			//´¦ÀíÆäÖĞÒ»¸öIP¡£ÓĞpÖ¸¶¨ip(»òÕßhostname)
+			//å¤„ç†å…¶ä¸­ä¸€ä¸ªIPã€‚æœ‰pæŒ‡å®šip(æˆ–è€…hostname)
             ret |= server_socket(p, the_port, transport, portnumber_file);
         }
         free(list);
@@ -5054,8 +5054,8 @@ static struct event clockevent;
  * from jitter, simply ticking our internal timer here is accurate enough.
  * Note that users who are setting explicit dates for expiration times *must*
  * ensure their clocks are correct before starting memcached. */
-//ÉèÖÃÒ»¸ö¶¨Ê±event£¬¶¨Ê±(ÆµÂÊ1Ãë)¸üĞÂcurrent_time±äÁ¿
-//Õâ¸ö³¬Ê±eventÊÇaddµ½È«¾Ö±äÁ¿main_baseÀïÃæ,ËùÒÔÖ÷Ïß³Ì¸ºÔğ¸üĞÂcurrent_time(ÕâÊÇÒ»¸öºÜÖØÒªµÄÈ«¾Ö±äÁ¿)
+//è®¾ç½®ä¸€ä¸ªå®šæ—¶eventï¼Œå®šæ—¶(é¢‘ç‡1ç§’)æ›´æ–°current_timeå˜é‡
+//è¿™ä¸ªè¶…æ—¶eventæ˜¯addåˆ°å…¨å±€å˜é‡main_baseé‡Œé¢,æ‰€ä»¥ä¸»çº¿ç¨‹è´Ÿè´£æ›´æ–°current_time(è¿™æ˜¯ä¸€ä¸ªå¾ˆé‡è¦çš„å…¨å±€å˜é‡)
 static void clock_handler(const int fd, const short which, void *arg) {
     struct timeval t = {.tv_sec = 1, .tv_usec = 0};
     static bool initialized = false;
@@ -5384,7 +5384,7 @@ int main (int argc, char **argv) {
     bool lock_memory = false;
     bool do_daemonize = false;
     bool preallocate = false;
-    int maxcore = 0; //-r²ÎÊıÖ¸¶¨²»ÏŞÖÆcoredumpÎÄ¼ş´óĞ¡
+    int maxcore = 0; //-rå‚æ•°æŒ‡å®šä¸é™åˆ¶coredumpæ–‡ä»¶å¤§å°
     char *username = NULL;
     char *pid_file = NULL;
     struct passwd *pw;
@@ -5429,7 +5429,7 @@ int main (int argc, char **argv) {
         [LRU_CRAWLER_TOCRAWL] = "lru_crawler_tocrawl",
         NULL
     };
-	//¼ì²élibeventµÄ°æ±¾ÊÇ·ñ×ã¹»ĞÂ 1.3¼´¿É
+	//æ£€æŸ¥libeventçš„ç‰ˆæœ¬æ˜¯å¦è¶³å¤Ÿæ–° 1.3å³å¯
     if (!sanitycheck()) {
         return EX_OSERR;
     }
@@ -5438,13 +5438,13 @@ int main (int argc, char **argv) {
     /* handle SIGINT */
     signal(SIGINT, sig_handler);
 
-	//¶ÔmemcachedÉèÖÃÈ¡Ä¬ÈÏÖµ
+	//å¯¹memcachedè®¾ç½®å–é»˜è®¤å€¼
     /* init settings */
     settings_init();
 
     /* set stderr non-buffering (for running under, say, daemontools) */
     setbuf(stderr, NULL);
-    //½âÎömemcachedÆô¶¯²ÎÊı
+    //è§£æmemcachedå¯åŠ¨å‚æ•°
     /* process arguments */
     while (-1 != (c = getopt(argc, argv,
           "a:"  /* access mask for unix socket */      
@@ -5479,63 +5479,63 @@ int main (int argc, char **argv) {
           "o:"  /* Extended generic options */
         ))) {
         switch (c) {
-		//ÊÇ·ñÔÊĞí¿Í»§¶ËÊ¹ÓÃshutdownÃüÁî¡£Ä¬ÈÏÊÇ²»ÔÊĞíµÄ¡£¸ÃÑ¡Ïî½«ÔÊĞí¡£¿Í»§¶ËµÄshutdownÃüÁî»á½«memcached½ø³ÌÉ±ËÀ¡£
-	    //¸ÃÑ¡Ïî»á½«setting.shutdown_command¸³ÖµÎªfalse	
+		//æ˜¯å¦å…è®¸å®¢æˆ·ç«¯ä½¿ç”¨shutdownå‘½ä»¤ã€‚é»˜è®¤æ˜¯ä¸å…è®¸çš„ã€‚è¯¥é€‰é¡¹å°†å…è®¸ã€‚å®¢æˆ·ç«¯çš„shutdownå‘½ä»¤ä¼šå°†memcachedè¿›ç¨‹æ€æ­»ã€‚
+	    //è¯¥é€‰é¡¹ä¼šå°†setting.shutdown_commandèµ‹å€¼ä¸ºfalse	
         case 'A':
             /* enables "shutdown" command */
             settings.shutdown_command = true;
             break;
-		//unix socketµÄÈ¨ÏŞÎ»ĞÅÏ¢(·ÃÎÊÑÚÂë)¡£¸ÃÑ¡Ïî
+		//unix socketçš„æƒé™ä½ä¿¡æ¯(è®¿é—®æ©ç )ã€‚è¯¥é€‰é¡¹
         case 'a':
             /* access for unix domain socket, as octal mask (like chmod)*/
             settings.access= strtol(optarg,NULL,8);
             break;
-		//¼àÌıµÄUDP¶Ë¿ÚºÅ -pÎªTCPµÄ¼àÌı¶Ë¿Ú  -UÎªUDPµÄ¼àÌı¶Ë¿Ú
+		//ç›‘å¬çš„UDPç«¯å£å· -pä¸ºTCPçš„ç›‘å¬ç«¯å£  -Uä¸ºUDPçš„ç›‘å¬ç«¯å£
         case 'U': 
             settings.udpport = atoi(optarg);
             udp_specified = true;
             break;
-		//memcached¼àÌıµÄtcp¶Ë¿Ú¡£Ä¬ÈÏ¶Ë¿ÚÎª11211£¬¸ÃÑ¡ÏîµÄ²ÎÊı¸³Öµ¸øsettings.port	
-        case 'p': // -pÎªTCPµÄ¼àÌı¶Ë¿Ú  -UÎªUDPµÄ¼àÌı¶Ë¿Ú
+		//memcachedç›‘å¬çš„tcpç«¯å£ã€‚é»˜è®¤ç«¯å£ä¸º11211ï¼Œè¯¥é€‰é¡¹çš„å‚æ•°èµ‹å€¼ç»™settings.port	
+        case 'p': // -pä¸ºTCPçš„ç›‘å¬ç«¯å£  -Uä¸ºUDPçš„ç›‘å¬ç«¯å£
             settings.port = atoi(optarg);
             tcp_specified = true;
             break;
-		 //¼àÌıµÄsocketµÄÂ·¾¶	
+		 //ç›‘å¬çš„socketçš„è·¯å¾„	
         case 's':
             settings.socketpath = optarg;
             break;
-		//memcachedÄÜ¹»Ê¹ÓÃµÄ×î´óÄÚ´æÖµ£¬Ä¬ÈÏÊÇ64MB¡£²ÎÊıµ¥Î»ÎªMB¡£¸Ã²ÎÊı¸³Öµ¸øsettings.maxbytes	
+		//memcachedèƒ½å¤Ÿä½¿ç”¨çš„æœ€å¤§å†…å­˜å€¼ï¼Œé»˜è®¤æ˜¯64MBã€‚å‚æ•°å•ä½ä¸ºMBã€‚è¯¥å‚æ•°èµ‹å€¼ç»™settings.maxbytes	
         case 'm':
             settings.maxbytes = ((size_t)atoi(optarg)) * 1024 * 1024;
             break;
-		//Ä¬ÈÏÇé¿öÏÂ£¬µ±memcachedµÄÄÚ´æÊ¹ÓÃÍêºó£¬½«½øĞĞLRU»úÖÆÌÔÌ­itemÒÔÌÚ³ö¿Õ¼ä¡£Èç¹ûÊ¹ÓÃ±¾Ñ¡ÏîÄÇÃ´½«¹Ø±ÕLRU¹¦ÄÜ¡£
-        //µ±È»¹Ø±ÕLRU²»´ú±í²»ÄÜ´æ´¢ĞÂÊı¾İ¡£Èç¹ûmemcachedÀïÃæ´æÓĞ¹ıÆÚÊ§Ğ§µÄitem£¬ÄÇÃ´¾Í¿ÉÒÔ´æ´¢ĞÂÊı¾İ¡£·ñÔò½«ÎŞ·¨´æ´¢¡£	
+		//é»˜è®¤æƒ…å†µä¸‹ï¼Œå½“memcachedçš„å†…å­˜ä½¿ç”¨å®Œåï¼Œå°†è¿›è¡ŒLRUæœºåˆ¶æ·˜æ±°itemä»¥è…¾å‡ºç©ºé—´ã€‚å¦‚æœä½¿ç”¨æœ¬é€‰é¡¹é‚£ä¹ˆå°†å…³é—­LRUåŠŸèƒ½ã€‚
+        //å½“ç„¶å…³é—­LRUä¸ä»£è¡¨ä¸èƒ½å­˜å‚¨æ–°æ•°æ®ã€‚å¦‚æœmemcachedé‡Œé¢å­˜æœ‰è¿‡æœŸå¤±æ•ˆçš„itemï¼Œé‚£ä¹ˆå°±å¯ä»¥å­˜å‚¨æ–°æ•°æ®ã€‚å¦åˆ™å°†æ— æ³•å­˜å‚¨ã€‚	
         case 'M':
             settings.evict_to_free = 0;
             break;
-		//×î¶àÔÊĞí¶àÉÙ¸ö¿Í»§¶ËÍ¬Ê±ÔÚÏß£¬¸ÃÑ¡ÏîºÍºóÃæµÄbÑ¡Ïî²»Í¬¡£Ä¬ÈÏÎª1024¸ö¡£¸ÃÑ¡Ïî²ÎÊı¸³Öµ¸øsettings.maxconns	
+		//æœ€å¤šå…è®¸å¤šå°‘ä¸ªå®¢æˆ·ç«¯åŒæ—¶åœ¨çº¿ï¼Œè¯¥é€‰é¡¹å’Œåé¢çš„bé€‰é¡¹ä¸åŒã€‚é»˜è®¤ä¸º1024ä¸ªã€‚è¯¥é€‰é¡¹å‚æ•°èµ‹å€¼ç»™settings.maxconns	
         case 'c':
-            settings.maxconns = atoi(optarg); //×¢ÒâÕâ¸ö°üÀ¨memcacheÄÚ²¿Ê¹ÓÃµÄfd£¬Êµ¼ÊÉÏÌá¹©¸ø¿Í»§¶Ë½¨Á´µÄfdÒªÉÙÓÚÕâ¸ö100¶à£¬ÀıÈçÅäÖÃ-c 1024£¬Êµ¼ÊÉÏ×î¶à½ÓÊÕ900¶à¸öÁ¬½Ó
+            settings.maxconns = atoi(optarg); //æ³¨æ„è¿™ä¸ªåŒ…æ‹¬memcacheå†…éƒ¨ä½¿ç”¨çš„fdï¼Œå®é™…ä¸Šæä¾›ç»™å®¢æˆ·ç«¯å»ºé“¾çš„fdè¦å°‘äºè¿™ä¸ª100å¤šï¼Œä¾‹å¦‚é…ç½®-c 1024ï¼Œå®é™…ä¸Šæœ€å¤šæ¥æ”¶900å¤šä¸ªè¿æ¥
             break;
-		//ÏÔÊ¾°ïÖúĞÅÏ¢	
+		//æ˜¾ç¤ºå¸®åŠ©ä¿¡æ¯	
         case 'h':
             usage();
             exit(EXIT_SUCCESS);
-		//ÏÔÊ¾memcachedºÍlibeventµÄ°æÈ¨ĞÅÏ¢	
+		//æ˜¾ç¤ºmemcachedå’Œlibeventçš„ç‰ˆæƒä¿¡æ¯	
         case 'i':
             usage_license();
             exit(EXIT_SUCCESS);
-		//½«memcachedÊ¹ÓÃµ½µÄÄÚ´æËø¶¨ÔÚÄÚ´æÖĞ£¬²»×¼OS°ÑmemcachedµÄÄÚ´æÒÆ¶¯µ½ĞéÄâÄÚ´æ¡£ÒòÎªµ±OS°ÑmemcachedµÄÄÚ´æÒÆ¶¯µ½ĞéÄâÄÚ´æ¿ÉÄÜµ¼ÖÂÒ³´íÎó£¬½µµÍmemcachedµÄÏìÓ¦Ê±¼ä
+		//å°†memcachedä½¿ç”¨åˆ°çš„å†…å­˜é”å®šåœ¨å†…å­˜ä¸­ï¼Œä¸å‡†OSæŠŠmemcachedçš„å†…å­˜ç§»åŠ¨åˆ°è™šæ‹Ÿå†…å­˜ã€‚å› ä¸ºå½“OSæŠŠmemcachedçš„å†…å­˜ç§»åŠ¨åˆ°è™šæ‹Ÿå†…å­˜å¯èƒ½å¯¼è‡´é¡µé”™è¯¯ï¼Œé™ä½memcachedçš„å“åº”æ—¶é—´
         case 'k':
             lock_memory = true;
             break;
-		//Êä³ömemcachedÔËĞĞÊ±µÄÒ»Ğ©ĞÅÏ¢¡£-v -vv -vvvÊä³öµÄĞÅÏ¢ÒÀ´ÎÔö¼Ó¡£¸ÃÑ¡Ïî»áÔö¼Ósettings.verboseµÄÖµ
+		//è¾“å‡ºmemcachedè¿è¡Œæ—¶çš„ä¸€äº›ä¿¡æ¯ã€‚-v -vv -vvvè¾“å‡ºçš„ä¿¡æ¯ä¾æ¬¡å¢åŠ ã€‚è¯¥é€‰é¡¹ä¼šå¢åŠ settings.verboseçš„å€¼
         case 'v':
             settings.verbose++;
             break;
-		//memcached°ó¶¨µÄipµØÖ·¡£Èç¹û²»ÉèÖÃÕâ¸öÑ¡Ïî£¬ÄÇÃ´memcached½«Ê¹ÓÃINADDR_ANY¡£Èç¹ûÏëÖ¸¶¨¶à¸öIPµØÖ·£¬
-		//ÄÇÃ´¸ÃÑ¡ÏîµÄ²ÎÊı¿ÉÒÔÓÉ¶à¸öip×é³É£¬ipÖ®¼äÓÃ¶ººÅ·Ö¸ô¡£Ò²¿ÉÒÔ¶à´ÎÊ¹ÓÃÕâ¸öÑ¡Ïî£¬´ËÊ±¶Ë¿ÚÓ¦¸ÃËæip¶ø²»ÊÇµ¥¶ÀÓÃ-pÑ¡ÏîÖ¸¶¨¡£
-		//ÀıÈç-l 127.0.0.1:8888, 192.168.1.112:9999
+		//memcachedç»‘å®šçš„ipåœ°å€ã€‚å¦‚æœä¸è®¾ç½®è¿™ä¸ªé€‰é¡¹ï¼Œé‚£ä¹ˆmemcachedå°†ä½¿ç”¨INADDR_ANYã€‚å¦‚æœæƒ³æŒ‡å®šå¤šä¸ªIPåœ°å€ï¼Œ
+		//é‚£ä¹ˆè¯¥é€‰é¡¹çš„å‚æ•°å¯ä»¥ç”±å¤šä¸ªipç»„æˆï¼Œipä¹‹é—´ç”¨é€—å·åˆ†éš”ã€‚ä¹Ÿå¯ä»¥å¤šæ¬¡ä½¿ç”¨è¿™ä¸ªé€‰é¡¹ï¼Œæ­¤æ—¶ç«¯å£åº”è¯¥éšipè€Œä¸æ˜¯å•ç‹¬ç”¨-pé€‰é¡¹æŒ‡å®šã€‚
+		//ä¾‹å¦‚-l 127.0.0.1:8888, 192.168.1.112:9999
         case 'l': 
             if (settings.inter != NULL) {
                 size_t len = strlen(settings.inter) + strlen(optarg) + 2;
@@ -5551,14 +5551,14 @@ int main (int argc, char **argv) {
                 settings.inter= strdup(optarg);
             }
             break;
-        case 'd':  //ÒÔÊØºò½ø³ÌµÄ·½Ê½ÔËĞĞmemcached
+        case 'd':  //ä»¥å®ˆå€™è¿›ç¨‹çš„æ–¹å¼è¿è¡Œmemcached
             do_daemonize = true;
             break;
-		//ÉèÖÃcoreÎÄ¼ş´óĞ¡²»ÊÜÏŞÖÆ
+		//è®¾ç½®coreæ–‡ä»¶å¤§å°ä¸å—é™åˆ¶
         case 'r':
             maxcore = 1;
             break;
-		//workerÏß³ÌÁ¬ĞøÎªÄ³¸ö¿Í»§¶ËÖ´ĞĞÃüÁîµÄ×î´óÃüÁîÊı.
+		//workerçº¿ç¨‹è¿ç»­ä¸ºæŸä¸ªå®¢æˆ·ç«¯æ‰§è¡Œå‘½ä»¤çš„æœ€å¤§å‘½ä»¤æ•°.
         case 'R':
             settings.reqs_per_event = atoi(optarg);
             if (settings.reqs_per_event == 0) {
@@ -5566,24 +5566,24 @@ int main (int argc, char **argv) {
                 return 1;
             }
             break;
-		//µ±ÒÔrootÓÃ»§Æô¶¯memcachedµÄÊ±ºòĞèÒªÖ¸¶¨memcachedËùÊôÓÃ»§£¬ÆäËûÓÃ»§Æô¶¯memcached²»ĞèÒª´ËÑ¡Ïî
+		//å½“ä»¥rootç”¨æˆ·å¯åŠ¨memcachedçš„æ—¶å€™éœ€è¦æŒ‡å®šmemcachedæ‰€å±ç”¨æˆ·ï¼Œå…¶ä»–ç”¨æˆ·å¯åŠ¨memcachedä¸éœ€è¦æ­¤é€‰é¡¹
         case 'u':
             username = optarg;
             break;
-		//¸ÃÑ¡ÏîµÄ²ÎÊıÖ¸Ã÷memcachedµÄpid±£´æÎÄ¼ş¡£ÒªºÍ-dÑ¡ÏîÅäºÏÊ¹ÓÃ¡£×¢ÒâÔËĞĞµÄÓÃ»§ÊÇ·ñÓĞÈ¨ÏŞĞ´¶ÔÓ¦µÄÎÄ¼ş
+		//è¯¥é€‰é¡¹çš„å‚æ•°æŒ‡æ˜memcachedçš„pidä¿å­˜æ–‡ä»¶ã€‚è¦å’Œ-dé€‰é¡¹é…åˆä½¿ç”¨ã€‚æ³¨æ„è¿è¡Œçš„ç”¨æˆ·æ˜¯å¦æœ‰æƒé™å†™å¯¹åº”çš„æ–‡ä»¶
         case 'P':
             pid_file = optarg;
             break;
-		//itemµÄÀ©ÈİÒò×Ó¡£Ä¬ÈÏÖµÎª1.25¡£¸ÃÑ¡ÏîµÄ²ÎÊıÖµ¿ÉÒÔÊÇĞ¡Êıµ«±ØĞë´óÓÚ1.0	
+		//itemçš„æ‰©å®¹å› å­ã€‚é»˜è®¤å€¼ä¸º1.25ã€‚è¯¥é€‰é¡¹çš„å‚æ•°å€¼å¯ä»¥æ˜¯å°æ•°ä½†å¿…é¡»å¤§äº1.0	
 		//
-        case 'f': //memcachedÄ¬ÈÏÇé¿öÏÂÏÂÒ»¸öslabµÄ×î´óÖµÎªÇ°Ò»¸öµÄ1.25±¶£¬Õâ¸ö¿ÉÒÔÍ¨¹ıĞŞ¸Ä-f²ÎÊıÀ´ĞŞ¸ÄÔö³¤±ÈÀı
+        case 'f': //memcachedé»˜è®¤æƒ…å†µä¸‹ä¸‹ä¸€ä¸ªslabçš„æœ€å¤§å€¼ä¸ºå‰ä¸€ä¸ªçš„1.25å€ï¼Œè¿™ä¸ªå¯ä»¥é€šè¿‡ä¿®æ”¹-få‚æ•°æ¥ä¿®æ”¹å¢é•¿æ¯”ä¾‹
             settings.factor = atof(optarg);
             if (settings.factor <= 1.0) {
                 fprintf(stderr, "Factor must be greater than 1\n");
                 return 1;
             }
             break;
-		//ÉèÖÃ×îĞ¡µÄitemÄÜ´æ´¢¶àÉÙ×Ö½ÚµÄÊı¾İ¡£	
+		//è®¾ç½®æœ€å°çš„itemèƒ½å­˜å‚¨å¤šå°‘å­—èŠ‚çš„æ•°æ®ã€‚	
         case 'n':
             settings.chunk_size = atoi(optarg);
             if (settings.chunk_size == 0) {
@@ -5591,7 +5591,7 @@ int main (int argc, char **argv) {
                 return 1;
             }
             break;
-		//¸ÃÑ¡ÏîµÄ²ÎÊıÓÃÓÚÖ¸¶¨workerÏß³ÌµÄ¸öÊı£¬½¨Òé²»³¬¹ı64¸ö¡£Èç¹û²»ÉèÖÃÄ¬ÈÏÓĞ4¸öÏß³Ì	
+		//è¯¥é€‰é¡¹çš„å‚æ•°ç”¨äºæŒ‡å®šworkerçº¿ç¨‹çš„ä¸ªæ•°ï¼Œå»ºè®®ä¸è¶…è¿‡64ä¸ªã€‚å¦‚æœä¸è®¾ç½®é»˜è®¤æœ‰4ä¸ªçº¿ç¨‹	
         case 't':
             settings.num_threads = atoi(optarg);
             if (settings.num_threads <= 0) {
@@ -5609,8 +5609,8 @@ int main (int argc, char **argv) {
                                 " your machine or less.\n");
             }
             break;
-		//²ÎÊı×Ö·û×÷ÎªÇ°×ººÍIDµÄ·Ö¸ô·û¡£Ê¹ÓÃÁË¸ÃÑ¡Ïî²Å»á×Ô¶¯ÊÕ¼¯×´Ì¬ĞÅÏ¢¡£Ò²¿ÉÒÔÔÚÆô¶¯memcachedºó£¬¿Í»§¶ËÊ¹ÓÃstat detail onÃüÁî¿ªÆô,
-		//´ËÊ±Ä¬ÈÏµÄ·Ö¸ô·ûÎªÃ°ºÅ":"
+		//å‚æ•°å­—ç¬¦ä½œä¸ºå‰ç¼€å’ŒIDçš„åˆ†éš”ç¬¦ã€‚ä½¿ç”¨äº†è¯¥é€‰é¡¹æ‰ä¼šè‡ªåŠ¨æ”¶é›†çŠ¶æ€ä¿¡æ¯ã€‚ä¹Ÿå¯ä»¥åœ¨å¯åŠ¨memcachedåï¼Œå®¢æˆ·ç«¯ä½¿ç”¨stat detail onå‘½ä»¤å¼€å¯,
+		//æ­¤æ—¶é»˜è®¤çš„åˆ†éš”ç¬¦ä¸ºå†’å·":"
         case 'D':
             if (! optarg || ! optarg[0]) {
                 fprintf(stderr, "No delimiter specified\n");
@@ -5619,7 +5619,7 @@ int main (int argc, char **argv) {
             settings.prefix_delimiter = optarg[0];
             settings.detail_enabled = 1;
             break;
-		//Èç¹ûOSÔÊĞíµÄ»°£¬ÄÇÃ´ÏòOSÉêÇë¸ü´óµÄÄÚ´æÒ³¡£OSµÄÄ¬ÈÏÄÚ´æÒ³Îª4KB¡£´óµÄÄÚ´æÒ³¿ÉÒÔÓĞĞ§½µµÍÒ³±íµÄ´óĞ¡£¬Ìá¸ßĞ§ÂÊ¡£
+		//å¦‚æœOSå…è®¸çš„è¯ï¼Œé‚£ä¹ˆå‘OSç”³è¯·æ›´å¤§çš„å†…å­˜é¡µã€‚OSçš„é»˜è®¤å†…å­˜é¡µä¸º4KBã€‚å¤§çš„å†…å­˜é¡µå¯ä»¥æœ‰æ•ˆé™ä½é¡µè¡¨çš„å¤§å°ï¼Œæé«˜æ•ˆç‡ã€‚
         case 'L' :
             if (enable_large_pages() == 0) {
                 preallocate = true;
@@ -5629,16 +5629,16 @@ int main (int argc, char **argv) {
                 return 1;
             }
             break;
-		//memcachedÄ¬ÈÏÊÇÊ¹ÓÃCASµÄ£¬±¾Ñ¡ÏîÊÇ½ûÓÃCAS¡£	
+		//memcachedé»˜è®¤æ˜¯ä½¿ç”¨CASçš„ï¼Œæœ¬é€‰é¡¹æ˜¯ç¦ç”¨CASã€‚	
         case 'C' :
             settings.use_cas = false;
             break;
-		//listenº¯ÊıµÄµÚ¶ş¸ö²ÎÊı¡£Èç¹û²»ÉèÖÃ£¬Ä¬ÈÏÎª1024	
+		//listenå‡½æ•°çš„ç¬¬äºŒä¸ªå‚æ•°ã€‚å¦‚æœä¸è®¾ç½®ï¼Œé»˜è®¤ä¸º1024	
         case 'b' :
             settings.backlog = atoi(optarg);
             break;
-		//memcachedÖ§³ÖÎÄ±¾Ğ­ÒéºÍ¶ş½øÖÆĞ­Òé¡£¸ÃÑ¡ÏîµÄ²ÎÊıÓÃÓÚÖ¸¶¨Ê¹ÓÃµÄĞ­Òé¡£Ä¬ÈÏÇé¿öÏÂÊÇ¸ù¾İ¿Í»§¶ËµÄÃüÁî
-		//¶ø×Ô¶¯ÅĞ¶Ï(Ò²½ĞĞ­ÉÌ)£¬²ÎÊıÖ»ÄÜÈ¡auto¡¢binary¡¢asciiÕâÈı¸ö×Ö·û´®Öµ¡£
+		//memcachedæ”¯æŒæ–‡æœ¬åè®®å’ŒäºŒè¿›åˆ¶åè®®ã€‚è¯¥é€‰é¡¹çš„å‚æ•°ç”¨äºæŒ‡å®šä½¿ç”¨çš„åè®®ã€‚é»˜è®¤æƒ…å†µä¸‹æ˜¯æ ¹æ®å®¢æˆ·ç«¯çš„å‘½ä»¤
+		//è€Œè‡ªåŠ¨åˆ¤æ–­(ä¹Ÿå«åå•†)ï¼Œå‚æ•°åªèƒ½å–autoã€binaryã€asciiè¿™ä¸‰ä¸ªå­—ç¬¦ä¸²å€¼ã€‚
         case 'B':
             protocol_specified = true;
             if (strcmp(optarg, "auto") == 0) {
@@ -5653,8 +5653,8 @@ int main (int argc, char **argv) {
                 exit(EX_USAGE);
             }
             break;
-		//slab·ÖÅäÆ÷ÖĞ£¬Ã¿Ò»¸öÒ³µÄ´óĞ¡¡£Õâ¸öÑ¡ÏîµÄ²ÎÊıÊÇÒ»¸öÊıÖµ±íÊ¾Ò³µÄ´óĞ¡¡£Ä¬ÈÏµ¥Î»ÊÇBÒ²¿ÉÒÔÔÚÊıÖµ
-		//ºóÃæ´øK»òÕßM¡£Ò³µÄ´óĞ¡Ğ¡ÓÚ1KB»òÕß´óÓÚ128MB ¶¼ÊÇ²»ÔÊĞíµÄ¡£²»ÍÆ¼öÊ¹ÓÃ¸ÃÑ¡Ïî¡£
+		//slabåˆ†é…å™¨ä¸­ï¼Œæ¯ä¸€ä¸ªé¡µçš„å¤§å°ã€‚è¿™ä¸ªé€‰é¡¹çš„å‚æ•°æ˜¯ä¸€ä¸ªæ•°å€¼è¡¨ç¤ºé¡µçš„å¤§å°ã€‚é»˜è®¤å•ä½æ˜¯Bä¹Ÿå¯ä»¥åœ¨æ•°å€¼
+		//åé¢å¸¦Kæˆ–è€…Mã€‚é¡µçš„å¤§å°å°äº1KBæˆ–è€…å¤§äº128MB éƒ½æ˜¯ä¸å…è®¸çš„ã€‚ä¸æ¨èä½¿ç”¨è¯¥é€‰é¡¹ã€‚
         case 'I':
             buf = strdup(optarg);
             unit = buf[strlen(buf)-1];
@@ -5687,7 +5687,7 @@ int main (int argc, char **argv) {
             }
             free(buf);
             break;
-		//´ò¿ªsasl °²È«Ğ­Òé¡£	
+		//æ‰“å¼€sasl å®‰å…¨åè®®ã€‚	
         case 'S': /* set Sasl authentication to true. Default is false */
 #ifndef ENABLE_SASL
             fprintf(stderr, "This server is not built with SASL support.\n");
@@ -5695,11 +5695,11 @@ int main (int argc, char **argv) {
 #endif
             settings.sasl = true;
             break;
-		//½ûÖ¹¿Í»§¶ËµÄflush_allÃüÁî¡£Ä¬ÈÏÊÇÔÊĞí¿Í»§¶ËµÄflush_allÃüÁîµÄ¡£	
+		//ç¦æ­¢å®¢æˆ·ç«¯çš„flush_allå‘½ä»¤ã€‚é»˜è®¤æ˜¯å…è®¸å®¢æˆ·ç«¯çš„flush_allå‘½ä»¤çš„ã€‚	
        case 'F' :
             settings.flush_enabled = false;
             break;
-		//ÓĞÏÂÃæ¼¸¸ö×ÓÑ¡Ïî¿ÉÒÔÉèÖÃ¡£Õâ¸öÑ¡ÏîÊÇÓÃÀ´ÓÅ»¯µÄ	
+		//æœ‰ä¸‹é¢å‡ ä¸ªå­é€‰é¡¹å¯ä»¥è®¾ç½®ã€‚è¿™ä¸ªé€‰é¡¹æ˜¯ç”¨æ¥ä¼˜åŒ–çš„	
         case 'o': /* It's sub-opts time! */
             subopts = optarg;
 
@@ -5719,11 +5719,11 @@ int main (int argc, char **argv) {
             };
             */
             switch (getsubopt(&subopts, subopts_tokens, &subopts_value)) {
-			//Èç¹ûÁ¬½ÓÊı³¬¹ıÁË×î´óÍ¬Ê±ÔÚÏßÊı£¬Á¢¼´¹Ø±ÕĞÂÁ¬½ÓÉÏµÄ¿Í»§¶Ë¡£	
+			//å¦‚æœè¿æ¥æ•°è¶…è¿‡äº†æœ€å¤§åŒæ—¶åœ¨çº¿æ•°ï¼Œç«‹å³å…³é—­æ–°è¿æ¥ä¸Šçš„å®¢æˆ·ç«¯ã€‚	
             case MAXCONNS_FAST:
                 settings.maxconns_fast = true;
                 break;
-			//¹şÏ£±íµÄ³¤¶ÈÊÇ2^n¡£	Êµ¼ÊÉÏhash±íÊı×éÖ¸Õë´óĞ¡Îª2^n´Î·½¸ö£¬hash²ÜÍ·²¿
+			//å“ˆå¸Œè¡¨çš„é•¿åº¦æ˜¯2^nã€‚	å®é™…ä¸Šhashè¡¨æ•°ç»„æŒ‡é’ˆå¤§å°ä¸º2^næ¬¡æ–¹ä¸ªï¼Œhashæ›¹å¤´éƒ¨
             case HASHPOWER_INIT:
                 if (subopts_value == NULL) {
                     fprintf(stderr, "Missing numeric argument for hashpower\n");
@@ -5741,13 +5741,13 @@ int main (int argc, char **argv) {
                     return 1;
                 }
                 break;
-			//¸ÃÑ¡ÏîÃ»ÓĞ²ÎÊı¡£ÓÃÓÚµ÷½Ú²»Í¬ÀàĞÍµÄitemËùÕ¼ÓÃµÄÄÚ´æ¡£²»Í¬ÀàĞÍÊÇÖ¸´óĞ¡²»Í¬¡£Ä³Ò»Ààitem
-			//ÒÑ¾­ºÜÉÙÊ¹ÓÃÁË£¬µ«ÈÔÕ¼ÓÃ×ÅÄÚ´æ¡£¿ÉÒÔÍ¨¹ı¿ªÆôslab_reassignµ÷¶ÈÄÚ´æ£¬¼õÉÙÕâÒ»ÀàitemµÄÄÚ´æ¡£
+			//è¯¥é€‰é¡¹æ²¡æœ‰å‚æ•°ã€‚ç”¨äºè°ƒèŠ‚ä¸åŒç±»å‹çš„itemæ‰€å ç”¨çš„å†…å­˜ã€‚ä¸åŒç±»å‹æ˜¯æŒ‡å¤§å°ä¸åŒã€‚æŸä¸€ç±»item
+			//å·²ç»å¾ˆå°‘ä½¿ç”¨äº†ï¼Œä½†ä»å ç”¨ç€å†…å­˜ã€‚å¯ä»¥é€šè¿‡å¼€å¯slab_reassignè°ƒåº¦å†…å­˜ï¼Œå‡å°‘è¿™ä¸€ç±»itemçš„å†…å­˜ã€‚
             case SLAB_REASSIGN:
                 settings.slab_reassign = true;
                 break;
-			//ÒÀÀµÓÚslab_reassign¡£ÓÃÓÚÖ÷¶¯¼ì²âÊÇ·ñĞèÒª½øĞĞÄÚ´æµ÷¶È¡£¸ÃÑ¡ÏîµÄ²ÎÊıÊÇ¿ÉÑ¡µÄ¡£²ÎÊıµÄÈ¡Öµ·¶Î§Ö»ÄÜÎª0¡¢1¡¢2¡£
-			//²ÎÊıÊÇ²»½¨ÒéµÄ¡£
+			//ä¾èµ–äºslab_reassignã€‚ç”¨äºä¸»åŠ¨æ£€æµ‹æ˜¯å¦éœ€è¦è¿›è¡Œå†…å­˜è°ƒåº¦ã€‚è¯¥é€‰é¡¹çš„å‚æ•°æ˜¯å¯é€‰çš„ã€‚å‚æ•°çš„å–å€¼èŒƒå›´åªèƒ½ä¸º0ã€1ã€2ã€‚
+			//å‚æ•°æ˜¯ä¸å»ºè®®çš„ã€‚
             case SLAB_AUTOMOVE:
                 if (subopts_value == NULL) {
                     settings.slab_automove = 1;
@@ -5759,8 +5759,8 @@ int main (int argc, char **argv) {
                     return 1;
                 }
                 break;
-			//ÓÃÓÚ¼à²âÊÇ·ñÓĞitem±»ÒÑËÀÏß³ÌËùÒıÓÃ¡£Ò»°ã²»»á³öÏÖÕâÖÖÇé¿ö£¬ËùÒÔÄ¬ÈÏ²»¿ªÆôÕâÖÖ¼ì²â¡£
-			//Èç¹û¿ªÆôÕâÖÖ¼ì²â£¬ÄÇÃ´ĞèÒªÊ¹ÓÃ±¾Ñ¡Ïî£¬±¾Ñ¡ÏîĞèÒªÒ»¸ö²ÎÊı£¬²ÎÊıÖµ±ØĞë²»Ğ¡ÓÚ10	
+			//ç”¨äºç›‘æµ‹æ˜¯å¦æœ‰itemè¢«å·²æ­»çº¿ç¨‹æ‰€å¼•ç”¨ã€‚ä¸€èˆ¬ä¸ä¼šå‡ºç°è¿™ç§æƒ…å†µï¼Œæ‰€ä»¥é»˜è®¤ä¸å¼€å¯è¿™ç§æ£€æµ‹ã€‚
+			//å¦‚æœå¼€å¯è¿™ç§æ£€æµ‹ï¼Œé‚£ä¹ˆéœ€è¦ä½¿ç”¨æœ¬é€‰é¡¹ï¼Œæœ¬é€‰é¡¹éœ€è¦ä¸€ä¸ªå‚æ•°ï¼Œå‚æ•°å€¼å¿…é¡»ä¸å°äº10	
             case TAIL_REPAIR_TIME:
                 if (subopts_value == NULL) {
                     fprintf(stderr, "Missing numeric argument for tail_repair_time\n");
@@ -5772,7 +5772,7 @@ int main (int argc, char **argv) {
                     return 1;
                 }
                 break;
-			//ÓÃÓÚÖ¸¶¨¹şÏ£Ëã·¨¡£¸ÃÑ¡Ïî±ØĞë´øÓĞ²ÎÊı¡£²¢ÇÒ²ÎÊıÖ»ÄÜÊÇ×Ö·û´®jenkins»òÕßmurmur3	
+			//ç”¨äºæŒ‡å®šå“ˆå¸Œç®—æ³•ã€‚è¯¥é€‰é¡¹å¿…é¡»å¸¦æœ‰å‚æ•°ã€‚å¹¶ä¸”å‚æ•°åªèƒ½æ˜¯å­—ç¬¦ä¸²jenkinsæˆ–è€…murmur3	
             case HASH_ALGORITHM:
                 if (subopts_value == NULL) {
                     fprintf(stderr, "Missing hash_algorithm argument\n");
@@ -5787,14 +5787,14 @@ int main (int argc, char **argv) {
                     return 1;
                 }
                 break;
-			//±¾Ñ¡ÏîÓÃÓÚÆô¶¯LRUÅÀ³æÏß³Ì¡£	
+			//æœ¬é€‰é¡¹ç”¨äºå¯åŠ¨LRUçˆ¬è™«çº¿ç¨‹ã€‚	
             case LRU_CRAWLER:
                 if (start_item_crawler_thread() != 0) {
                     fprintf(stderr, "Failed to enable LRU crawler thread\n");
                     return 1;
                 }
                 break;
-			//LRUÅÀ³æÏß³Ì¹¤×÷Ê±µÄĞİÃß¼ä¸ô¡£±¾Ñ¡ÏîĞèÒªÒ»¸ö²ÎÊı×÷ÎªĞİÃßÊ±¼ä£¬µ¥Î»ÎªÎ¢Ãî£¬È¡Öµ·¶Î§ÊÇ[0,100000]	
+			//LRUçˆ¬è™«çº¿ç¨‹å·¥ä½œæ—¶çš„ä¼‘çœ é—´éš”ã€‚æœ¬é€‰é¡¹éœ€è¦ä¸€ä¸ªå‚æ•°ä½œä¸ºä¼‘çœ æ—¶é—´ï¼Œå•ä½ä¸ºå¾®å¦™ï¼Œå–å€¼èŒƒå›´æ˜¯[0,100000]	
             case LRU_CRAWLER_SLEEP:
                 settings.lru_crawler_sleep = atoi(subopts_value);
                 if (settings.lru_crawler_sleep > 1000000 || settings.lru_crawler_sleep < 0) {
@@ -5802,7 +5802,7 @@ int main (int argc, char **argv) {
                     return 1;
                 }
                 break;
-			//LRUÅÀ³æ¼ì²âÃ¿ÌõLRU¶ÓÁĞÖĞµÄ¶àÉÙ¸öitem	
+			//LRUçˆ¬è™«æ£€æµ‹æ¯æ¡LRUé˜Ÿåˆ—ä¸­çš„å¤šå°‘ä¸ªitem	
             case LRU_CRAWLER_TOCRAWL:
                 if (!safe_strtoul(subopts_value, &tocrawl)) {
                     fprintf(stderr, "lru_crawler_tocrawl takes a numeric 32bit value\n");
@@ -5833,7 +5833,7 @@ int main (int argc, char **argv) {
      * multiple ports
      */
     if (settings.inter != NULL && strchr(settings.inter, ',')) {
-        settings.num_threads_per_udp = 1; //Èç¹û-L²ÎÊıºóÃæĞ¯´ø¶à¸öµØÖ·£¬ÔòÖ»ÓĞÒ»¸öÏß³ÌÎªudpÌá¹©·şÎñ
+        settings.num_threads_per_udp = 1; //å¦‚æœ-Lå‚æ•°åé¢æºå¸¦å¤šä¸ªåœ°å€ï¼Œåˆ™åªæœ‰ä¸€ä¸ªçº¿ç¨‹ä¸ºudpæä¾›æœåŠ¡
     } else {
         settings.num_threads_per_udp = settings.num_threads;
     }
@@ -5849,7 +5849,7 @@ int main (int argc, char **argv) {
         }
     }
 
-    //Èç¹ûÖ»ÉèÖÃÁËudp»òÕßtcpµÄ¼àÌı¶Ë¿Ú£¬ÔòÆätcpºÍudp¼àÌı¶Ë¿Ú¶¼ÊÇÍ¬Ò»¸ö¶Ë¿Ú
+    //å¦‚æœåªè®¾ç½®äº†udpæˆ–è€…tcpçš„ç›‘å¬ç«¯å£ï¼Œåˆ™å…¶tcpå’Œudpç›‘å¬ç«¯å£éƒ½æ˜¯åŒä¸€ä¸ªç«¯å£
     if (tcp_specified && !udp_specified) {
         settings.udpport = settings.port;
     } else if (udp_specified && !tcp_specified) {
@@ -5900,7 +5900,7 @@ int main (int argc, char **argv) {
     }
 
     /* lose root privileges if we have them */
-    if (getuid() == 0 || geteuid() == 0) { //rootÓÃ»§±ØĞëÖ¸¶¨ÓÃ»§ĞÅÏ¢
+    if (getuid() == 0 || geteuid() == 0) { //rootç”¨æˆ·å¿…é¡»æŒ‡å®šç”¨æˆ·ä¿¡æ¯
         if (username == 0 || *username == '\0') {
             fprintf(stderr, "can't run as root without the -u switch\n");
             exit(EX_USAGE);
@@ -5933,8 +5933,8 @@ int main (int argc, char **argv) {
     }
 
     /* lock paged memory if needed */
-    /* ½«½ø³ÌÊ¹ÓÃµÄ²¿·Ö»òÕßÈ«²¿µÄµØÖ·¿Õ¼äËø¶¨ÔÚÎïÀíÄÚ´æÖĞ£¬·ÀÖ¹Æä±»½»»»µ½swap¿Õ¼ä¡£
-ÓĞĞ©¶ÔÊ±¼äÃô¸ĞµÄÓ¦ÓÃ»áÏ£ÍûÈ«²¿Ê¹ÓÃÎïÀíÄÚ´æ£¬ÒÔÌá¸ßÊı¾İ·ÃÎÊºÍ²Ù×÷µÄĞ§ÂÊ¡£ */
+    /* å°†è¿›ç¨‹ä½¿ç”¨çš„éƒ¨åˆ†æˆ–è€…å…¨éƒ¨çš„åœ°å€ç©ºé—´é”å®šåœ¨ç‰©ç†å†…å­˜ä¸­ï¼Œé˜²æ­¢å…¶è¢«äº¤æ¢åˆ°swapç©ºé—´ã€‚
+æœ‰äº›å¯¹æ—¶é—´æ•æ„Ÿçš„åº”ç”¨ä¼šå¸Œæœ›å…¨éƒ¨ä½¿ç”¨ç‰©ç†å†…å­˜ï¼Œä»¥æé«˜æ•°æ®è®¿é—®å’Œæ“ä½œçš„æ•ˆç‡ã€‚ */
     if (lock_memory) {
 #ifdef HAVE_MLOCKALL
         int res = mlockall(MCL_CURRENT | MCL_FUTURE);
@@ -5949,30 +5949,30 @@ int main (int argc, char **argv) {
 
 
     /*
-    ÓÃ»§Ïß³ÌÊ¹ÓÃlibeventÔòÍ¨³£°´ÒÔÏÂ²½Öè£º
-    1£©ÓÃ»§Ïß³ÌÍ¨¹ıevent_init()º¯Êı´´½¨Ò»¸öevent_base¶ÔÏó¡£event_base¶ÔÏó¹ÜÀíËùÓĞ×¢²áµ½×Ô¼ºÄÚ²¿µÄIOÊÂ¼ş¡£
-    ¶àÏß³Ì»·¾³ÏÂ£¬event_base¶ÔÏó²»ÄÜ±»¶à¸öÏß³Ì¹²Ïí£¬¼´Ò»¸öevent_base¶ÔÏóÖ»ÄÜ¶ÔÓ¦Ò»¸öÏß³Ì¡£
-    2£©È»ºó¸ÃÏß³ÌÍ¨¹ıevent_addº¯Êı£¬½«Óë×Ô¼º¸ĞĞËÈ¤µÄÎÄ¼şÃèÊö·ûÏà¹ØµÄIOÊÂ¼ş£¬×¢²áµ½event_base¶ÔÏó£¬Í¬Ê±Ö¸¶¨
-    ÊÂ¼ş·¢ÉúÊ±ËùÒªµ÷ÓÃµÄÊÂ¼ş´¦Àíº¯Êı£¨event handler£©¡£·şÎñÆ÷³ÌĞòÍ¨³£¼àÌıÌ×½Ó×Ö£¨socket£©µÄ¿É¶ÁÊÂ¼ş¡£±ÈÈç£¬
-    ·şÎñÆ÷Ïß³Ì×¢²áÌ×½Ó×Ösock1µÄEV_READÊÂ¼ş£¬²¢Ö¸¶¨event_handler1()Îª¸ÃÊÂ¼şµÄ»Øµ÷º¯Êı¡£libevent½«IOÊÂ¼ş·â
-    ×°³Éstruct eventÀàĞÍ¶ÔÏó£¬ÊÂ¼şÀàĞÍÓÃEV_READ/EV_WRITEµÈ³£Á¿±êÖ¾¡£
-    3£© ×¢²áÍêÊÂ¼şÖ®ºó£¬Ïß³Ìµ÷ÓÃevent_base_loop½øÈëÑ­»·¼àÌı£¨monitor£©×´Ì¬¡£¸ÃÑ­»·ÄÚ²¿»áµ÷ÓÃepollµÈIO¸´ÓÃ
-    º¯Êı½øÈë×èÈû×´Ì¬£¬Ö±µ½ÃèÊö·ûÉÏ·¢Éú×Ô¼º¸ĞĞËÈ¤µÄÊÂ¼ş¡£´ËÊ±£¬Ïß³Ì»áµ÷ÓÃÊÂÏÈÖ¸¶¨µÄ»Øµ÷º¯Êı´¦Àí¸ÃÊÂ¼ş¡£Àı
-    Èç£¬µ±Ì×½Ó×Ösock1·¢Éú¿É¶ÁÊÂ¼ş£¬¼´sock1µÄÄÚºËbuffÖĞÒÑÓĞ¿É¶ÁÊı¾İÊ±£¬±»×èÈûµÄÏß³ÌÁ¢¼´·µ»Ø£¨wake up£©²¢µ÷
-    ÓÃevent_handler1()º¯ÊıÀ´´¦Àí¸Ã´ÎÊÂ¼ş¡£
-    4£©´¦ÀíÍêÕâ´Î¼àÌı»ñµÃµÄÊÂ¼şºó£¬Ïß³ÌÔÙ´Î½øÈë×èÈû×´Ì¬²¢¼àÌı£¬Ö±µ½ÏÂ´ÎÊÂ¼ş·¢Éú¡£
+    ç”¨æˆ·çº¿ç¨‹ä½¿ç”¨libeventåˆ™é€šå¸¸æŒ‰ä»¥ä¸‹æ­¥éª¤ï¼š
+    1ï¼‰ç”¨æˆ·çº¿ç¨‹é€šè¿‡event_init()å‡½æ•°åˆ›å»ºä¸€ä¸ªevent_baseå¯¹è±¡ã€‚event_baseå¯¹è±¡ç®¡ç†æ‰€æœ‰æ³¨å†Œåˆ°è‡ªå·±å†…éƒ¨çš„IOäº‹ä»¶ã€‚
+    å¤šçº¿ç¨‹ç¯å¢ƒä¸‹ï¼Œevent_baseå¯¹è±¡ä¸èƒ½è¢«å¤šä¸ªçº¿ç¨‹å…±äº«ï¼Œå³ä¸€ä¸ªevent_baseå¯¹è±¡åªèƒ½å¯¹åº”ä¸€ä¸ªçº¿ç¨‹ã€‚
+    2ï¼‰ç„¶åè¯¥çº¿ç¨‹é€šè¿‡event_addå‡½æ•°ï¼Œå°†ä¸è‡ªå·±æ„Ÿå…´è¶£çš„æ–‡ä»¶æè¿°ç¬¦ç›¸å…³çš„IOäº‹ä»¶ï¼Œæ³¨å†Œåˆ°event_baseå¯¹è±¡ï¼ŒåŒæ—¶æŒ‡å®š
+    äº‹ä»¶å‘ç”Ÿæ—¶æ‰€è¦è°ƒç”¨çš„äº‹ä»¶å¤„ç†å‡½æ•°ï¼ˆevent handlerï¼‰ã€‚æœåŠ¡å™¨ç¨‹åºé€šå¸¸ç›‘å¬å¥—æ¥å­—ï¼ˆsocketï¼‰çš„å¯è¯»äº‹ä»¶ã€‚æ¯”å¦‚ï¼Œ
+    æœåŠ¡å™¨çº¿ç¨‹æ³¨å†Œå¥—æ¥å­—sock1çš„EV_READäº‹ä»¶ï¼Œå¹¶æŒ‡å®ševent_handler1()ä¸ºè¯¥äº‹ä»¶çš„å›è°ƒå‡½æ•°ã€‚libeventå°†IOäº‹ä»¶å°
+    è£…æˆstruct eventç±»å‹å¯¹è±¡ï¼Œäº‹ä»¶ç±»å‹ç”¨EV_READ/EV_WRITEç­‰å¸¸é‡æ ‡å¿—ã€‚
+    3ï¼‰ æ³¨å†Œå®Œäº‹ä»¶ä¹‹åï¼Œçº¿ç¨‹è°ƒç”¨event_base_loopè¿›å…¥å¾ªç¯ç›‘å¬ï¼ˆmonitorï¼‰çŠ¶æ€ã€‚è¯¥å¾ªç¯å†…éƒ¨ä¼šè°ƒç”¨epollç­‰IOå¤ç”¨
+    å‡½æ•°è¿›å…¥é˜»å¡çŠ¶æ€ï¼Œç›´åˆ°æè¿°ç¬¦ä¸Šå‘ç”Ÿè‡ªå·±æ„Ÿå…´è¶£çš„äº‹ä»¶ã€‚æ­¤æ—¶ï¼Œçº¿ç¨‹ä¼šè°ƒç”¨äº‹å…ˆæŒ‡å®šçš„å›è°ƒå‡½æ•°å¤„ç†è¯¥äº‹ä»¶ã€‚ä¾‹
+    å¦‚ï¼Œå½“å¥—æ¥å­—sock1å‘ç”Ÿå¯è¯»äº‹ä»¶ï¼Œå³sock1çš„å†…æ ¸buffä¸­å·²æœ‰å¯è¯»æ•°æ®æ—¶ï¼Œè¢«é˜»å¡çš„çº¿ç¨‹ç«‹å³è¿”å›ï¼ˆwake upï¼‰å¹¶è°ƒ
+    ç”¨event_handler1()å‡½æ•°æ¥å¤„ç†è¯¥æ¬¡äº‹ä»¶ã€‚
+    4ï¼‰å¤„ç†å®Œè¿™æ¬¡ç›‘å¬è·å¾—çš„äº‹ä»¶åï¼Œçº¿ç¨‹å†æ¬¡è¿›å…¥é˜»å¡çŠ¶æ€å¹¶ç›‘å¬ï¼Œç›´åˆ°ä¸‹æ¬¡äº‹ä»¶å‘ç”Ÿã€‚
     
     */
 
-	//main_baseÊÇÒ»¸östruct event_baseÀàĞÍµÄÈ«¾Ö±äÁ¿
-	//ÎªÖ÷Ïß³Ì´´½¨Ò»¸öevent_base
+	//main_baseæ˜¯ä¸€ä¸ªstruct event_baseç±»å‹çš„å…¨å±€å˜é‡
+	//ä¸ºä¸»çº¿ç¨‹åˆ›å»ºä¸€ä¸ªevent_base
     /* initialize main thread libevent instance */
     main_base = event_init(); 
 
     /* initialize other stuff */
     stats_init();
     assoc_init(settings.hashpower_init);
-	//¶ÔÁ¬½Ó¹ÜÀíÕßconn½øĞĞ³õÊ¼»¯²Ù×÷
+	//å¯¹è¿æ¥ç®¡ç†è€…connè¿›è¡Œåˆå§‹åŒ–æ“ä½œ
     conn_init();
     slabs_init(settings.maxbytes, settings.factor, preallocate);
 
@@ -5985,8 +5985,8 @@ int main (int argc, char **argv) {
         exit(EX_OSERR);
     }
 
-	//´´½¨settings.num_threads¸öworkerÏß³Ì£¬²¢ÇÒÎªÃ¿¸öworkerÏß³Ì´´½¨Ò»¸öCQ¶ÓÁĞ
-	//²¢ÎªÕâĞ©workerÉêÇë¸÷×ÔµÄevent_base£¬workerÏß³ÌÈ»ºó½øÈëÊÂ¼şÑ­»·
+	//åˆ›å»ºsettings.num_threadsä¸ªworkerçº¿ç¨‹ï¼Œå¹¶ä¸”ä¸ºæ¯ä¸ªworkerçº¿ç¨‹åˆ›å»ºä¸€ä¸ªCQé˜Ÿåˆ—
+	//å¹¶ä¸ºè¿™äº›workerç”³è¯·å„è‡ªçš„event_baseï¼Œworkerçº¿ç¨‹ç„¶åè¿›å…¥äº‹ä»¶å¾ªç¯
     /* start up worker threads if MT mode */
     thread_init(settings.num_threads, main_base);
 
@@ -6002,8 +6002,8 @@ int main (int argc, char **argv) {
     /* Run regardless of initializing it later */
     init_lru_crawler();
 
-	//ÉèÖÃÒ»¸ö¶¨Ê±event£¬¶¨Ê±(ÆµÂÊ1Ãë)¸üĞÂcurrent_time±äÁ¿
-	//Õâ¸ö³¬Ê±eventÊÇaddµ½È«¾Ö±äÁ¿main_baseÀïÃæ,ËùÒÔÖ÷Ïß³Ì¸ºÔğ¸üĞÂcurrent_time(ÕâÊÇÒ»¸öºÜÖØÒªµÄÈ«¾Ö±äÁ¿)
+	//è®¾ç½®ä¸€ä¸ªå®šæ—¶eventï¼Œå®šæ—¶(é¢‘ç‡1ç§’)æ›´æ–°current_timeå˜é‡
+	//è¿™ä¸ªè¶…æ—¶eventæ˜¯addåˆ°å…¨å±€å˜é‡main_baseé‡Œé¢,æ‰€ä»¥ä¸»çº¿ç¨‹è´Ÿè´£æ›´æ–°current_time(è¿™æ˜¯ä¸€ä¸ªå¾ˆé‡è¦çš„å…¨å±€å˜é‡)
     /* initialise clock event */
     clock_handler(0, 0, 0);
 
@@ -6034,9 +6034,9 @@ int main (int argc, char **argv) {
             }
         }
 
-        //´´½¨¶àÉÙ¸öTCPÌ×½Ó×Ö¾Í»á´´½¨¶àÉÙ¸öudpÌ×½Ó×Ö£¬IPµØÖ·¶¼ÊÇÒ»ÑùµÄ
+        //åˆ›å»ºå¤šå°‘ä¸ªTCPå¥—æ¥å­—å°±ä¼šåˆ›å»ºå¤šå°‘ä¸ªudpå¥—æ¥å­—ï¼ŒIPåœ°å€éƒ½æ˜¯ä¸€æ ·çš„
         errno = 0;
-		//´´½¨¼àÌı¿Í»§¶ËµÄsocket   TCPÌ×½Ó×Ö´´½¨
+		//åˆ›å»ºç›‘å¬å®¢æˆ·ç«¯çš„socket   TCPå¥—æ¥å­—åˆ›å»º
         if (settings.port && server_sockets(settings.port, tcp_transport,
                                            portnumber_file)) {
             vperror("failed to listen on TCP port %d", settings.port);
@@ -6050,9 +6050,9 @@ int main (int argc, char **argv) {
          * descriptors created by libevent wouldn't survive forking).
          */
 
-        //udpÌ×½Ó×Ö´´½¨
+        //udpå¥—æ¥å­—åˆ›å»º
         /* create the UDP listening socket and bind it */
-        errno = 0;   //´´½¨¶àÉÙ¸öTCPÌ×½Ó×Ö¾Í»á´´½¨¶àÉÙ¸öudpÌ×½Ó×Ö£¬IPµØÖ·¶¼ÊÇÒ»ÑùµÄ
+        errno = 0;   //åˆ›å»ºå¤šå°‘ä¸ªTCPå¥—æ¥å­—å°±ä¼šåˆ›å»ºå¤šå°‘ä¸ªudpå¥—æ¥å­—ï¼ŒIPåœ°å€éƒ½æ˜¯ä¸€æ ·çš„
         if (settings.udpport && server_sockets(settings.udpport, udp_transport,
                                               portnumber_file)) {
             vperror("failed to listen on UDP port %d", settings.udpport);
@@ -6081,7 +6081,7 @@ int main (int argc, char **argv) {
     /* Drop privileges no longer needed */
     drop_privileges();
 
-	//Ö÷Ïß³Ì½øÈëÊÂ¼şÑ­»·
+	//ä¸»çº¿ç¨‹è¿›å…¥äº‹ä»¶å¾ªç¯
     /* enter the event loop */
     if (event_base_loop(main_base, 0) != 0) {
         retval = EXIT_FAILURE;

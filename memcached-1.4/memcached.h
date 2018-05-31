@@ -76,7 +76,7 @@
 #endif
 
 /* Slab sizing definitions. */
-#define POWER_SMALLEST 1 //´Ó1¿ªÊ¼£¬ slabclassÊı×é´Ó1¿ªÊ¼£¬¼ûslabs_init
+#define POWER_SMALLEST 1 //ä»1å¼€å§‹ï¼Œ slabclassæ•°ç»„ä»1å¼€å§‹ï¼Œè§slabs_init
 #define POWER_LARGEST  200
 #define CHUNK_ALIGN_BYTES 8
 #define MAX_NUMBER_OF_SLAB_CLASSES (POWER_LARGEST + 1)
@@ -146,14 +146,14 @@ typedef void (*ADD_STAT)(const char *key, const uint16_t klen,
 /**
  * Possible states of a connection.
  */
-enum conn_states { //connËù´¦µÄ×´Ì¬
+enum conn_states { //connæ‰€å¤„çš„çŠ¶æ€
     conn_listening,  /**< the socket which listens for connections */
-    //Ö÷Ïß³Ìaccept·µ»ØĞÂµÄfd£¬Í¨Öª×ÓÏß³Ì
+    //ä¸»çº¿ç¨‹acceptè¿”å›æ–°çš„fdï¼Œé€šçŸ¥å­çº¿ç¨‹
     conn_new_cmd,    /**< Prepare connection for next command */
-    //µÈ´ıÊı¾İµÄµ½À´£¬Ìí¼Óread¶ÁÊÂ¼ş£¬È»ºó×´Ì¬½øÈëconn_read£¬µÈ´ıÊı¾İµ½À´
+    //ç­‰å¾…æ•°æ®çš„åˆ°æ¥ï¼Œæ·»åŠ readè¯»äº‹ä»¶ï¼Œç„¶åçŠ¶æ€è¿›å…¥conn_readï¼Œç­‰å¾…æ•°æ®åˆ°æ¥
     conn_waiting,    /**< waiting for a readable socket */
     conn_read,       /**< reading in a command line */
-    //½âÎö¶Áµ½µÄÊı¾İ
+    //è§£æè¯»åˆ°çš„æ•°æ®
     conn_parse_cmd,  /**< try to parse a command from the input buffer */
     conn_write,      /**< writing out a simple response */
     conn_nread,      /**< reading in a fixed number of bytes */
@@ -192,22 +192,22 @@ enum network_transport {
 };
 
 /*
-    Èç¹ûÖ»Ê¹ÓÃÒ»¸öËø£¬ÇÀµ½ËøÄÜÊ¹ÓÃ¹şÏ£±í£¬ÇÀ²»µ½Ôò²»ÄÜÊ¹ÓÃ¡£ÄÇÃ´memcachedµÄĞ§ÂÊ½«±äµÃÏàµ±µÍ¡£Îª´Ë£¬memcached²É
-ÓÃÀàËÆÊı¾İ¿âµÄ²ßÂÔ£ºÊ¹ÓÃ²»Í¬¼¶±ğµÄËø¡£memcached¶¨ÒåÁËÁ½¸ö¼¶±ğµÄËø£º¶Î¼¶±ğºÍÈ«¾Ö¼¶±ğ¡£ÔÚÆ½Ê±(²»½øĞĞ¹şÏ£±íÀ©
-Õ¹Ê±)£¬Ê¹ÓÃ¶Î¼¶±ğµÄËø¡£ÔÚÀ©Õ¹¹şÏ£±íÊ±£¬Ê¹ÓÃÈ«¾Ö¼¶±ğµÄËø¡£
-    ¶Î¼¶±ğÊÇÊ²Ã´¼¶±ğ£¿½«¹şÏ£±í°´ÕÕ¼¸¸öÍ°Ò»¶Î¼¸¸öÍ°Ò»¶ÎµØÆ½¾ù·Ö£¬Ò»¸ö¶Î¶ÔÓ¦ÓĞ¶à¸öÍ°£¬Ã¿Ò»¸ö¶Î¶ÔÓ¦ÓĞÒ»¸öËø¡£ËùÒÔ
-Õû¸ö¹şÏ£±íÓĞ¶à¸ö¶Î¼¶±ğËø¡£ÓÉÓÚ¶Î¼¶±ğËøµÄÊıÁ¿ÔÚ³ÌĞòµÄÒ»¿ªÊ¼¾ÍÒÑ¾­È·¶¨ÁË£¬²»»áÔÙ±äµÄÁË¡£¶øËæ×Å¹şÏ£±íµÄÀ©Õ¹£¬Í°µÄ
-ÊıÁ¿ÊÇ»áÔö¼ÓµÄ¡£ËùÒÔËæ×Å¹şÏ£±íµÄÀ©Õ¹£¬Ô½À´Ô½¶àµÄÍ°¶ÔÓ¦Ò»¸ö¶Î£¬Ò²¾ÍÊÇËµÔ½À´Ô½¶àµÄÍ°¶ÔÓ¦Ò»¸öËø¡£
+    å¦‚æœåªä½¿ç”¨ä¸€ä¸ªé”ï¼ŒæŠ¢åˆ°é”èƒ½ä½¿ç”¨å“ˆå¸Œè¡¨ï¼ŒæŠ¢ä¸åˆ°åˆ™ä¸èƒ½ä½¿ç”¨ã€‚é‚£ä¹ˆmemcachedçš„æ•ˆç‡å°†å˜å¾—ç›¸å½“ä½ã€‚ä¸ºæ­¤ï¼Œmemcachedé‡‡
+ç”¨ç±»ä¼¼æ•°æ®åº“çš„ç­–ç•¥ï¼šä½¿ç”¨ä¸åŒçº§åˆ«çš„é”ã€‚memcachedå®šä¹‰äº†ä¸¤ä¸ªçº§åˆ«çš„é”ï¼šæ®µçº§åˆ«å’Œå…¨å±€çº§åˆ«ã€‚åœ¨å¹³æ—¶(ä¸è¿›è¡Œå“ˆå¸Œè¡¨æ‰©
+å±•æ—¶)ï¼Œä½¿ç”¨æ®µçº§åˆ«çš„é”ã€‚åœ¨æ‰©å±•å“ˆå¸Œè¡¨æ—¶ï¼Œä½¿ç”¨å…¨å±€çº§åˆ«çš„é”ã€‚
+    æ®µçº§åˆ«æ˜¯ä»€ä¹ˆçº§åˆ«ï¼Ÿå°†å“ˆå¸Œè¡¨æŒ‰ç…§å‡ ä¸ªæ¡¶ä¸€æ®µå‡ ä¸ªæ¡¶ä¸€æ®µåœ°å¹³å‡åˆ†ï¼Œä¸€ä¸ªæ®µå¯¹åº”æœ‰å¤šä¸ªæ¡¶ï¼Œæ¯ä¸€ä¸ªæ®µå¯¹åº”æœ‰ä¸€ä¸ªé”ã€‚æ‰€ä»¥
+æ•´ä¸ªå“ˆå¸Œè¡¨æœ‰å¤šä¸ªæ®µçº§åˆ«é”ã€‚ç”±äºæ®µçº§åˆ«é”çš„æ•°é‡åœ¨ç¨‹åºçš„ä¸€å¼€å§‹å°±å·²ç»ç¡®å®šäº†ï¼Œä¸ä¼šå†å˜çš„äº†ã€‚è€Œéšç€å“ˆå¸Œè¡¨çš„æ‰©å±•ï¼Œæ¡¶çš„
+æ•°é‡æ˜¯ä¼šå¢åŠ çš„ã€‚æ‰€ä»¥éšç€å“ˆå¸Œè¡¨çš„æ‰©å±•ï¼Œè¶Šæ¥è¶Šå¤šçš„æ¡¶å¯¹åº”ä¸€ä¸ªæ®µï¼Œä¹Ÿå°±æ˜¯è¯´è¶Šæ¥è¶Šå¤šçš„æ¡¶å¯¹åº”ä¸€ä¸ªé”ã€‚
 */
-//²Î¿¼http://blog.csdn.net/luotuo44/article/details/42913549
-enum item_lock_types {//itemËø¼¶±ğ  
-    ITEM_LOCK_GRANULAR = 0, //¶Î¼¶±ğ  
-    ITEM_LOCK_GLOBAL //È«¾Ö¼¶±ğ  
+//å‚è€ƒhttp://blog.csdn.net/luotuo44/article/details/42913549
+enum item_lock_types {//itemé”çº§åˆ«  
+    ITEM_LOCK_GRANULAR = 0, //æ®µçº§åˆ«  
+    ITEM_LOCK_GLOBAL //å…¨å±€çº§åˆ«  
 }; 
 
 #define IS_UDP(x) (x == udp_transport)
 
-//¶ÔÓ¦ add set replace append prepend casµÈÃüÁî
+//å¯¹åº” add set replace append prepend casç­‰å‘½ä»¤
 #define NREAD_ADD 1
 #define NREAD_SET 2
 #define NREAD_REPLACE 3
@@ -227,21 +227,21 @@ enum delta_result_type {
 typedef unsigned int rel_time_t;
 
 /** Stats stored per slab (and per thread). */
-struct slab_stats { //´æ´¢ÓÚthread_stats->slab_stats
-    uint64_t  set_cmds; //set´ÎÊı
+struct slab_stats { //å­˜å‚¨äºthread_stats->slab_stats
+    uint64_t  set_cmds; //setæ¬¡æ•°
     uint64_t  get_hits;
     uint64_t  touch_hits;
     uint64_t  delete_hits;
     uint64_t  cas_hits;
     uint64_t  cas_badval;
-    uint64_t  incr_hits; //incÃüÁîÖ´ĞĞ´ÎÊı
-    uint64_t  decr_hits; //decÃüÁîÖ´ĞĞ´ÎÊı
+    uint64_t  incr_hits; //incå‘½ä»¤æ‰§è¡Œæ¬¡æ•°
+    uint64_t  decr_hits; //decå‘½ä»¤æ‰§è¡Œæ¬¡æ•°
 };
 
 /**
  * Stats stored per-thread.
  */
-struct thread_stats { //´æ´¢ÓÚLIBEVENT_THREAD->stats
+struct thread_stats { //å­˜å‚¨äºLIBEVENT_THREAD->stats
     pthread_mutex_t   mutex;
     uint64_t          get_cmds;
     uint64_t          get_misses;
@@ -250,11 +250,11 @@ struct thread_stats { //´æ´¢ÓÚLIBEVENT_THREAD->stats
     uint64_t          delete_misses;
     uint64_t          incr_misses;
     uint64_t          decr_misses;
-    uint64_t          cas_misses; //casÃüÁîÃ»²éÕÒµ½
-    uint64_t          bytes_read; //´Ó¿Í»§¶Ë¶ÁÈ¡µÄ×Ö½ÚÊı
+    uint64_t          cas_misses; //caså‘½ä»¤æ²¡æŸ¥æ‰¾åˆ°
+    uint64_t          bytes_read; //ä»å®¢æˆ·ç«¯è¯»å–çš„å­—èŠ‚æ•°
     uint64_t          bytes_written;
     uint64_t          flush_cmds;
-    //Ò»¸öÏß³ÌÒ»´Î´¦ÀíÃüÁîÊı³¬¹ıÏŞÖÆ£¬Ôò×ÔÔö£¬¼ûdrive_machine
+    //ä¸€ä¸ªçº¿ç¨‹ä¸€æ¬¡å¤„ç†å‘½ä»¤æ•°è¶…è¿‡é™åˆ¶ï¼Œåˆ™è‡ªå¢ï¼Œè§drive_machine
     uint64_t          conn_yields; /* # of yields for connections (-R option)*/
     uint64_t          auth_cmds;
     uint64_t          auth_errors;
@@ -266,12 +266,12 @@ struct thread_stats { //´æ´¢ÓÚLIBEVENT_THREAD->stats
  */
 struct stats_t { //struct stats_t stats;
     pthread_mutex_t mutex;
-    unsigned int  curr_items; //µ±Ç°Ê¹ÓÃitemÊı£¬¼ûdo_item_link
-    unsigned int  total_items; //×Ü¹²Ê¹ÓÃitemÊı£¬Ö»¼Ó²»¼õ
-    uint64_t      curr_bytes; //µ±Ç°Õ¼ÓÃ×Ö½ÚÊı£¬¼ûdo_item_link
-    unsigned int  curr_conns; //µ±Ç°ÒÑÊ¹ÓÃconn½á¹¹ÊıÄ¿  conn_new×ÔÔö£¬conn_close×Ô¼õ¡£°üÀ¨listenÊ¹ÓÃÁËµÄconn
-    unsigned int  total_conns; //×Ü¹²Ê¹ÓÃ¹ı¶àÉÙconn½á¹¹£¬Ö»Ôö²»¼õ
-    //³¬¹ıÁ´½ÓÏÖÔÚ´Ó¶ø¾Ü¾øÁ´½ÓµÄÁ´½ÓÊı
+    unsigned int  curr_items; //å½“å‰ä½¿ç”¨itemæ•°ï¼Œè§do_item_link
+    unsigned int  total_items; //æ€»å…±ä½¿ç”¨itemæ•°ï¼ŒåªåŠ ä¸å‡
+    uint64_t      curr_bytes; //å½“å‰å ç”¨å­—èŠ‚æ•°ï¼Œè§do_item_link
+    unsigned int  curr_conns; //å½“å‰å·²ä½¿ç”¨connç»“æ„æ•°ç›®  conn_newè‡ªå¢ï¼Œconn_closeè‡ªå‡ã€‚åŒ…æ‹¬listenä½¿ç”¨äº†çš„conn
+    unsigned int  total_conns; //æ€»å…±ä½¿ç”¨è¿‡å¤šå°‘connç»“æ„ï¼Œåªå¢ä¸å‡
+    //è¶…è¿‡é“¾æ¥ç°åœ¨ä»è€Œæ‹’ç»é“¾æ¥çš„é“¾æ¥æ•°
     uint64_t      rejected_conns;
     uint64_t      malloc_fails;
     unsigned int  reserved_fds;
@@ -288,14 +288,14 @@ struct stats_t { //struct stats_t stats;
     time_t        started;          /* when the process was started */
     bool          accepting_conns;  /* whether we are currently accepting */
     uint64_t      listen_disabled_num;
-    //¹şÏ£±íµÄ³¤¶ÈÊÇ2^n¡£Õâ¸öÖµhash_power_levelÊÇnµÄÖµ¡£
+    //å“ˆå¸Œè¡¨çš„é•¿åº¦æ˜¯2^nã€‚è¿™ä¸ªå€¼hash_power_levelæ˜¯nçš„å€¼ã€‚
     unsigned int  hash_power_level; /* Better hope it's not over 9000 */
     uint64_t      hash_bytes;       /* size used for hash tables */
     bool          hash_is_expanding; /* If the hash table is being expanded */
     uint64_t      expired_unfetched; /* items reclaimed but never touched */
     uint64_t      evicted_unfetched; /* items evicted but never touched */
-    bool          slab_reassign_running; /* slab reassign in progress */ //ÊÇ·ñÕıÔÚ½øĞĞÒ³Ç¨ÒÆ slab_rebalance_finish
-    uint64_t      slabs_moved;       /* times slabs were moved around */ //½øĞĞÒ³Ç¨ÒÆµÄ´ÎÊı slab_rebalance_finish
+    bool          slab_reassign_running; /* slab reassign in progress */ //æ˜¯å¦æ­£åœ¨è¿›è¡Œé¡µè¿ç§» slab_rebalance_finish
+    uint64_t      slabs_moved;       /* times slabs were moved around */ //è¿›è¡Œé¡µè¿ç§»çš„æ¬¡æ•° slab_rebalance_finish
     bool          lru_crawler_running; /* crawl in progress */
 };
 
@@ -306,104 +306,104 @@ struct stats_t { //struct stats_t stats;
  * Globally accessible settings as derived from the commandline.
  */
 struct settings_s {
-    size_t maxbytes; //memcachedÄÜ¹»Ê¹ÓÃµÄ×î´óÄÚ´æ
-    //×¢ÒâÕâ¸ö°üÀ¨memcacheÄÚ²¿Ê¹ÓÃµÄfd£¬Êµ¼ÊÉÏÌá¹©¸ø¿Í»§¶Ë½¨Á´µÄfdÒªÉÙÓÚÕâ¸ö100¶à£¬ÀıÈçÅäÖÃ-c 1024£¬Êµ¼ÊÉÏ×î¶à½ÓÊÕ900¶à¸öÁ¬½Ó
-    int maxconns;//×î¶àÔÊĞí¶àÉÙ¸ö¿Í»§¶ËÍ¬Ê±ÔÚÏß¡£²»Í¬ÓÚsetting.backlog
-    int port; //¼àÌı¶Ë¿Ú£¬Ä¬ÈÏ11211
-    int udpport; //memcached¼àÌıµÄudp¶Ë¿Ú
-    //Ì×½Ó×Ö´´½¨ÔÚserver_sockets //´´½¨¶àÉÙ¸öTCPÌ×½Ó×Ö¾Í»á´´½¨¶àÉÙ¸öudpÌ×½Ó×Ö£¬IPµØÖ·¶¼ÊÇÒ»ÑùµÄ
-    char *inter;//memcached°ó¶¨µÄipµØÖ·¡£Èç¹û¸ÃÖµÎªNULL£¬ÄÇÃ´¾ÍÊÇINADDR_ANY¡£·ñÔò¸ÃÖµÖ¸ÏòÒ»¸öip×Ö·û´®
-    //-v   -vv   -vvv²ÎÊıÉèÖÃÈÕÖ¾´òÓ¡¼¶±ğ
-    int verbose;//ÔËĞĞĞÅÏ¢µÄÊä³ö¼¶±ğ¡£¸ÃÖµÔ½´óÊä³öµÄĞÅÏ¢¾ÍÔ½ÏêÏ¸
-    //flush_allÃüÁîµÄÊ±¼ä½çÏŞ¡£²åÈëÊ±¼äĞ¡ÓÚÕâ¸öÊ±¼äµÄitemÉ¾³ı
+    size_t maxbytes; //memcachedèƒ½å¤Ÿä½¿ç”¨çš„æœ€å¤§å†…å­˜
+    //æ³¨æ„è¿™ä¸ªåŒ…æ‹¬memcacheå†…éƒ¨ä½¿ç”¨çš„fdï¼Œå®é™…ä¸Šæä¾›ç»™å®¢æˆ·ç«¯å»ºé“¾çš„fdè¦å°‘äºè¿™ä¸ª100å¤šï¼Œä¾‹å¦‚é…ç½®-c 1024ï¼Œå®é™…ä¸Šæœ€å¤šæ¥æ”¶900å¤šä¸ªè¿æ¥
+    int maxconns;//æœ€å¤šå…è®¸å¤šå°‘ä¸ªå®¢æˆ·ç«¯åŒæ—¶åœ¨çº¿ã€‚ä¸åŒäºsetting.backlog
+    int port; //ç›‘å¬ç«¯å£ï¼Œé»˜è®¤11211
+    int udpport; //memcachedç›‘å¬çš„udpç«¯å£
+    //å¥—æ¥å­—åˆ›å»ºåœ¨server_sockets //åˆ›å»ºå¤šå°‘ä¸ªTCPå¥—æ¥å­—å°±ä¼šåˆ›å»ºå¤šå°‘ä¸ªudpå¥—æ¥å­—ï¼ŒIPåœ°å€éƒ½æ˜¯ä¸€æ ·çš„
+    char *inter;//memcachedç»‘å®šçš„ipåœ°å€ã€‚å¦‚æœè¯¥å€¼ä¸ºNULLï¼Œé‚£ä¹ˆå°±æ˜¯INADDR_ANYã€‚å¦åˆ™è¯¥å€¼æŒ‡å‘ä¸€ä¸ªipå­—ç¬¦ä¸²
+    //-v   -vv   -vvvå‚æ•°è®¾ç½®æ—¥å¿—æ‰“å°çº§åˆ«
+    int verbose;//è¿è¡Œä¿¡æ¯çš„è¾“å‡ºçº§åˆ«ã€‚è¯¥å€¼è¶Šå¤§è¾“å‡ºçš„ä¿¡æ¯å°±è¶Šè¯¦ç»†
+    //flush_allå‘½ä»¤çš„æ—¶é—´ç•Œé™ã€‚æ’å…¥æ—¶é—´å°äºè¿™ä¸ªæ—¶é—´çš„itemåˆ é™¤
     rel_time_t oldest_live; /* ignore existing items older than this */
-    //±ê¼ÇmemcachedÊÇ·ñÔÊĞíLRUÌÔÌ­»úÖÆ¡£Ä¬ÈÏÊÇ¿ÉÒÔµÄ¡£¿ÉÒÔÍ¨¹ı-MÑ¡Ïî½ûÖ¹
+    //æ ‡è®°memcachedæ˜¯å¦å…è®¸LRUæ·˜æ±°æœºåˆ¶ã€‚é»˜è®¤æ˜¯å¯ä»¥çš„ã€‚å¯ä»¥é€šè¿‡-Mé€‰é¡¹ç¦æ­¢
     int evict_to_free;
-    //unix_socket¼àÌıµÄsocketÂ·¾¶£¬Ä¬ÈÏ²»Ê¹ÓÃunix_socket
+    //unix_socketç›‘å¬çš„socketè·¯å¾„ï¼Œé»˜è®¤ä¸ä½¿ç”¨unix_socket
     char *socketpath;   /* path to unix socket if using local socket */
-    //unix socketµÄÈ¨ÏŞĞÅÏ¢
+    //unix socketçš„æƒé™ä¿¡æ¯
     int access;  /* access mask (a la chmod) for unix domain socket */
-    //itemµÄÀ©ÈİÒò×Ó
+    //itemçš„æ‰©å®¹å› å­
     double factor;          /* chunk size growth factor */
-    int chunk_size;//×îĞ¡µÄÒ»¸öitemÄÜ´æ´¢¶àÉÙ×Ö½ÚµÄÊı¾İ(set¡¢addÃüÁîÖĞµÄÊı¾İ) Ä¬ÈÏ48
-    //workerÏß³ÌµÄ¸öÊı
+    int chunk_size;//æœ€å°çš„ä¸€ä¸ªitemèƒ½å­˜å‚¨å¤šå°‘å­—èŠ‚çš„æ•°æ®(setã€addå‘½ä»¤ä¸­çš„æ•°æ®) é»˜è®¤48
+    //workerçº¿ç¨‹çš„ä¸ªæ•°
     int num_threads;        /* number of worker (without dispatcher) libevent threads to run */
-    //¶àÉÙ¸öworkerÏß³ÌÎªÒ»¸öudp socket·şÎñ
+    //å¤šå°‘ä¸ªworkerçº¿ç¨‹ä¸ºä¸€ä¸ªudp socketæœåŠ¡
     int num_threads_per_udp; /* number of worker threads serving each udp socket */
     /*
-    °Ñ¸÷ÖÖÒª´æ´¢µÄ¼üÃûÇ°Ãæ¼Ó¸öÇ°×º(prefix),À´±êÊ¶Ò»¶¨µÄÃüÃû¿Õ¼ä,ÕâÑù¸÷ÖÖ¼üÃû×ÖÔÚ±¾ÃüÃû¿Õ¼äÀïÃæÊÇ²»ÄÜÖØ¸´µÄ
-    (µ±È»Ò²¿ÉÒÔÖØ¸´,µ«ÊÇ»á°Ñ¹ıÈ¥µÄ¸²¸Ç,:)),
-    µ«ÊÇÔÚÕû¸ömemcacheÀïÃæ¿ÉÒÔÖØ¸´ÉèÖÃ,Í¨¹ıÕâ¶Î´úÂë¿ÉÒÔ²é¿´Ä³Ğ©ÃüÃû¿Õ¼ä(prefix)µÄ»ñÈ¡´ÎÊı¡¢ÃüÖĞÂÊ¡¢ÉèÖÃ´ÎÊıµÈÖ¸±ê¡£
+    æŠŠå„ç§è¦å­˜å‚¨çš„é”®åå‰é¢åŠ ä¸ªå‰ç¼€(prefix),æ¥æ ‡è¯†ä¸€å®šçš„å‘½åç©ºé—´,è¿™æ ·å„ç§é”®åå­—åœ¨æœ¬å‘½åç©ºé—´é‡Œé¢æ˜¯ä¸èƒ½é‡å¤çš„
+    (å½“ç„¶ä¹Ÿå¯ä»¥é‡å¤,ä½†æ˜¯ä¼šæŠŠè¿‡å»çš„è¦†ç›–,:)),
+    ä½†æ˜¯åœ¨æ•´ä¸ªmemcacheé‡Œé¢å¯ä»¥é‡å¤è®¾ç½®,é€šè¿‡è¿™æ®µä»£ç å¯ä»¥æŸ¥çœ‹æŸäº›å‘½åç©ºé—´(prefix)çš„è·å–æ¬¡æ•°ã€å‘½ä¸­ç‡ã€è®¾ç½®æ¬¡æ•°ç­‰æŒ‡æ ‡ã€‚
     */
-    //·Ö¸ô·û  ¿ÉÒÔ²Î¿¼http://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
-    char prefix_delimiter;  /* character that marks a key prefix (for stats) */ //Ò»°ã¶àÒµÎñ¹¦ÄÜµÄÊ±ºòÓĞÓÃµ½
+    //åˆ†éš”ç¬¦  å¯ä»¥å‚è€ƒhttp://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
+    char prefix_delimiter;  /* character that marks a key prefix (for stats) */ //ä¸€èˆ¬å¤šä¸šåŠ¡åŠŸèƒ½çš„æ—¶å€™æœ‰ç”¨åˆ°
     //http://www.cnblogs.com/xianbei/archive/2011/01/02/1921258.html
-    //ÊÇ·ñ×Ô¶¯ÊÕ¼¯×´Ì¬ĞÅÏ¢  -D²ÎÊı»òÕßstats detail on
+    //æ˜¯å¦è‡ªåŠ¨æ”¶é›†çŠ¶æ€ä¿¡æ¯  -Då‚æ•°æˆ–è€…stats detail on
     int detail_enabled;     /* nonzero if we're collecting detailed stats */
-    //workerÏß³ÌÁ¬ĞøÎªÄ³¸ö¿Í»§¶ËÖ´ĞĞÃüÁîµÄ×î´óÃüÁîÊı¡£ÕâÖ÷ÒªÊÇÎªÁË·ÀÖ¹Ò»¸ö¿Í»§¶Ë°ÔÕ¼Õû¸öworkerÏß³Ì ÉúĞ§µØ·½¼ûdrive_machine
+    //workerçº¿ç¨‹è¿ç»­ä¸ºæŸä¸ªå®¢æˆ·ç«¯æ‰§è¡Œå‘½ä»¤çš„æœ€å¤§å‘½ä»¤æ•°ã€‚è¿™ä¸»è¦æ˜¯ä¸ºäº†é˜²æ­¢ä¸€ä¸ªå®¢æˆ·ç«¯éœ¸å æ•´ä¸ªworkerçº¿ç¨‹ ç”Ÿæ•ˆåœ°æ–¹è§drive_machine
     int reqs_per_event;     /* Maximum number of io to process on each
                                io-event. */
-    //¿ªÆôCASÒµÎñ£¬Èç¹û¿ªÆôÁËÄÇÃ´ÔÚitemÀïÃæ¾Í»á¶àÒ»¸öÓÃÓÚCASµÄ×Ö¶Î¡£¿ÉÒÔÔÚÆô¶¯memcachedµÄÊ±ºòÍ¨¹ı-CÑ¡Ïî½ûÓÃ
-    bool use_cas; //²Î¿¼do_item_alloc
-    //ÓÃ»§ÃüÁîĞ­Òé£¬ÓĞÎÄ¼şºÍ¶ş½øÖÆÁ½ÖÖ¡£negotiating_portÊÇĞ­ÉÌ£¬×Ô¶¯¸ù¾İÃüÁîÄÚÈİÅĞ¶Ï
+    //å¼€å¯CASä¸šåŠ¡ï¼Œå¦‚æœå¼€å¯äº†é‚£ä¹ˆåœ¨itemé‡Œé¢å°±ä¼šå¤šä¸€ä¸ªç”¨äºCASçš„å­—æ®µã€‚å¯ä»¥åœ¨å¯åŠ¨memcachedçš„æ—¶å€™é€šè¿‡-Cé€‰é¡¹ç¦ç”¨
+    bool use_cas; //å‚è€ƒdo_item_alloc
+    //ç”¨æˆ·å‘½ä»¤åè®®ï¼Œæœ‰æ–‡ä»¶å’ŒäºŒè¿›åˆ¶ä¸¤ç§ã€‚negotiating_portæ˜¯åå•†ï¼Œè‡ªåŠ¨æ ¹æ®å‘½ä»¤å†…å®¹åˆ¤æ–­
     enum protocol binding_protocol;
-    int backlog;//listenº¯ÊıµÄµÚ¶ş¸ö²ÎÊı£¬²»Í¬ÓÚsettings.maxconns
-    //slabµÄÄÚ´æÒ³´óĞ¡¡£µ¥Î»ÊÇ×Ö½Ú  Ä¬ÈÏ1M£¬Ò²¾ÍÊÇ´æ´¢Ò»¸ökey-value×î´ó1M
+    int backlog;//listenå‡½æ•°çš„ç¬¬äºŒä¸ªå‚æ•°ï¼Œä¸åŒäºsettings.maxconns
+    //slabçš„å†…å­˜é¡µå¤§å°ã€‚å•ä½æ˜¯å­—èŠ‚  é»˜è®¤1Mï¼Œä¹Ÿå°±æ˜¯å­˜å‚¨ä¸€ä¸ªkey-valueæœ€å¤§1M
     int item_size_max;        /* Maximum item size, and upper end for slabs */
     bool sasl;              /* SASL on/off */
-    //Èç¹ûÁ¬ĞøÊı³¬¹ıÁË×î´óÍ¬Ê±ÔÚÏßÊı(ÓÉ-CÑ¡ÏîÖ¸¶¨)£¬ÊÇ·ñÁ¢¼´¹Ø±ÕĞÂÁ¬½ÓÁ¬½ÓÉÏµÄ¿Í»§¶Ë
+    //å¦‚æœè¿ç»­æ•°è¶…è¿‡äº†æœ€å¤§åŒæ—¶åœ¨çº¿æ•°(ç”±-Cé€‰é¡¹æŒ‡å®š)ï¼Œæ˜¯å¦ç«‹å³å…³é—­æ–°è¿æ¥è¿æ¥ä¸Šçš„å®¢æˆ·ç«¯
     bool maxconns_fast;     /* Whether or not to early close connections */
-    //ÓÃÓÚÖ¸Ã÷memcachedÊÇ·ñÆô¶¯ÁËLRUÅÀ³æÏß³Ì¡£Ä¬ÈÏÖµÎªfalse£¬²»Æô¶¯LRUÅÀ³æÏß³Ì¡£
-	//¿ÉÒÔÔÚÆô¶¯memcachedÊ±Í¨¹ı-o lru_crawler½«±äÁ¿µÄ¸³ÖµÎªtrue£¬Æô¶¯LRUÅÀ³æÏß³Ì
-	//±ê¼ÇÊÇ·ñÒÑ¾­´´½¨ÅÀ³æÏß³Ì£¬¿ÉÒÔ±ÜÃâÖØ¸´£¬²Î¿¼start_item_crawler_thread
+    //ç”¨äºæŒ‡æ˜memcachedæ˜¯å¦å¯åŠ¨äº†LRUçˆ¬è™«çº¿ç¨‹ã€‚é»˜è®¤å€¼ä¸ºfalseï¼Œä¸å¯åŠ¨LRUçˆ¬è™«çº¿ç¨‹ã€‚
+	//å¯ä»¥åœ¨å¯åŠ¨memcachedæ—¶é€šè¿‡-o lru_crawlerå°†å˜é‡çš„èµ‹å€¼ä¸ºtrueï¼Œå¯åŠ¨LRUçˆ¬è™«çº¿ç¨‹
+	//æ ‡è®°æ˜¯å¦å·²ç»åˆ›å»ºçˆ¬è™«çº¿ç¨‹ï¼Œå¯ä»¥é¿å…é‡å¤ï¼Œå‚è€ƒstart_item_crawler_thread
     bool lru_crawler;        /* Whether or not to enable the autocrawler thread */
-    //ÊÇ·ñ¿ªÆôµ÷½Ú²»Í¬ÀàĞÍitemËùÕ¼ÓÃµÄÄÚ´æÊı¡£¿ÉÒÔÍ¨¹ı-o slab_reassignÑ¡Ïî¿ªÆô
+    //æ˜¯å¦å¼€å¯è°ƒèŠ‚ä¸åŒç±»å‹itemæ‰€å ç”¨çš„å†…å­˜æ•°ã€‚å¯ä»¥é€šè¿‡-o slab_reassigné€‰é¡¹å¼€å¯
     bool slab_reassign;     /* Whether or not slab reassignment is allowed */
 
     /*
-    Ä¬ÈÏÇé¿öÏÂÊÇ²»¿ªÆô×Ô¶¯¼ì²â¹¦ÄÜµÄ£¬¼´Ê¹ÔÚÆô¶¯memcachedµÄÊ±ºò¼ÓÈëÁË-o slab_reassign²ÎÊı¡£×Ô¶¯¼ì²â¹¦ÄÜÓÉ
-    È«¾Ö±äÁ¿settings.slab_automove¿ØÖÆ(Ä¬ÈÏÖµÎª0£¬0¾ÍÊÇ²»¿ªÆô)¡£Èç¹ûÒª¿ªÆô¿ÉÒÔÔÚÆô¶¯memcachedµÄÊ±ºò¼ÓÈë
-    slab_automoveÑ¡Ïî£¬²¢½«Æä²ÎÊıÊıÉèÖÃÎª1¡£±ÈÈçÃüÁî$memcached -o slab_reassign,slab_automove=1¾Í¿ªÆôÁË
-    ×Ô¶¯¼ì²â¹¦ÄÜ¡£µ±È»Ò²ÊÇ¿ÉÒÔÔÚÆô¶¯memcachedºóÍ¨¹ı¿Í»§¶ËÃüÁîÆô¶¯automove¹¦ÄÜ£¬Ê¹ÓÃÃüÁîslabsautomove <0|1>¡£
-    ÆäÖĞ0±íÊ¾¹Ø±Õautomove£¬1±íÊ¾¿ªÆôautomove¡£¿Í»§¶ËµÄÕâ¸öÃüÁîÖ»ÊÇ¼òµ¥µØÉèÖÃsettings.slab_automoveµÄÖµ£¬
-    ²»×öÆäËûÈÎºÎ¹¤×÷¡£
+    é»˜è®¤æƒ…å†µä¸‹æ˜¯ä¸å¼€å¯è‡ªåŠ¨æ£€æµ‹åŠŸèƒ½çš„ï¼Œå³ä½¿åœ¨å¯åŠ¨memcachedçš„æ—¶å€™åŠ å…¥äº†-o slab_reassignå‚æ•°ã€‚è‡ªåŠ¨æ£€æµ‹åŠŸèƒ½ç”±
+    å…¨å±€å˜é‡settings.slab_automoveæ§åˆ¶(é»˜è®¤å€¼ä¸º0ï¼Œ0å°±æ˜¯ä¸å¼€å¯)ã€‚å¦‚æœè¦å¼€å¯å¯ä»¥åœ¨å¯åŠ¨memcachedçš„æ—¶å€™åŠ å…¥
+    slab_automoveé€‰é¡¹ï¼Œå¹¶å°†å…¶å‚æ•°æ•°è®¾ç½®ä¸º1ã€‚æ¯”å¦‚å‘½ä»¤$memcached -o slab_reassign,slab_automove=1å°±å¼€å¯äº†
+    è‡ªåŠ¨æ£€æµ‹åŠŸèƒ½ã€‚å½“ç„¶ä¹Ÿæ˜¯å¯ä»¥åœ¨å¯åŠ¨memcachedåé€šè¿‡å®¢æˆ·ç«¯å‘½ä»¤å¯åŠ¨automoveåŠŸèƒ½ï¼Œä½¿ç”¨å‘½ä»¤slabsautomove <0|1>ã€‚
+    å…¶ä¸­0è¡¨ç¤ºå…³é—­automoveï¼Œ1è¡¨ç¤ºå¼€å¯automoveã€‚å®¢æˆ·ç«¯çš„è¿™ä¸ªå‘½ä»¤åªæ˜¯ç®€å•åœ°è®¾ç½®settings.slab_automoveçš„å€¼ï¼Œ
+    ä¸åšå…¶ä»–ä»»ä½•å·¥ä½œã€‚
     */
     
-    //×Ô¶¯¼ì²âÊÇ·ñĞèÒª½øĞĞ²»Í¬ÀàĞÍitemµÄÄÚ´æµ÷Õû£¬ÒÀÀµÓÚsetting.slab_reassignµÄ¿ªÆô
-    //ÉúĞ§µØ·½¼ûslab_maintenance_thread
+    //è‡ªåŠ¨æ£€æµ‹æ˜¯å¦éœ€è¦è¿›è¡Œä¸åŒç±»å‹itemçš„å†…å­˜è°ƒæ•´ï¼Œä¾èµ–äºsetting.slab_reassignçš„å¼€å¯
+    //ç”Ÿæ•ˆåœ°æ–¹è§slab_maintenance_thread
     int slab_automove;     /* Whether or not to automatically move slabs */ 
-    //¹şÏ£±íµÄ³¤¶ÈÊÇ2^n¡£Õâ¸öÖµÊÇnµÄ³õÊ¼Öµ¡£¿ÉÒÔÔÚÆô¶¯memcachedµÄÊ±ºòÍ¨¹ı-o hashpower_initÉèÖÃ
-	//ÉèÖÃµÄÖµÒªÔÚ[12,64]Ö®¼ä¡£Èç¹û²»ÉèÖÃ£¬¸ÃÖµÎª0.¹şÏ£±íµÄÃİ½«È¡Ä¬ÈÏÖµ16
+    //å“ˆå¸Œè¡¨çš„é•¿åº¦æ˜¯2^nã€‚è¿™ä¸ªå€¼æ˜¯nçš„åˆå§‹å€¼ã€‚å¯ä»¥åœ¨å¯åŠ¨memcachedçš„æ—¶å€™é€šè¿‡-o hashpower_initè®¾ç½®
+	//è®¾ç½®çš„å€¼è¦åœ¨[12,64]ä¹‹é—´ã€‚å¦‚æœä¸è®¾ç½®ï¼Œè¯¥å€¼ä¸º0.å“ˆå¸Œè¡¨çš„å¹‚å°†å–é»˜è®¤å€¼16
     int hashpower_init;     /* Starting hash power level */
-    //ÊÇ·ñÖ§³Ö¿Í»§¶ËµÄ¹Ø±ÕÃüÁî£¬¸ÃÃüÁî»á¹Ø±Õmemcached½ø³Ì
-    //µ±Í¨¹ı-A¿ªÆô¸Ãshutdown¹¦ÄÜ£¬µ±¿Í»§¶Ë·¢ËÍÃüÁîshutdown¹ıÀ´£¬memcached½ø³¡»á·¢ËÍINTĞÅºÅ¸ø×Ô¼º£¬½ø³ÌÍË³ö
+    //æ˜¯å¦æ”¯æŒå®¢æˆ·ç«¯çš„å…³é—­å‘½ä»¤ï¼Œè¯¥å‘½ä»¤ä¼šå…³é—­memcachedè¿›ç¨‹
+    //å½“é€šè¿‡-Aå¼€å¯è¯¥shutdownåŠŸèƒ½ï¼Œå½“å®¢æˆ·ç«¯å‘é€å‘½ä»¤shutdownè¿‡æ¥ï¼Œmemcachedè¿›åœºä¼šå‘é€INTä¿¡å·ç»™è‡ªå·±ï¼Œè¿›ç¨‹é€€å‡º
     bool shutdown_command; /* allow shutdown command */
-    //ÓÃÓÚĞŞ¸´itemµÄÒıÓÃÊı¡£Èç¹ûÒ»¸öworkerÏß³ÌÒıÓÃÁËÄ³¸öitem£¬»¹Ã»À´µÃ¼°½â³ıÒıÓÃÕâ¸öÏß³Ì¾Í¹ÒÁË
-	//ÄÇÃ´Õâ¸öitem¾ÍÓÀÔ¶±»Õâ¸öÒÑËÀµÄÏß³ÌËùÒıÓÃ¶ø²»ÄÜÊÍ·Å¡£memcachedÓÃÕâ¸öÖµÀ´¼ì²âÊÇ·ñ³öÏÖÕâÖÖ
-	//Çé¿ö¡£ÒòÎªÕâÖÖÇé¿öºÜÉÙ·¢Éú£¬ËùÒÔ¸Ã±äÁ¿µÄÄ¬ÈÏÖµÎª0£¬¼´²»½øĞĞ¼ì²â
+    //ç”¨äºä¿®å¤itemçš„å¼•ç”¨æ•°ã€‚å¦‚æœä¸€ä¸ªworkerçº¿ç¨‹å¼•ç”¨äº†æŸä¸ªitemï¼Œè¿˜æ²¡æ¥å¾—åŠè§£é™¤å¼•ç”¨è¿™ä¸ªçº¿ç¨‹å°±æŒ‚äº†
+	//é‚£ä¹ˆè¿™ä¸ªitemå°±æ°¸è¿œè¢«è¿™ä¸ªå·²æ­»çš„çº¿ç¨‹æ‰€å¼•ç”¨è€Œä¸èƒ½é‡Šæ”¾ã€‚memcachedç”¨è¿™ä¸ªå€¼æ¥æ£€æµ‹æ˜¯å¦å‡ºç°è¿™ç§
+	//æƒ…å†µã€‚å› ä¸ºè¿™ç§æƒ…å†µå¾ˆå°‘å‘ç”Ÿï¼Œæ‰€ä»¥è¯¥å˜é‡çš„é»˜è®¤å€¼ä¸º0ï¼Œå³ä¸è¿›è¡Œæ£€æµ‹
 /*
-tail_repair_time£º
-    ¿¼ÂÇÕâÑùµÄÇé¿ö:Ä³¸öworkerÏß³ÌÍ¨¹ırefcount_incrÔö¼ÓÁËÒ»¸öitemµÄÒıÓÃÊı¡£µ«ÓÉÓÚÄ³ÖÖÔ­Òò(¿ÉÄÜÊÇÄÚºË³öÁËÎÊÌâ)£¬
-Õâ¸öworkerÏß³Ì»¹Ã»À´µÃ¼°µ÷ÓÃrefcount_decr¾Í¹ÒÁË¡£´ËÊ±Õâ¸öitemµÄÒıÓÃÊı¾Í¿Ï¶¨²»»áµÈÓÚ0£¬Ò²¾ÍÊÇ×ÜÓĞworkerÏß³ÌÕ¼
-ÓÃ×ÅËü.µ«Êµ¼ÊÉÏÕâ¸öworkerÏß³ÌÔç¾Í¹ÒÁË¡£ËùÒÔ¶ÔÓÚÕâÖÖÇé¿öĞèÒªĞŞ¸´¡£ĞŞ¸´Ò²ºÜ¶à¼òµ¥£ºÖ±½Ó°ÑÕâ¸öitemµÄÒıÓÃ¼ÆÊı¸³ÖµÎª1¡£
-    ¸ù¾İÊ²Ã´ÅĞ¶ÏÄ³Ò»¸öworkerÏß³Ì¹ÒÁËÄØ?Ê×ÏÈÔÚmemcachedÀïÃæ£¬Ò»°ãÀ´Ëµ£¬ÈÎºÎº¯Êı¶¼µÄµ÷ÓÃ¶¼²»»áºÄÊ±Ì«´óµÄ£¬¼´Ê¹Õâ¸öº¯Êı
-ĞèÒª¼ÓËø¡£ËùÒÔÈç¹ûÕâ¸öitemµÄ×îºóÒ»´Î·ÃÎÊÊ±¼ä¾àÀëÏÖÔÚ¶¼±È½ÏÒ£Ô¶ÁË£¬µ«ËüÈ´»¹±»Ò»¸öworkerÏß³ÌËùÒıÓÃ£¬ÄÇÃ´¾Í¼¸ºõ¿É
-ÒÔÅĞ¶ÏÕâ¸öworkerÏß³Ì¹ÒÁË¡£ÔÚ1.4.16°æ±¾Ö®Ç°£¬Õâ¸öÊ±¼ä¾àÀë¶¼ÊÇ¹Ì¶¨µÄÎª3¸öĞ¡Ê±¡£´Ó1.4.16¿ª¾ÍÊ¹ÓÃsettings.tail_repair_time
-´æ´¢Ê±¼ä¾àÀë£¬¿ÉÒÔÔÚÆô¶¯memcachedµÄÊ±ºòÉèÖÃ£¬Ä¬ÈÏÊ±¼ä¾àÀëÎª1¸öĞ¡Ê±¡£ÏÖÔÚÕâ¸ö°æ±¾1.4.21Ä¬ÈÏ¶¼²»½øĞĞÕâ¸öĞŞ¸´ÁË£¬
-settings.tail_repair_timeµÄÄ¬ÈÏÖµÎª0¡£ÒòÎªmemcachedµÄ×÷ÕßºÜÉÙ¿´µ½Õâ¸öbugÁË£¬¹À¼ÆÊÇÒòÎª²Ù×÷ÏµÍ³µÄ½øÒ»²½ÎÈ¶¨¡£
+tail_repair_timeï¼š
+    è€ƒè™‘è¿™æ ·çš„æƒ…å†µ:æŸä¸ªworkerçº¿ç¨‹é€šè¿‡refcount_incrå¢åŠ äº†ä¸€ä¸ªitemçš„å¼•ç”¨æ•°ã€‚ä½†ç”±äºæŸç§åŸå› (å¯èƒ½æ˜¯å†…æ ¸å‡ºäº†é—®é¢˜)ï¼Œ
+è¿™ä¸ªworkerçº¿ç¨‹è¿˜æ²¡æ¥å¾—åŠè°ƒç”¨refcount_decrå°±æŒ‚äº†ã€‚æ­¤æ—¶è¿™ä¸ªitemçš„å¼•ç”¨æ•°å°±è‚¯å®šä¸ä¼šç­‰äº0ï¼Œä¹Ÿå°±æ˜¯æ€»æœ‰workerçº¿ç¨‹å 
+ç”¨ç€å®ƒ.ä½†å®é™…ä¸Šè¿™ä¸ªworkerçº¿ç¨‹æ—©å°±æŒ‚äº†ã€‚æ‰€ä»¥å¯¹äºè¿™ç§æƒ…å†µéœ€è¦ä¿®å¤ã€‚ä¿®å¤ä¹Ÿå¾ˆå¤šç®€å•ï¼šç›´æ¥æŠŠè¿™ä¸ªitemçš„å¼•ç”¨è®¡æ•°èµ‹å€¼ä¸º1ã€‚
+    æ ¹æ®ä»€ä¹ˆåˆ¤æ–­æŸä¸€ä¸ªworkerçº¿ç¨‹æŒ‚äº†å‘¢?é¦–å…ˆåœ¨memcachedé‡Œé¢ï¼Œä¸€èˆ¬æ¥è¯´ï¼Œä»»ä½•å‡½æ•°éƒ½çš„è°ƒç”¨éƒ½ä¸ä¼šè€—æ—¶å¤ªå¤§çš„ï¼Œå³ä½¿è¿™ä¸ªå‡½æ•°
+éœ€è¦åŠ é”ã€‚æ‰€ä»¥å¦‚æœè¿™ä¸ªitemçš„æœ€åä¸€æ¬¡è®¿é—®æ—¶é—´è·ç¦»ç°åœ¨éƒ½æ¯”è¾ƒé¥è¿œäº†ï¼Œä½†å®ƒå´è¿˜è¢«ä¸€ä¸ªworkerçº¿ç¨‹æ‰€å¼•ç”¨ï¼Œé‚£ä¹ˆå°±å‡ ä¹å¯
+ä»¥åˆ¤æ–­è¿™ä¸ªworkerçº¿ç¨‹æŒ‚äº†ã€‚åœ¨1.4.16ç‰ˆæœ¬ä¹‹å‰ï¼Œè¿™ä¸ªæ—¶é—´è·ç¦»éƒ½æ˜¯å›ºå®šçš„ä¸º3ä¸ªå°æ—¶ã€‚ä»1.4.16å¼€å°±ä½¿ç”¨settings.tail_repair_time
+å­˜å‚¨æ—¶é—´è·ç¦»ï¼Œå¯ä»¥åœ¨å¯åŠ¨memcachedçš„æ—¶å€™è®¾ç½®ï¼Œé»˜è®¤æ—¶é—´è·ç¦»ä¸º1ä¸ªå°æ—¶ã€‚ç°åœ¨è¿™ä¸ªç‰ˆæœ¬1.4.21é»˜è®¤éƒ½ä¸è¿›è¡Œè¿™ä¸ªä¿®å¤äº†ï¼Œ
+settings.tail_repair_timeçš„é»˜è®¤å€¼ä¸º0ã€‚å› ä¸ºmemcachedçš„ä½œè€…å¾ˆå°‘çœ‹åˆ°è¿™ä¸ªbugäº†ï¼Œä¼°è®¡æ˜¯å› ä¸ºæ“ä½œç³»ç»Ÿçš„è¿›ä¸€æ­¥ç¨³å®šã€‚
 
-    ´úÂëÖĞµÄsettings.tail_repair_timeÖ¸Ã÷ÓĞÃ»ÓĞ¿ªÆôÕâÖÖ¼ì²â£¬Ä¬ÈÏÊÇÃ»ÓĞ¿ªÆôµÄ(Ä¬ÈÏÖµµÈÓÚ0)¡£¿ÉÒÔÔÚÆô¶¯memcachedµÄÊ±ºò
-Í¨¹ı-o tail_repair_timeÑ¡Ïî¿ªÆô
+    ä»£ç ä¸­çš„settings.tail_repair_timeæŒ‡æ˜æœ‰æ²¡æœ‰å¼€å¯è¿™ç§æ£€æµ‹ï¼Œé»˜è®¤æ˜¯æ²¡æœ‰å¼€å¯çš„(é»˜è®¤å€¼ç­‰äº0)ã€‚å¯ä»¥åœ¨å¯åŠ¨memcachedçš„æ—¶å€™
+é€šè¿‡-o tail_repair_timeé€‰é¡¹å¼€å¯
 */
     int tail_repair_time;   /* LRU tail refcount leak repair time */
-    //ÊÇ·ñÔÊĞí¿Í»§¶ËÊ¹ÓÃflush_allÃüÁî 
+    //æ˜¯å¦å…è®¸å®¢æˆ·ç«¯ä½¿ç”¨flush_allå‘½ä»¤ 
     bool flush_enabled;     /* flush_all enabled */
-    //hashËã·¨Ãû£¬¼ûhash_init
+    //hashç®—æ³•åï¼Œè§hash_init
     char *hash_algorithm;     /* Hash algorithm in use */
-    //LRUÅÀ³æÏß³Ì¹¤×÷Ê±µÄĞİÃß¼ä¸ô¡£µ¥Î»ÊÇÎ¢Ãî
+    //LRUçˆ¬è™«çº¿ç¨‹å·¥ä½œæ—¶çš„ä¼‘çœ é—´éš”ã€‚å•ä½æ˜¯å¾®å¦™
     int lru_crawler_sleep;  /* Microsecond sleep between items */
-    //LRUÅÀ³æ¼ì²âÃ¿ÌõLRU¶ÓÁĞÖĞµÄ¶àÉÙ¸öitem£¬Èç¹ûÏëÈÃLRUÅÀ³æ¹¤×÷±ØĞëĞŞ¸ÄÕâ¸öÖµ
-    //Êµ¼ÊÉÏÉúĞ§ÊÇÓÉlru_crawler tocrawl numÖ¸¶¨µÄ
+    //LRUçˆ¬è™«æ£€æµ‹æ¯æ¡LRUé˜Ÿåˆ—ä¸­çš„å¤šå°‘ä¸ªitemï¼Œå¦‚æœæƒ³è®©LRUçˆ¬è™«å·¥ä½œå¿…é¡»ä¿®æ”¹è¿™ä¸ªå€¼
+    //å®é™…ä¸Šç”Ÿæ•ˆæ˜¯ç”±lru_crawler tocrawl numæŒ‡å®šçš„
     uint32_t lru_crawler_tocrawl; /* Number of items to crawl per run */
 };
 
@@ -411,76 +411,76 @@ extern struct stats_t stats;
 extern time_t process_started;
 extern struct settings_s settings;
 
-//¸Ãitem²åÈëµ½LRU¶ÓÁĞÁË
-#define ITEM_LINKED 1 //¼ûdo_item_link
-//¸ÃitemÊ¹ÓÃCAS
+//è¯¥itemæ’å…¥åˆ°LRUé˜Ÿåˆ—äº†
+#define ITEM_LINKED 1 //è§do_item_link
+//è¯¥itemä½¿ç”¨CAS
 #define ITEM_CAS 2
 
 /* temp */
-//¸Ãitem»¹ÔÚslabµÄ¿ÕÏĞ¶ÓÁĞÀïÃæ£¬Ã»ÓĞ·ÖÅä³öÈ¥
-#define ITEM_SLABBED 4  //¼ûdo_slabs_free
-//¸Ãitem ²åÈëµ½LRU¶ÓÁĞºó£¬±»workerÏß³Ì·ÃÎÊ¹ı
+//è¯¥itemè¿˜åœ¨slabçš„ç©ºé—²é˜Ÿåˆ—é‡Œé¢ï¼Œæ²¡æœ‰åˆ†é…å‡ºå»
+#define ITEM_SLABBED 4  //è§do_slabs_free
+//è¯¥item æ’å…¥åˆ°LRUé˜Ÿåˆ—åï¼Œè¢«workerçº¿ç¨‹è®¿é—®è¿‡
 #define ITEM_FETCHED 8
 
 /*
-//itemÉ¾³ı»úÖÆ
-Ò»¸öitemÔÚÁ½ÖÖÇé¿öÏÂ»á¹ıÆÚÊ§Ğ§£º1.itemµÄexptimeÊ±¼ä´Áµ½ÁË¡£2.ÓÃ»§Ê¹ÓÃflush_allÃüÁî½«È«²¿item±ä³É¹ıÆÚÊ§Ğ§µÄ
-²Î¿¼http://blog.csdn.net/luotuo44/article/details/42963793
+//itemåˆ é™¤æœºåˆ¶
+ä¸€ä¸ªitemåœ¨ä¸¤ç§æƒ…å†µä¸‹ä¼šè¿‡æœŸå¤±æ•ˆï¼š1.itemçš„exptimeæ—¶é—´æˆ³åˆ°äº†ã€‚2.ç”¨æˆ·ä½¿ç”¨flush_allå‘½ä»¤å°†å…¨éƒ¨itemå˜æˆè¿‡æœŸå¤±æ•ˆçš„
+å‚è€ƒhttp://blog.csdn.net/luotuo44/article/details/42963793
 */
 /**
  * Structure for storing items within memcached.
- */ //ÕæÕı´æ´¢ÔÚslabclass[id]ÖĞµÄtunckÖĞµÄÊı¾İ¸ñÊ½¼ûitem_make_header
+ */ //çœŸæ­£å­˜å‚¨åœ¨slabclass[id]ä¸­çš„tunckä¸­çš„æ•°æ®æ ¼å¼è§item_make_header
 typedef struct _stritem {
-	//nextÖ¸Õë£¬ÓÃÓÚLRUÁ´±í
+	//nextæŒ‡é’ˆï¼Œç”¨äºLRUé“¾è¡¨
     struct _stritem *next;
-	//prevÖ¸Õë£¬ÓÃÓÚLRUÁ´±í
+	//prevæŒ‡é’ˆï¼Œç”¨äºLRUé“¾è¡¨
     struct _stritem *prev;
-	//h_nextÖ¸Õë£¬ÓÃÓÚ¹şÏ£±íµÄ³åÍ»Á´
+	//h_nextæŒ‡é’ˆï¼Œç”¨äºå“ˆå¸Œè¡¨çš„å†²çªé“¾
     struct _stritem *h_next;    /* hash chain next */
-	//×îºóÒ»´Î·ÃÎÊÊ±¼ä¡£¾ø¶ÔÊ±¼ä  lru¶ÓÁĞÀïÃæµÄitemÊÇ¸ù¾İtime½µĞòÅÅĞòµÄ
+	//æœ€åä¸€æ¬¡è®¿é—®æ—¶é—´ã€‚ç»å¯¹æ—¶é—´  lrué˜Ÿåˆ—é‡Œé¢çš„itemæ˜¯æ ¹æ®timeé™åºæ’åºçš„
     rel_time_t      time;       /* least recent access */
-	//¹ıÆÚÊ§Ğ§Ê±¼ä£¬¾ø¶ÔÊ±¼ä Ò»¸öitemÔÚÁ½ÖÖÇé¿öÏÂ»á¹ıÆÚÊ§Ğ§£º1.itemµÄexptimeÊ±¼ä´Áµ½ÁË¡£2.ÓÃ»§Ê¹ÓÃflush_allÃüÁî½«È«²¿item±ä³É¹ıÆÚÊ§Ğ§µÄ
+	//è¿‡æœŸå¤±æ•ˆæ—¶é—´ï¼Œç»å¯¹æ—¶é—´ ä¸€ä¸ªitemåœ¨ä¸¤ç§æƒ…å†µä¸‹ä¼šè¿‡æœŸå¤±æ•ˆï¼š1.itemçš„exptimeæ—¶é—´æˆ³åˆ°äº†ã€‚2.ç”¨æˆ·ä½¿ç”¨flush_allå‘½ä»¤å°†å…¨éƒ¨itemå˜æˆè¿‡æœŸå¤±æ•ˆçš„
 	rel_time_t      exptime;    /* expire time */
-	//±¾item´æ·ÅµÄÊı¾İµÄ³¤¶È   nbytesÊÇËãÉÏÁË\r\n×Ö·ûµÄ£¬¼ûdo_item_allocÍâ²ã   ²Î¿¼item_make_headerÖĞµÄ
+	//æœ¬itemå­˜æ”¾çš„æ•°æ®çš„é•¿åº¦   nbytesæ˜¯ç®—ä¸Šäº†\r\nå­—ç¬¦çš„ï¼Œè§do_item_allocå¤–å±‚   å‚è€ƒitem_make_headerä¸­çš„
     int             nbytes;     /* size of data */
 
     /*
-    ¿ÉÒÔ¿´µ½£¬ÕâÊÇÒòÎª¼õÉÙÒ»¸öitemµÄÒıÓÃÊı¿ÉÄÜÒªÉ¾³ıÕâ¸öitem¡£ÎªÊ²Ã´ÄØ£¿¿¼ÂÇÕâÑùµÄÇé¾°£¬Ïß³ÌAÒòÎªÒª¶ÁÒ»¸öitem¶øÔö¼ÓÁËÕâ¸öitemµÄ
-    ÒıÓÃ¼ÆÊı£¬´ËÊ±Ïß³ÌB½øÀ´ÁË£¬ËüÒªÉ¾³ıÕâ¸öitem¡£Õâ¸öÉ¾³ıÃüÁîÊÇ¿Ï¶¨»áÖ´ĞĞµÄ£¬¶ø²»ÊÇËµÕâ¸öitem±»±ğµÄÏß³ÌÒıÓÃÁË¾Í²»Ö´ĞĞÉ¾³ıÃüÁî¡£
-    µ«ÓÖ¿Ï¶¨²»ÄÜÂíÉÏÉ¾³ı£¬ÒòÎªÏß³ÌA»¹ÔÚÊ¹ÓÃÕâ¸öitem£¬´ËÊ±memcached¾Í²ÉÓÃÑÓ³ÙÉ¾³ıµÄ×ö·¨¡£Ïß³ÌBÖ´ĞĞÉ¾³ıÃüÁîÊ±¼õ¶àÒ»´ÎitemµÄÒıÓÃÊı£¬
-    Ê¹µÃµ±Ïß³ÌAÊÍ·Å×Ô¼º¶ÔitemµÄÒıÓÃºó£¬itemµÄÒıÓÃÊı±ä³É0¡£´ËÊ±item¾Í±»ÊÍ·ÅÁË(¹é»¹¸øslab·ÖÅäÆ÷)¡£
+    å¯ä»¥çœ‹åˆ°ï¼Œè¿™æ˜¯å› ä¸ºå‡å°‘ä¸€ä¸ªitemçš„å¼•ç”¨æ•°å¯èƒ½è¦åˆ é™¤è¿™ä¸ªitemã€‚ä¸ºä»€ä¹ˆå‘¢ï¼Ÿè€ƒè™‘è¿™æ ·çš„æƒ…æ™¯ï¼Œçº¿ç¨‹Aå› ä¸ºè¦è¯»ä¸€ä¸ªitemè€Œå¢åŠ äº†è¿™ä¸ªitemçš„
+    å¼•ç”¨è®¡æ•°ï¼Œæ­¤æ—¶çº¿ç¨‹Bè¿›æ¥äº†ï¼Œå®ƒè¦åˆ é™¤è¿™ä¸ªitemã€‚è¿™ä¸ªåˆ é™¤å‘½ä»¤æ˜¯è‚¯å®šä¼šæ‰§è¡Œçš„ï¼Œè€Œä¸æ˜¯è¯´è¿™ä¸ªitemè¢«åˆ«çš„çº¿ç¨‹å¼•ç”¨äº†å°±ä¸æ‰§è¡Œåˆ é™¤å‘½ä»¤ã€‚
+    ä½†åˆè‚¯å®šä¸èƒ½é©¬ä¸Šåˆ é™¤ï¼Œå› ä¸ºçº¿ç¨‹Aè¿˜åœ¨ä½¿ç”¨è¿™ä¸ªitemï¼Œæ­¤æ—¶memcachedå°±é‡‡ç”¨å»¶è¿Ÿåˆ é™¤çš„åšæ³•ã€‚çº¿ç¨‹Bæ‰§è¡Œåˆ é™¤å‘½ä»¤æ—¶å‡å¤šä¸€æ¬¡itemçš„å¼•ç”¨æ•°ï¼Œ
+    ä½¿å¾—å½“çº¿ç¨‹Aé‡Šæ”¾è‡ªå·±å¯¹itemçš„å¼•ç”¨åï¼Œitemçš„å¼•ç”¨æ•°å˜æˆ0ã€‚æ­¤æ—¶itemå°±è¢«é‡Šæ”¾äº†(å½’è¿˜ç»™slabåˆ†é…å™¨)ã€‚
     */
     
-	//±¾itemµÄÒıÓÃÊı ÔÚÊ¹ÓÃdo_item_removeº¯ÊıÏòslab¹é»¹itemÊ±£¬»áÏÈ²âÊÔÕâ¸öitemµÄÒıÓÃÊıÊÇ·ñµÈÓÚ0¡£
-	//ÒıÓÃÊı¿ÉÒÔ¼òµ¥Àí½âÎªÊÇ·ñÓĞworkerÏß³ÌÔÚÊ¹ÓÃÕâ¸öitem   ¼ÇÂ¼Õâ¸öitem±»ÒıÓÃ(±»workerÏß³ÌÕ¼ÓÃ)µÄ×ÜÊı
-	//²Î¿¼http://blog.csdn.net/luotuo44/article/details/42913549
-    unsigned short  refcount;  //ÔÚdo_item_linkÖĞÔö¼Ó  //ĞÂ¿ªÅÌµÄÄ¬ÈÏ³õÖµÎª1
-	//ºó×º³¤¶È£¬  (nkey + *nsuffix + nbytes)ÖĞµÄnsuffix  ²Î¿¼item_make_headerÖĞµÄ
+	//æœ¬itemçš„å¼•ç”¨æ•° åœ¨ä½¿ç”¨do_item_removeå‡½æ•°å‘slabå½’è¿˜itemæ—¶ï¼Œä¼šå…ˆæµ‹è¯•è¿™ä¸ªitemçš„å¼•ç”¨æ•°æ˜¯å¦ç­‰äº0ã€‚
+	//å¼•ç”¨æ•°å¯ä»¥ç®€å•ç†è§£ä¸ºæ˜¯å¦æœ‰workerçº¿ç¨‹åœ¨ä½¿ç”¨è¿™ä¸ªitem   è®°å½•è¿™ä¸ªitemè¢«å¼•ç”¨(è¢«workerçº¿ç¨‹å ç”¨)çš„æ€»æ•°
+	//å‚è€ƒhttp://blog.csdn.net/luotuo44/article/details/42913549
+    unsigned short  refcount;  //åœ¨do_item_linkä¸­å¢åŠ   //æ–°å¼€ç›˜çš„é»˜è®¤åˆå€¼ä¸º1
+	//åç¼€é•¿åº¦ï¼Œ  (nkey + *nsuffix + nbytes)ä¸­çš„nsuffix  å‚è€ƒitem_make_headerä¸­çš„
     uint8_t         nsuffix;    /* length of flags-and-length string */
-	//itemµÄÊôĞÔ  ÊÇ·ñÊ¹ÓÃcas£¬settings.use_cas   // itemµÄÈıÖÖflag: ITEM_SLABBED, ITEM_LINKED,ITEM_CAS
+	//itemçš„å±æ€§  æ˜¯å¦ä½¿ç”¨casï¼Œsettings.use_cas   // itemçš„ä¸‰ç§flag: ITEM_SLABBED, ITEM_LINKED,ITEM_CAS
     uint8_t         it_flags;   /* ITEM_* above */
-    //¸ÃitemÊÇ´ÓÄÄ¸öslabclass»ñÈ¡µÃµ½
+    //è¯¥itemæ˜¯ä»å“ªä¸ªslabclassè·å–å¾—åˆ°
     uint8_t         slabs_clsid;/* which slab class we're in */
-	//¼üÖµµÄ³¤¶È Êµ¼ÊÉÏÕæÊµÓÃµ½µÄÄÚ´æÊÇnkey+1,¼ûdo_item_alloc  ²Î¿¼item_make_headerÖĞµÄ
+	//é”®å€¼çš„é•¿åº¦ å®é™…ä¸ŠçœŸå®ç”¨åˆ°çš„å†…å­˜æ˜¯nkey+1,è§do_item_alloc  å‚è€ƒitem_make_headerä¸­çš„
     uint8_t         nkey;       /* key length, w/terminating null and padding */
     
     /* this odd type prevents type-punning issues when we do
      * the little shuffle to save space when not using CAS. */
     union {
-        //ITEM_set_cas  Ö»ÓĞÔÚ¿ªÆôsettings.use_cas²ÅÓĞÓÃ
-        //ITEM_set_cas   get_cas_id  ITEM_get_cas  Ã¿´Î¶ÁÈ¡ÍêÊı¾İ²¿·Öºó£¬´æ´¢µ½itemÖĞºó£¬storedµÄÊ±ºò¶¼»áµ÷ÓÃdo_store_item×ÔÔö
-        uint64_t cas; //²Î¿¼process_update_commandÖĞµÄreq_cas_id,Êµ¼ÊÊÇ´Ó¿Í»§¶ËµÄsetµÈÃüÁîÖĞ»ñÈ¡µ½µÄ
+        //ITEM_set_cas  åªæœ‰åœ¨å¼€å¯settings.use_casæ‰æœ‰ç”¨
+        //ITEM_set_cas   get_cas_id  ITEM_get_cas  æ¯æ¬¡è¯»å–å®Œæ•°æ®éƒ¨åˆ†åï¼Œå­˜å‚¨åˆ°itemä¸­åï¼Œstoredçš„æ—¶å€™éƒ½ä¼šè°ƒç”¨do_store_itemè‡ªå¢
+        uint64_t cas; //å‚è€ƒprocess_update_commandä¸­çš„req_cas_id,å®é™…æ˜¯ä»å®¢æˆ·ç«¯çš„setç­‰å‘½ä»¤ä¸­è·å–åˆ°çš„
         char end;
     } data[];
-    //+ DATA ÕâºóÃæµÄ¾ÍÊÇÊµ¼ÊÊı¾İ (nkey + *nsuffix + nbytes) ²Î¿¼item_make_header
+    //+ DATA è¿™åé¢çš„å°±æ˜¯å®é™…æ•°æ® (nkey + *nsuffix + nbytes) å‚è€ƒitem_make_header
     /* if it_flags & ITEM_CAS we have 8 bytes CAS */
     /* then null-terminated key */
     /* then " flags length\r\n" (no terminating null) */
     /* then data with terminating \r\n (no terminating null; it's binary!) */
 } item;
 
-//Õâ¸ö½á¹¹ÌåºÍitem½á¹¹Ìå³¤µÃºÜÏñ,ÊÇÎ±item½á¹¹Ìå£¬ÓÃÓÚLRUÅÀ³æ 
-typedef struct { //¸³ÖµºÍ³õÊ¼»¯²Î¿¼lru_crawler_crawl
+//è¿™ä¸ªç»“æ„ä½“å’Œitemç»“æ„ä½“é•¿å¾—å¾ˆåƒ,æ˜¯ä¼ªitemç»“æ„ä½“ï¼Œç”¨äºLRUçˆ¬è™« 
+typedef struct { //èµ‹å€¼å’Œåˆå§‹åŒ–å‚è€ƒlru_crawler_crawl
     struct _stritem *next;
     struct _stritem *prev;
     struct _stritem *h_next;    /* hash chain next */
@@ -489,26 +489,26 @@ typedef struct { //¸³ÖµºÍ³õÊ¼»¯²Î¿¼lru_crawler_crawl
     int             nbytes;     /* size of data */
     unsigned short  refcount;
     uint8_t         nsuffix;    /* length of flags-and-length string */
-    uint8_t         it_flags;   /* ITEM_* above */ //±êÊ¶ÊÇÒ»¸öÅÀ³æÎ±item,Îª1±êÊ¶ĞèÒªÇå³ıÆä¶ÔÓÚµÄslabclass£¬²Î¿¼item_crawler_thread
+    uint8_t         it_flags;   /* ITEM_* above */ //æ ‡è¯†æ˜¯ä¸€ä¸ªçˆ¬è™«ä¼ªitem,ä¸º1æ ‡è¯†éœ€è¦æ¸…é™¤å…¶å¯¹äºçš„slabclassï¼Œå‚è€ƒitem_crawler_thread
     uint8_t         slabs_clsid;/* which slab class we're in */
     uint8_t         nkey;       /* key length, w/terminating null and padding */
-    //lru_crawler tocrawl numÖ¸¶¨
+    //lru_crawler tocrawl numæŒ‡å®š
     uint32_t        remaining;  /* Max keys to crawl per slab per invocation */
 } crawler;
 
-//memcachedÏß³Ì½á¹¹µÄ·â×°½á¹¹
+//memcachedçº¿ç¨‹ç»“æ„çš„å°è£…ç»“æ„
 typedef struct {
-    pthread_t thread_id;        /* unique ID of this thread */ //Ïß³Ìid
-    //¸³Öµ¼ûsetup_thread
-    struct event_base *base;    /* libevent handle this thread uses */ //Ïß³ÌËùÊ¹ÓÃµÄevent_base
-    struct event notify_event;  /* listen event for notify pipe */ //ÓÃÓÚ¼àÌı¹ÜµÀ¶ÁÊÂ¼şµÄevent
-    //Ö÷Ïß³ÌºÍ¹¤×÷×ÓÏß³ÌÍ¨¹ı¹ÜµÀ½øĞĞÍ¨ĞÅ      ¹¤×÷×ÓÏß³ÌÍ¨¹ı¸Ãfd¶Á£¬¼ûsetup_thread->thread_libevent_process
-    int notify_receive_fd;      /* receiving end of notify pipe */ //¹ÜµÀµÄ¶Á¶Ëfd
-    //Ö÷Ïß³ÌÍ¨¹ı¸ÃfdĞ´£¬¼ûdispatch_conn_new
-    int notify_send_fd;         /* sending end of notify pipe */ //¹ÜµÀµÄĞ´¶Ëfd
+    pthread_t thread_id;        /* unique ID of this thread */ //çº¿ç¨‹id
+    //èµ‹å€¼è§setup_thread
+    struct event_base *base;    /* libevent handle this thread uses */ //çº¿ç¨‹æ‰€ä½¿ç”¨çš„event_base
+    struct event notify_event;  /* listen event for notify pipe */ //ç”¨äºç›‘å¬ç®¡é“è¯»äº‹ä»¶çš„event
+    //ä¸»çº¿ç¨‹å’Œå·¥ä½œå­çº¿ç¨‹é€šè¿‡ç®¡é“è¿›è¡Œé€šä¿¡      å·¥ä½œå­çº¿ç¨‹é€šè¿‡è¯¥fdè¯»ï¼Œè§setup_thread->thread_libevent_process
+    int notify_receive_fd;      /* receiving end of notify pipe */ //ç®¡é“çš„è¯»ç«¯fd
+    //ä¸»çº¿ç¨‹é€šè¿‡è¯¥fdå†™ï¼Œè§dispatch_conn_new
+    int notify_send_fd;         /* sending end of notify pipe */ //ç®¡é“çš„å†™ç«¯fd
     struct thread_stats stats;  /* Stats generated by this thread */
-    //setup_thread³õÊ¼»¯£¬
-    //dispatch_conn_newÖ÷Ïß³Ì½ÓÊÕaccept¿Í»§¶Ë·µ»ØĞÂfdºó´´½¨Ò»¸öCQ_ITEM·ÅÈë¶ÓÁĞ£¬¹¤×÷×ÓÏß³Ìthread_libevent_process´Ó¶ÓÁĞÈ¡³ö´¦Àí
+    //setup_threadåˆå§‹åŒ–ï¼Œ
+    //dispatch_conn_newä¸»çº¿ç¨‹æ¥æ”¶acceptå®¢æˆ·ç«¯è¿”å›æ–°fdååˆ›å»ºä¸€ä¸ªCQ_ITEMæ”¾å…¥é˜Ÿåˆ—ï¼Œå·¥ä½œå­çº¿ç¨‹thread_libevent_processä»é˜Ÿåˆ—å–å‡ºå¤„ç†
     struct conn_queue *new_conn_queue; /* queue of new connections to handle */
     cache_t *suffix_cache;      /* suffix cache */
     uint8_t item_lock_type;     /* use fine-grained or global item lock */
@@ -524,30 +524,30 @@ typedef struct {
  */
 typedef struct conn_t conn;
 struct conn_t {
-	//¸Ãconn¶ÔÓ¦µÄsocket fd
+	//è¯¥connå¯¹åº”çš„socket fd
     int    sfd;
     sasl_conn_t *sasl_conn;
     bool authenticated;
-	//µ±Ç°×´Ì¬ conn_set_state½øĞĞÉèÖÃ    ²é¿´×´Ì¬ÓÃstate_text
+	//å½“å‰çŠ¶æ€ conn_set_stateè¿›è¡Œè®¾ç½®    æŸ¥çœ‹çŠ¶æ€ç”¨state_text
     enum conn_states  state;
     enum bin_substates substate;
-    rel_time_t last_cmd_time;//×îºóÒ»´Î´¦Àí¿Í»§¶ËÃüÁîkey valueµÄÊ±¼ä
-	//¸Ãconn¶ÔÓ¦µÄevent
+    rel_time_t last_cmd_time;//æœ€åä¸€æ¬¡å¤„ç†å®¢æˆ·ç«¯å‘½ä»¤key valueçš„æ—¶é—´
+	//è¯¥connå¯¹åº”çš„event
     struct event event;
-	//eventµ±Ç°¼àÌıµÄÊÂ¼şÀàĞÍ
+	//eventå½“å‰ç›‘å¬çš„äº‹ä»¶ç±»å‹
     short  ev_flags;
-	//´¥·¢event»Øµ÷º¯ÊıµÄÔ­Òò
+	//è§¦å‘eventå›è°ƒå‡½æ•°çš„åŸå› 
     short  which;   /** which events were just triggered */
 
-	//¶Á»º³åÇø    ÓÃÓÚ´æ´¢¿Í»§¶ËÊı¾İ±¨ÎÄÖĞµÄÃüÁî¡£
+	//è¯»ç¼“å†²åŒº    ç”¨äºå­˜å‚¨å®¢æˆ·ç«¯æ•°æ®æŠ¥æ–‡ä¸­çš„å‘½ä»¤ã€‚
     char   *rbuf;   /** buffer to read commands into */
     //
-	//ÓĞĞ§Êı¾İµÄ¿ªÊ¼Î»ÖÃ¡£´Órbufµ½rcurrÖ®¼äµÄÊı¾İÊÇÒÑ¾­´¦ÀíµÄÁË£¬±ä³ÉÎŞĞ§Êı¾İÁË   Î´½âÎöµÄÃüÁîµÄ×Ö·ûÖ¸Õë¡£
+	//æœ‰æ•ˆæ•°æ®çš„å¼€å§‹ä½ç½®ã€‚ä»rbufåˆ°rcurrä¹‹é—´çš„æ•°æ®æ˜¯å·²ç»å¤„ç†çš„äº†ï¼Œå˜æˆæ— æ•ˆæ•°æ®äº†   æœªè§£æçš„å‘½ä»¤çš„å­—ç¬¦æŒ‡é’ˆã€‚
     char   *rcurr;  /** but if we parsed some already, this is where we stopped */
 
-	//¶Á»º³åÇøµÄ³¤¶È     rbufµÄ´óĞ¡¡£
+	//è¯»ç¼“å†²åŒºçš„é•¿åº¦     rbufçš„å¤§å°ã€‚
 	int    rsize;   /** total allocated size of rbuf */
-	//ÓĞĞ§Êı¾İµÄ³¤¶È   Î´½âÎöµÄÃüÁîµÄ³¤¶È¡£
+	//æœ‰æ•ˆæ•°æ®çš„é•¿åº¦   æœªè§£æçš„å‘½ä»¤çš„é•¿åº¦ã€‚
     int    rbytes;  /** how much data, starting from rcur, do we have unparsed */
 
     char   *wbuf;
@@ -555,13 +555,13 @@ struct conn_t {
     int    wsize;
     int    wbytes;
     /** which state to go into after finishing current write */
-    enum conn_states  write_and_go;//Ğ´ÍêºóµÄÏÂÒ»¸ö×´Ì¬  
+    enum conn_states  write_and_go;//å†™å®Œåçš„ä¸‹ä¸€ä¸ªçŠ¶æ€  
     void   *write_and_free; /** free this memory after finishing writing */
 
-	//Êı¾İÖ±Í¨³µ   Êı¾İ²¿·Ö¸³Öµ¹ı³Ì£¬¸³Öµ¼ûprocess_update_commandºÍdrive_machine
+	//æ•°æ®ç›´é€šè½¦   æ•°æ®éƒ¨åˆ†èµ‹å€¼è¿‡ç¨‹ï¼Œèµ‹å€¼è§process_update_commandå’Œdrive_machine
     char   *ritem;  /** when we read in an item's value, it goes here */
-    //×î¿ªÊ¼rlbytesÎªÊı¾İ²¿·Ö×Ü³¤¶È£¬µ±°ÑÊı¾İ²¿·ÖÌî³äºÃºó£¬ÆäÖµ¾Í¸ÕºÃÎª0
-    int    rlbytes; //Êı¾İ²¿·Ö»¹²î¶àÉÙ ¸³Öµ¼ûprocess_update_commandºÍdrive_machine
+    //æœ€å¼€å§‹rlbytesä¸ºæ•°æ®éƒ¨åˆ†æ€»é•¿åº¦ï¼Œå½“æŠŠæ•°æ®éƒ¨åˆ†å¡«å……å¥½åï¼Œå…¶å€¼å°±åˆšå¥½ä¸º0
+    int    rlbytes; //æ•°æ®éƒ¨åˆ†è¿˜å·®å¤šå°‘ èµ‹å€¼è§process_update_commandå’Œdrive_machine
 
     /* data for the nread state */
 
@@ -570,41 +570,41 @@ struct conn_t {
      * line of set/add/replace commands, but before we finished reading the actual
      * data. The data is read into ITEM_data(item) to avoid extra copying.
      */
-    //¸³Öµ¼ûprocess_update_command  
-    //¸ÃÁ´½Óµ±Ç°Ëù´¦ÀíÃüÁîµÄitem½á¹¹ĞÅÏ¢
+    //èµ‹å€¼è§process_update_command  
+    //è¯¥é“¾æ¥å½“å‰æ‰€å¤„ç†å‘½ä»¤çš„itemç»“æ„ä¿¡æ¯
     void   *item;     /* for commands set/add/replace  */
 
     /* data for the swallow state */
     int    sbytes;    /* how many bytes to swallow */
 
     /* data for the mwrite state */
-	//iovecÊı×éÖ¸Õë  conn_new´´½¨¿Õ¼ä
+	//iovecæ•°ç»„æŒ‡é’ˆ  conn_newåˆ›å»ºç©ºé—´
     struct iovec *iov;
-	//Êı×é´óĞ¡
+	//æ•°ç»„å¤§å°
     int    iovsize;   /* number of elements allocated in iov[] */
-	//ÒÑ¾­Ê¹ÓÃµÄiovÊı×éÔªËØ¸öÊı
+	//å·²ç»ä½¿ç”¨çš„iovæ•°ç»„å…ƒç´ ä¸ªæ•°
     int    iovused;   /* number of elements used in iov[] */
 
-	//ÒòÎªmsghdr½á¹¹ÌåÀïÃæµÄiovec½á¹¹ÌåÊı×é³¤¶ÈÊÇÓĞÏŞÖÆµÄ¡£ËùÒÔÎªÁË
-	//ÄÜ´«Êä¸ü¶àµÄÊı¾İ£¬Ö»ÄÜÔö¼Ómsghdr½á¹¹ÌåµÄ¸öÊı.add_msghdrº¯Êı¸ºÔğÔö¼Ó
-    struct msghdr *msglist; //Ö¸ÏòmsghdrÊı×é  add_msghdr·ÖÅä¿Õ¼ä
-    //Êı×é´óĞ¡  Ä¬ÈÏMSG_LIST_INITIAL
+	//å› ä¸ºmsghdrç»“æ„ä½“é‡Œé¢çš„iovecç»“æ„ä½“æ•°ç»„é•¿åº¦æ˜¯æœ‰é™åˆ¶çš„ã€‚æ‰€ä»¥ä¸ºäº†
+	//èƒ½ä¼ è¾“æ›´å¤šçš„æ•°æ®ï¼Œåªèƒ½å¢åŠ msghdrç»“æ„ä½“çš„ä¸ªæ•°.add_msghdrå‡½æ•°è´Ÿè´£å¢åŠ 
+    struct msghdr *msglist; //æŒ‡å‘msghdræ•°ç»„  add_msghdråˆ†é…ç©ºé—´
+    //æ•°ç»„å¤§å°  é»˜è®¤MSG_LIST_INITIAL
     int    msgsize;   /* number of elements allocated in msglist[] */
-	//ÒÑ¾­Ê¹ÓÃÁËµÄmsghdrÔªËØ¸öÊı
+	//å·²ç»ä½¿ç”¨äº†çš„msghdrå…ƒç´ ä¸ªæ•°
     int    msgused;   /* number of elements used in msglist[] */
-	//ÕıÔÚÓÃsendmsgº¯Êı´«ÊämsghdrÊı×éÖĞµÄÄÄÒ»¸öÔªËØ
+	//æ­£åœ¨ç”¨sendmsgå‡½æ•°ä¼ è¾“msghdræ•°ç»„ä¸­çš„å“ªä¸€ä¸ªå…ƒç´ 
     int    msgcurr;   /* element in msglist[] being transmitted now */
-	//msgcurrÖ¸ÏòµÄmsghdr×Ü¹²¶àÉÙ¸ö×Ö½Ú
+	//msgcurræŒ‡å‘çš„msghdræ€»å…±å¤šå°‘ä¸ªå­—èŠ‚
     int    msgbytes;  /* number of bytes in current msg */
 
-	//workerÏß³ÌĞèÒªÕ¼ÓĞÕâ¸öitem£¬Ö±ÖÁ°ÑitemµÄÊı¾İ¶¼Ğ´»Ø¸ø¿Í»§¶ËÁË
-	//¹ÊĞèÒªÒ»¸öitemÖ¸ÕëÊı×é¼ÇÂ¼±¾connÕ¼ÓĞµÄitem
+	//workerçº¿ç¨‹éœ€è¦å æœ‰è¿™ä¸ªitemï¼Œç›´è‡³æŠŠitemçš„æ•°æ®éƒ½å†™å›ç»™å®¢æˆ·ç«¯äº†
+	//æ•…éœ€è¦ä¸€ä¸ªitemæŒ‡é’ˆæ•°ç»„è®°å½•æœ¬connå æœ‰çš„item
     item   **ilist;   /* list of items to write out */
-	//Êı×éµÄ´óĞ¡
+	//æ•°ç»„çš„å¤§å°
     int    isize;
-	//µ±Ç°Ê¹ÓÃµ½µÄitem(ÔÚÊÍ·ÅÕ¼ÓÃitemÊ±»áÓÃµ½)
+	//å½“å‰ä½¿ç”¨åˆ°çš„item(åœ¨é‡Šæ”¾å ç”¨itemæ—¶ä¼šç”¨åˆ°)
     item   **icurr;
-	//ilistÊı×éÖĞÓĞ¶àÉÙ¸öitemĞèÒªÊÍ·Å
+	//ilistæ•°ç»„ä¸­æœ‰å¤šå°‘ä¸ªiteméœ€è¦é‡Šæ”¾
     int    ileft;
 
     char   **suffixlist;
@@ -612,20 +612,20 @@ struct conn_t {
     char   **suffixcurr;
     int    suffixleft;
 
-    //settings.binding_protocol //¸ù¾İ½ÓÊÕµÄµÚÒ»¸ö×Ö·ûÀ´È·¶¨ÊÇÄÇÖÖĞ­Òétry_read_command
+    //settings.binding_protocol //æ ¹æ®æ¥æ”¶çš„ç¬¬ä¸€ä¸ªå­—ç¬¦æ¥ç¡®å®šæ˜¯é‚£ç§åè®®try_read_command
     enum protocol protocol;   /* which protocol this connection speaks */
     
     enum network_transport transport; /* what transport is used by this connection */
 
     /* data for UDP clients */
     int    request_id; /* Incoming UDP request ID, if this is a UDP "connection" */
-    //¿Í»§¶ËIPµØÖ·£¬¼ûconn_new
+    //å®¢æˆ·ç«¯IPåœ°å€ï¼Œè§conn_new
     struct sockaddr_in6 request_addr; /* udp: Who sent the most recent request */
     socklen_t request_addr_size;
     unsigned char *hdrbuf; /* udp packet headers */
     int    hdrsize;   /* number of headers' worth of space is allocated */
 
-    //ÊÇ·ñ²»ÓÃ»Ø¸´¿Í»§¶ËĞÅÏ¢£¬set_noreply_maybe
+    //æ˜¯å¦ä¸ç”¨å›å¤å®¢æˆ·ç«¯ä¿¡æ¯ï¼Œset_noreply_maybe
     bool   noreply;   /* True if the reply should not be sent. */
     /* current stats command */
     struct {
@@ -638,13 +638,13 @@ struct conn_t {
     /* This is where the binary header goes */
     protocol_binary_request_header binary_header;
     uint64_t cas; /* the cas to return */
-    //NREAD_SETµÈ£¬±íÊ¾Ê²Ã´ÃüÁî
+    //NREAD_SETç­‰ï¼Œè¡¨ç¤ºä»€ä¹ˆå‘½ä»¤
     short cmd; /* current command being processed */
     int opaque;
     int keylen;
-    //Ö¸ÏòÏÂÒ»¸öconn
+    //æŒ‡å‘ä¸‹ä¸€ä¸ªconn
     conn   *next;     /* Used for generating a list of conn structures */
-	//Õâ¸öconnÊôÓÚÄÄ¸öworkerÏß³Ì
+	//è¿™ä¸ªconnå±äºå“ªä¸ªworkerçº¿ç¨‹
     LIBEVENT_THREAD *thread; /* Pointer to the thread object serving this connection */
 };
 
@@ -657,17 +657,17 @@ extern volatile rel_time_t current_time;
 /* TODO: Move to slabs.h? */
 extern volatile int slab_rebalance_signal;
 
-struct slab_rebalance { //´æ´¢ÔÚslab_rebal   ¸³Öµ¿ÉÒÔ²Î¿¼slab_rebalance_start  ÖØ·ÖÒ³µÄÊ±ºòÓÃ
-    //¼ÇÂ¼ÒªÒÆ¶¯µÄÒ³µÄĞÅÏ¢¡£slab_startÖ¸ÏòÒ³µÄ¿ªÊ¼Î»ÖÃ¡£slab_endÖ¸ÏòÒ³  
-    //µÄ½áÊøÎ»ÖÃ¡£slab_posÔò¼ÇÂ¼µ±Ç°´¦ÀíµÄÎ»ÖÃ(item)  
+struct slab_rebalance { //å­˜å‚¨åœ¨slab_rebal   èµ‹å€¼å¯ä»¥å‚è€ƒslab_rebalance_start  é‡åˆ†é¡µçš„æ—¶å€™ç”¨
+    //è®°å½•è¦ç§»åŠ¨çš„é¡µçš„ä¿¡æ¯ã€‚slab_startæŒ‡å‘é¡µçš„å¼€å§‹ä½ç½®ã€‚slab_endæŒ‡å‘é¡µ  
+    //çš„ç»“æŸä½ç½®ã€‚slab_posåˆ™è®°å½•å½“å‰å¤„ç†çš„ä½ç½®(item)  
     void *slab_start;
     void *slab_end;
     void *slab_pos;
-    //½øĞĞautomoveµÄÔ´slabclass[]idºÍÄ¿µÄslabclass[]id
-    int s_clsid;//Ô´slab classµÄÏÂ±êË÷Òı  
-    int d_clsid;//Ä¿±êslab classµÄÏÂ±êË÷Òı  
-    int busy_items;//ÊÇ·ñworkerÏß³ÌÔÚÒıÓÃÄ³¸öitem,¼ÇÂ¼ÒıÓÃÊı   slabÇ¨ÒÆ¹ı³ÌÖĞÕıÔÚ±»ÆäËûÏß³Ì·ÃÎÊµÄtrunkÊı£¬¸³Öµ¼ûslab_rebalance_move
-    uint8_t done;//ÊÇ·ñÍê³ÉÁËÄÚ´æÒ³ÒÆ¶¯  
+    //è¿›è¡Œautomoveçš„æºslabclass[]idå’Œç›®çš„slabclass[]id
+    int s_clsid;//æºslab classçš„ä¸‹æ ‡ç´¢å¼•  
+    int d_clsid;//ç›®æ ‡slab classçš„ä¸‹æ ‡ç´¢å¼•  
+    int busy_items;//æ˜¯å¦workerçº¿ç¨‹åœ¨å¼•ç”¨æŸä¸ªitem,è®°å½•å¼•ç”¨æ•°   slabè¿ç§»è¿‡ç¨‹ä¸­æ­£åœ¨è¢«å…¶ä»–çº¿ç¨‹è®¿é—®çš„trunkæ•°ï¼Œèµ‹å€¼è§slab_rebalance_move
+    uint8_t done;//æ˜¯å¦å®Œæˆäº†å†…å­˜é¡µç§»åŠ¨  
 };
 
 extern struct slab_rebalance slab_rebal;
